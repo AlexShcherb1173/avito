@@ -1,0 +1,52 @@
+databaseChangeLog:
+  - logicalFilePath: 0.1/user-table
+  - changeSet:
+      id: user-table-0
+      author: anton
+      changes:
+        - createTable:
+            schemaName: graduate
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: username
+                  type: text
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: text
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: firstName
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lastName
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image
+                  type: text
