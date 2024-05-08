@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - logicalFilePath: 0.1/comment-table
+  - changeSet:
+      id: comment-table-0
+      author: anton
+      changes:
+        - createTable:
+            schemaName: graduate
+            tableName: comment
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: createdAt
+                  type: bigint
+              - column:
+                  name: text
+                  type: text

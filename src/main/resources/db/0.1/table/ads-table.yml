@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - logicalFilePath: 0.1/ads-table
+  - changeSet:
+      id: ads-table-0
+      author: anton
+      changes:
+        - createTable:
+            schemaName: graduate
+            tableName: ads
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: image
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: bigint
+              - column:
+                  name: title
+                  type: text

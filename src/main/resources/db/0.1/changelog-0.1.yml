@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - include:
+      file: table/ads-table.yml
+      relativeToChangelogFile: true
+  - include:
+      file: table/comment-table.yml
+      relativeToChangelogFile: true
+  - include:
+      file: table/role-table.yml
+      relativeToChangelogFile: true
+  - include:
+      file: table/user-table.yml
+      relativeToChangelogFile: true

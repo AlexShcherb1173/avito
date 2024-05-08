@@ -1,0 +1,22 @@
+databaseChangeLog:
+  - logicalFilePath: 0.1/role-table
+  - changeSet:
+      id: role-table-0
+      author: anton
+      changes:
+        - createTable:
+            schemaName: graduate
+            tableName: role
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
