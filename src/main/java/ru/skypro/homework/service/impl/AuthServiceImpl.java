@@ -1,46 +1,46 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.dto.RegisterDto;
+import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.mapper.RegisterDtoMapperService;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
+
+import java.util.Optional;
 
 @Service
 public class AuthServiceImpl implements AuthService {
-
-    private final UserDetailsManager manager;
     private final PasswordEncoder encoder;
+    private final RegisterDtoMapperService registerDtoMapperService;
+    private final UserRepository userRepository;
 
-    public AuthServiceImpl(UserDetailsManager manager,
-                           PasswordEncoder passwordEncoder) {
-        this.manager = manager;
+    public AuthServiceImpl(PasswordEncoder passwordEncoder, RegisterDtoMapperService registerDtoMapperService, UserRepository userRepository) {
         this.encoder = passwordEncoder;
+        this.registerDtoMapperService = registerDtoMapperService;
+        this.userRepository = userRepository;
     }
 
     @Override
     public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
+        Optional<UserEntity> userEntityOptional = userRepository.findByEmail(userName);
+        if (userEntityOptional.isEmpty()) {
             return false;
         }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        return encoder.matches(password, userDetails.getPassword());
+        UserEntity userEntity = userEntityOptional.get();
+        return encoder.matches(password, userEntity.getPassword());
     }
 
     @Override
-    public boolean register(Register register) {
-        if (manager.userExists(register.getUsername())) {
+    public boolean register(RegisterDto registerDto) {
+        Optional<UserEntity> userEntityOptional = userRepository.findByEmail(registerDto.getUsername());
+        if (userEntityOptional.isPresent()) {
             return false;
         }
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
-                        .username(register.getUsername())
-                        .roles(register.getRole().name())
-                        .build());
+        registerDto.setPassword(encoder.encode(registerDto.getPassword()));
+        UserEntity userEntity = registerDtoMapperService.mappingToEntity(registerDto);
+        userRepository.save(userEntity);
         return true;
     }
 
