@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/scripts/images.yml
+  - include:
+      file: liquibase/scripts/users.yml
+  - include:
+      file: liquibase/scripts/ads.yml
+  - include:
+      file: liquibase/scripts/comment.yml
+  - include:
+      file: liquibase/scripts/test/insertimages.yml
+  - include:
+      file: liquibase/scripts/test/insertusers.yml
+  - include:
+      file: liquibase/scripts/test/insertads.yml
+  - include:
+      file: liquibase/scripts/test/insertcomment.yml

@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 13
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: ads
+            columns:
+              - column:
+                  name: description
+                  value: 'bestShip'
+              - column:
+                  name: price
+                  value: 10000000
+              - column:
+                  name: title
+                  value: 'blackPearl'
+              - column:
+                  name: image_id
+                  value: 2
+              - column:
+                  name: user_id
+                  value: 1
+
+  - changeSet:
+      id: 14
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: ads
+            columns:
+              - column:
+                  name: description
+                  value: 'fastShip'
+              - column:
+                  name: price
+                  value: 5000
+              - column:
+                  name: title
+                  value: 'smashing'
+              - column:
+                  name: image_id
+                  value: 3
+              - column:
+                  name: user_id
+                  value: 1

@@ -1,0 +1,25 @@
+server:
+  port: 8080
+spring:
+  config:
+    import: classpath:myconfig.yml
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:liquibase/changelog-master.yml
+    enabled: true
+    contexts: prod
+  datasource:
+    url: ${db.url}
+    username: ${db.username}
+    password: ${db.password}
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger
+    tryItOutEnabled: true
+download:
+  url: /image/

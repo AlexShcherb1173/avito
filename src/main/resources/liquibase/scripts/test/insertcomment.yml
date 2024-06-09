@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 15
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: "comment"
+            columns:
+              - column:
+                  name: created_at
+                  value: '2024-06-01 11:19:47.907'
+              - column:
+                  name: text
+                  value: 'самый быстроходный корабль в мире'
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: ad_id
+                  valueNumeric: 1
+
+  - changeSet:
+      id: 16
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: "comment"
+            columns:
+              - column:
+                  name: created_at
+                  value: '2024-06-01 11:20:15.205'
+              - column:
+                  name: text
+                  value: 'корабль Ост-индской компании'
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: ad_id
+                  valueNumeric: 2

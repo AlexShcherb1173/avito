@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: aleksbratchin
+      context: prod
+      changes:
+        - createTable:
+            tableName: images
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: data
+                  type: bytea
+              - column:
+                  name: file_size
+                  type: int8
+                  constraints:
+                    nullable: false
+              - column:
+                  name: media_type
+                  type: varchar(255)

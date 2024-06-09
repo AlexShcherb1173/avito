@@ -1,0 +1,150 @@
+databaseChangeLog:
+  - changeSet:
+      id: 6
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: 'Jack'
+              - column:
+                  name: last_name
+                  value: 'Sparrow'
+              - column:
+                  name: password
+                  value: '$2a$10$3X6Ja2M58GD5qSEtligDqepIA1WYMUUxZLSecg8pFIMO588D30Nty'
+              - column:
+                  name: phone
+                  value: '+7 (812) 1234567'
+              - column:
+                  name: role
+                  value: 'ADMIN'
+              - column:
+                  name: username
+                  value: 'captain.jack.sparrow@gmail.com'
+              - column:
+                  name: avatar_id
+                  valueNumeric: 1
+
+  - changeSet:
+      id: 7
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: 'Will'
+              - column:
+                  name: last_name
+                  value: 'Turner'
+              - column:
+                  name: password
+                  value: '$2a$10$E.u4KBrpaX.LW9Y/ytMd9u52c/jSbYKi80tSgOWXtTzIETFcPYpYm'
+              - column:
+                  name: phone
+                  value: '+7 (921) 7654321'
+              - column:
+                  name: role
+                  value: 'USER'
+              - column:
+                  name: username
+                  value: 'will.turner@gmail.com'
+              - column:
+                  name: avatar_id
+                  value: null
+
+  - changeSet:
+      id: 8
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: 'Hector'
+              - column:
+                  name: last_name
+                  value: 'Barbossa'
+              - column:
+                  name: password
+                  value: '$2a$10$9DkcgLEGsr4FQ1QFqcF5meKpiiVdYSCcNEI3Amv4IsN/BD5cDXB0a'
+              - column:
+                  name: phone
+                  value: '+7 (499) 8765432'
+              - column:
+                  name: role
+                  value: 'ADMIN'
+              - column:
+                  name: username
+                  value: 'hector.barbossa@gmail.com'
+              - column:
+                  name: avatar_id
+                  value: null
+
+  - changeSet:
+      id: 9
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: 'James'
+              - column:
+                  name: last_name
+                  value: 'Norrington'
+              - column:
+                  name: password
+                  value: '$2a$10$nCiwHUxUHwnyoVXaEskpkuLSJtwtJrdK3VNm7qJMIzgnHDtUWfaE6'
+              - column:
+                  name: phone
+                  value: '+7 (812) 9876543'
+              - column:
+                  name: role
+                  value: 'ADMIN'
+              - column:
+                  name: username
+                  value: 'james.norrington@gmail.com'
+              - column:
+                  name: avatar_id
+                  value: null
+
+  - changeSet:
+      id: 10
+      author: aleksbratchin
+      context: test
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: first_name
+                  value: 'Elizabeth'
+              - column:
+                  name: last_name
+                  value: 'Swann'
+              - column:
+                  name: password
+                  value: '$2a$10$brEWkkdZLiX9LFTa6BQqVO5RbmOR.MjxdmHvZiIzfW5SwZFE/vNpy'
+              - column:
+                  name: phone
+                  value: '+7 (495) 2345678'
+              - column:
+                  name: role
+                  value: 'USER'
+              - column:
+                  name: username
+                  value: 'elizabeth.swann@gmail.com'
+              - column:
+                  name: avatar_id
+                  value: null

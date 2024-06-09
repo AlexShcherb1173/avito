@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: aleksbratchin
+      context: prod
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: varchar(255)
+              - column:
+                  name: last_name
+                  type: varchar(255)
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: varchar(255)
+              - column:
+                  name: role
+                  type: varchar(255)
+              - column:
+                  name: username
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: avatar_id
+                  type: int8
+                  constraints:
+                    unique: true
+        - addUniqueConstraint:
+            columnNames: username
+            constraintName: uk_username
+            tableName: users
+        - addUniqueConstraint:
+            columnNames: avatar_id
+            constraintName: uk_avatar_id
+            tableName: users
+        - addForeignKeyConstraint:
+            baseTableName: users
+            baseColumnNames: avatar_id
+            constraintName: fk_users_images
+            referencedTableName: images
+            referencedColumnNames: id
+        - createIndex:
+            indexName: idx_username
+            tableName: users
+            columns:
+              - column:
+                  name: username
+        - sql:
+            stripComments: true
+            splitStatements: false
+            endDelimiter: ";"
+            sql: |
+              ALTER TABLE users ADD CONSTRAINT users_role_check CHECK (role IN ('USER', 'ADMIN'));

@@ -1,0 +1,49 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3
+      author: aleksbratchin
+      context: prod
+      changes:
+        - createTable:
+            tableName: ads
+            columns:
+              - column:
+                  name: id
+                  type: bigserial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(255)
+              - column:
+                  name: price
+                  type: int4
+              - column:
+                  name: title
+                  type: varchar(255)
+              - column:
+                  name: image_id
+                  type: int8
+                  constraints:
+                    unique: true
+              - column:
+                  name: user_id
+                  type: int8
+        - addForeignKeyConstraint:
+            baseTableName: ads
+            baseColumnNames: user_id
+            constraintName: fk_ads_users
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: ads
+            baseColumnNames: image_id
+            constraintName: fk_ads_images
+            referencedTableName: images
+            referencedColumnNames: id
+        - addUniqueConstraint:
+            columnNames: image_id
+            constraintName: uk_image_id
+            tableName: ads
