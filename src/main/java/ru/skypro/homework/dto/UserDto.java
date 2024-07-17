@@ -10,6 +10,8 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private String phone;
-    private Role role;
-    private String avatar;
+
+    // type String и дальше указан энам. Как тут отписать поле?
+    private String role;
+    private String image;
 }
