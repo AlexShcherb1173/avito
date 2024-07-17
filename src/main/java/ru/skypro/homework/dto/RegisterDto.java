@@ -12,6 +12,6 @@ public class RegisterDto {
     private String phone;
 
     // Какой тип ставить? В Апишке просмотреть!!! Тип указан Стринг но потом указан enum
-    private String role;
-    //private Role role;
+    //private String role;
+    private Role role;
 }
