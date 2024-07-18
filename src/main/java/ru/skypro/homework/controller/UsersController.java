@@ -23,46 +23,50 @@ import ru.skypro.homework.service.UsersService;
 @AllArgsConstructor
 public class UsersController {
 
-    private final UsersService usersService;
+    private UsersService usersService;
 
     @PostMapping("/set_password")
-    @Operation(summary = "Обновление пароля")
+    @Operation(summary = "Обновление пароля",
+            operationId = "setPassword")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    public ResponseEntity<String> setPassword(@RequestBody NewPasswordDto newPassword) {
+    public ResponseEntity<?> setPassword(@RequestBody NewPasswordDto newPassword) {
         return ResponseEntity.ok("Пароль успешно обновлен");
     }
 
     @GetMapping("/me")
-    @Operation(summary = "Получение информации об авторизованном пользователе")
+    @Operation(summary = "Получение информации об авторизованном пользователе",
+            operationId = "getUser")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-    public ResponseEntity<String> getUser() {
+    public ResponseEntity<?> getUser() {
         return ResponseEntity.ok("Информация получена");
     }
 
     @PatchMapping("/me")
-    @Operation(summary = "Обновление информации об авторизованном пользователе")
+    @Operation(summary = "Обновление информации об авторизованном пользователе",
+            operationId = "updateUser")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-    public ResponseEntity<String> updateUser(@RequestBody UpdateUserDto updateUser) {
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto updateUser) {
         return ResponseEntity.ok("Информация успешна обнавлена");
     }
 
     @PatchMapping(path = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Обновление аватара авторизованного пользователя")
+    @Operation(summary = "Обновление аватара авторизованного пользователя",
+            operationId = "updateUserImage")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-    public ResponseEntity<String> updateUserImage(@RequestPart MultipartFile image) {
+    public ResponseEntity<?> updateUserImage(@RequestPart MultipartFile image) {
         return ResponseEntity.ok("Аватарка успешно обновлена");
     }
 
