@@ -9,9 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.NewPasswordDto;
-import ru.skypro.homework.dto.UpdateUserDto;
-import ru.skypro.homework.service.UsersService;
+import ru.skypro.homework.dto.NewPassword;
+import ru.skypro.homework.dto.UpdateUser;
+import ru.skypro.homework.service.UserService;
 
 
 /**
@@ -21,9 +21,9 @@ import ru.skypro.homework.service.UsersService;
 @RequestMapping("/users")
 @Tag(name = "Пользователи", description = "Эндпойнты для работы с пользователями")
 @AllArgsConstructor
-public class UsersController {
+public class UserController {
 
-    private UsersService usersService;
+    private UserService service;
 
     @PostMapping("/set_password")
     @Operation(summary = "Обновление пароля",
@@ -33,7 +33,7 @@ public class UsersController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    public ResponseEntity<?> setPassword(@RequestBody NewPasswordDto newPassword) {
+    public ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword) {
         return ResponseEntity.ok("Пароль успешно обновлен");
     }
 
@@ -55,7 +55,7 @@ public class UsersController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto updateUser) {
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUser updateUser) {
         return ResponseEntity.ok("Информация успешна обнавлена");
     }
 
