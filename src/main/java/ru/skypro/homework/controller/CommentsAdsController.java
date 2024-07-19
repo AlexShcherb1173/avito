@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CreateOrUpdateCommentDto;
+import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.service.CommentsAdsService;
 
 @RestController
@@ -39,7 +39,7 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
     public ResponseEntity<?> addCommentsAds(@PathVariable long id,
-                                                 @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
+                                            @RequestBody CreateOrUpdateComment createOrUpdateComment) {
         return null;
     }
 
@@ -54,7 +54,7 @@ public class CommentsAdsController {
     })
     public ResponseEntity<?> deleteComments(@PathVariable long adId,
                                                  @PathVariable long commentId,
-                                                 @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
+                                                 @RequestBody CreateOrUpdateComment createOrUpdateCommentDto) {
         return null;
     }
 
@@ -69,7 +69,7 @@ public class CommentsAdsController {
     })
     public ResponseEntity<?> updateComments(@PathVariable long adId,
                                                  @PathVariable long commentId,
-                                                 @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
+                                                 @RequestBody CreateOrUpdateComment createOrUpdateCommentDto) {
         return null;
     }
 

@@ -5,10 +5,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.Ads;
+import ru.skypro.homework.dto.CreateOrUpdateAd;
+import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.service.AdsService;
 
 /**
@@ -34,7 +35,7 @@ public class AdsController {
     @Operation(summary = "Добавление объявления",
             operationId = "addAd")
     @ApiResponse(responseCode = "201", description = "Created")
-    public ResponseEntity<?> createAds(@RequestBody AdsDto adsDto) {
+    public ResponseEntity<?> createAds(@RequestBody Ads ads) {
         return null;
     }
 
@@ -72,7 +73,8 @@ public class AdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<?> updateInfoAd(@PathVariable long id) {
+    public ResponseEntity<?> updateInfoAd(@PathVariable long id,
+                                          @RequestBody CreateOrUpdateAd createOrUpdateAd) {
         return null;
     }
 
@@ -83,7 +85,7 @@ public class AdsController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    public ResponseEntity<?> getAdsAuthorizedUser(@RequestBody AdsDto adsDto) {
+    public ResponseEntity<?> getAdsAuthorizedUser(@RequestBody Ads ads) {
         return null;
     }
 
