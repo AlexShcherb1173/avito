@@ -2,13 +2,9 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Data
-public class ExtendedAd {
+public class ExtendedAdDto {
 
     @Schema(description = "id объявления")
     private int pk;
