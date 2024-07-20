@@ -4,26 +4,25 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.skypro.homework.dto.Register;
-import ru.skypro.homework.service.RegisterService;
+import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.RegisterDto;
+import ru.skypro.homework.service.impl.RegisterServiceImpl;
 
 /**
  * Контроллер для регистрации пользователей
  */
+@Slf4j
+@CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/register")
 @Tag(name = "Регистрация пользователя", description = "Эндпойнты для работы с пользователями")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class RegisterController {
 
-    private RegisterService service;
+    private final RegisterServiceImpl service;
 
     @PostMapping
     @Operation(summary = "Регистрация пользователя",
@@ -32,7 +31,7 @@ public class RegisterController {
             @ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = "Bad Request")
     })
-    public ResponseEntity<?> registerUser(@RequestBody Register register) {
+    public ResponseEntity<?> registerUser(@RequestBody RegisterDto register) {
         return null;
     }
 }

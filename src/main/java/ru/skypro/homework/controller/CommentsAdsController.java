@@ -4,19 +4,22 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CreateOrUpdateComment;
-import ru.skypro.homework.service.CommentsAdsService;
+import ru.skypro.homework.dto.CreateOrUpdateCommentDto;
+import ru.skypro.homework.service.impl.CommentsAdsServiceImpl;
 
+@Slf4j
+@CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
 @Tag(name = "Комментарии", description = "Эндпойнты для работы с пользователями")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class CommentsAdsController {
 
-    private CommentsAdsService service;
+    private final CommentsAdsServiceImpl service;
 
     @GetMapping("/{id}/comments")
     @Operation(summary = "Получение комментариев объявления",
@@ -26,7 +29,7 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> getCommentsAds(@PathVariable long id) {
+    public ResponseEntity<?> getCommentsAds(@PathVariable Integer id) {
         return null;
     }
 
@@ -38,8 +41,8 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> addCommentsAds(@PathVariable long id,
-                                            @RequestBody CreateOrUpdateComment createOrUpdateComment) {
+    public ResponseEntity<?> addCommentsAds(@PathVariable Integer id,
+                                            @RequestBody CreateOrUpdateCommentDto createOrUpdateComment) {
         return null;
     }
 
@@ -52,9 +55,9 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> deleteComments(@PathVariable long adId,
-                                                 @PathVariable long commentId,
-                                                 @RequestBody CreateOrUpdateComment createOrUpdateCommentDto) {
+    public ResponseEntity<?> deleteComments(@PathVariable Integer adId,
+                                                 @PathVariable Integer commentId,
+                                                 @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
         return null;
     }
 
@@ -67,9 +70,9 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> updateComments(@PathVariable long adId,
-                                                 @PathVariable long commentId,
-                                                 @RequestBody CreateOrUpdateComment createOrUpdateCommentDto) {
+    public ResponseEntity<?> updateComments(@PathVariable Integer adId,
+                                                 @PathVariable Integer commentId,
+                                                 @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
         return null;
     }
 

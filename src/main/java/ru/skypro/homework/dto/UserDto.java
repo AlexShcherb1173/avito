@@ -2,13 +2,9 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Data
-public class User {
+public class UserDto {
 
     @Schema(description = "id пользователя",
             required = true)
@@ -33,7 +29,7 @@ public class User {
     @Schema(description = "роль пользователя",
             required = true,
             allowableValues = {"USER", "ADMIN"})
-    private Role role;
+    private RoleDto role;
 
     @Schema(description = "ссылка на автора пользователя",
             required = true)

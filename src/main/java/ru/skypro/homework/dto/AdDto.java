@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Data
-public class Ad {
+public class AdDto {
 
     @Schema(description = "id автора объявления",
             required = true)
