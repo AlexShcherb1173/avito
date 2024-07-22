@@ -1,3 +1,4 @@
+/*
 package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,13 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.RegisterDto;
 import ru.skypro.homework.service.impl.RegisterServiceImpl;
 
+*/
 /**
  * Контроллер для регистрации пользователей
- */
+ *//*
+
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequestMapping("/register")
+@RequestMapping("/registers")
 @Tag(name = "Регистрация пользователя", description = "Эндпойнты для работы с пользователями")
 @RequiredArgsConstructor
 public class RegisterController {
@@ -35,3 +38,4 @@ public class RegisterController {
         return null;
     }
 }
+*/

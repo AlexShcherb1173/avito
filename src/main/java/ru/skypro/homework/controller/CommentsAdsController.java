@@ -15,7 +15,7 @@ import ru.skypro.homework.service.impl.CommentsAdsServiceImpl;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
-@Tag(name = "Комментарии", description = "Эндпойнты для работы с пользователями")
+@Tag(name = "Комментарии", description = "Эндпойнты для работы с комментариями")
 @RequiredArgsConstructor
 public class CommentsAdsController {
 
