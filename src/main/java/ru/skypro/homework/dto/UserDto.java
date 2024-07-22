@@ -6,32 +6,25 @@ import lombok.Data;
 @Data
 public class UserDto {
 
-    @Schema(description = "id пользователя",
-            required = true)
+    @Schema(description = "id пользователя")
     private int id;
 
-    @Schema(description = "логин пользователя",
-            required = true)
+    @Schema(description = "логин пользователя")
     private String email;
 
-    @Schema(description = "имя пользователя",
-            required = true)
+    @Schema(description = "имя пользователя")
     private String firstName;
 
-    @Schema(description = "фамилия пользователя",
-            required = true)
+    @Schema(description = "фамилия пользователя")
     private String lastName;
 
-    @Schema(description = "телефон пользователя",
-            required = true)
+    @Schema(description = "телефон пользователя")
     private String phone;
 
     @Schema(description = "роль пользователя",
-            required = true,
             allowableValues = {"USER", "ADMIN"})
     private RoleDto role;
 
-    @Schema(description = "ссылка на автора пользователя",
-            required = true)
+    @Schema(description = "ссылка на автора пользователя")
     private String image;
 }

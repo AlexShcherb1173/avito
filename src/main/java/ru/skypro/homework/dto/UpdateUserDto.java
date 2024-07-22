@@ -7,13 +7,11 @@ import lombok.Data;
 public class UpdateUserDto {
 
     @Schema(description = "имя пользователя",
-            required = true,
             minLength = 3,
             maxLength = 10)
     private String firstName;
 
     @Schema(description = "фамилия пользователя",
-            required = true,
             minLength = 3,
             maxLength = 10)
     private String lastName;
