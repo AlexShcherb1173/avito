@@ -7,13 +7,11 @@ import lombok.Data;
 public class LoginDto {
 
     @Schema(description = "логин",
-            required = true,
             minLength = 8,
             maxLength = 16)
     private String username;
 
     @Schema(description = "пароль",
-            required = true,
             minLength = 4,
             maxLength = 32)
     private String password;
