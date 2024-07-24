@@ -7,7 +7,9 @@ import lombok.Setter;
 
 import javax.management.relation.Role;
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -26,6 +28,15 @@ public class User {
     private String phoneNumber;
     private Role role;
     private String image;
+
+    @OneToMany(mappedBy = "author")
+    //@JoinColumn(name = "")  Название колонки
+    private List<Ad> ads;
+
+    //@ManyToOne
+    //private List<Comment> comments;
+    // нужно ли это поле? ругается краасным
+
 
     @Override
     public boolean equals(Object o) {
