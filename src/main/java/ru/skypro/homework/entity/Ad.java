@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
@@ -21,18 +22,16 @@ public class Ad {
     private String description;
     private int price;
 
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private Image image;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User author;
 
-    // добавить поле фото объявления
-    /*@ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "image_id")
-    private Photo photo;*/
-
-    //@OneToMany(mappedBy = "advert", cascade = CascadeType.REMOVE)
-    //@JoinColumn(name = "comment_id")
-    //private List<Comment> comments;
+    @OneToMany(mappedBy = "advert", cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "comment_id")
+    private List<Comment> comments;
 
     @Override
     public boolean equals(Object o) {
