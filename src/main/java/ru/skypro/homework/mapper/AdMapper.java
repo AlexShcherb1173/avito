@@ -13,17 +13,17 @@ public interface AdMapper {
 
     Ad createAdsDtoToAd(CreateOrUpdateAdDto createOrUpdateAdDto);
 
-    @Mapping(target = "pk", source = "id")
-    @Mapping(target = "author", source = "author.id")
-    @Mapping(target = "image", expression = "java(getUrlToImage(advert))")
+    @Mapping(source = "id", target = "pk")
+    @Mapping(source = "author.id", target = "author")
+    @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
     AdsDto advertToAdsDto(Ad ad);
 
-    @Mapping(target = "pk", source = "id")
-    @Mapping(target = "authorFirstName", source = "author.firstName")
-    @Mapping(target = "authorLastName", source = "author.lastName")
-    @Mapping(target = "email", source = "author.username")
-    @Mapping(target = "phone", source = "author.phone")
-    @Mapping(target = "image", expression = "java(getUrlToImage(advert))")
+    @Mapping(source = "id", target = "pk")
+    @Mapping(source = "author.firstName", target = "authorFirstName")
+    @Mapping(source = "author.lastName", target = "authorLastName")
+    @Mapping(source = "author.username", target = "email")
+    @Mapping(source = "author.phone", target = "phone")
+    @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
     ExtendedAdDto adToAdsDto(Ad ad);
 
     List<CommentDto> advertListToAdsDtoList(List<Ad> adv);
