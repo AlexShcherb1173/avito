@@ -5,42 +5,33 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.entity.Ad;
+import ru.skypro.homework.entity.User;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    Ad createAdsDtoToAdvert(CreateOrUpdateAdDto createAdsDto);
+    User userDtoToUser(UserDto userDto);
 
-    @Mapping(source = "id", target = "pk")
-    @Mapping(source = "author.id", target = "author")
-    @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
-    AdsDto advertToAdsDto(Ad ad);
+    @Mapping(source = "username", target = "email")
+    @Mapping(expression = "java(getUrlToImageCE(user))", target = "image")
+    @Mapping(source = "roleDto", target = "role")
+    UserDto userToUserDto(User user);
 
-    @Mapping(source = "id", target = "pk")
-    @Mapping(source = "author.firstName", target = "authorFirstName")
-    @Mapping(source = "author.lastName", target = "authorLastName")
-    @Mapping(source = "author.username", target = "email")
-    @Mapping(source = "author.phone", target = "phone")
-    @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
-    ExtendedAdDto adToFullAdsDto(Ad ad);
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "id", expression = "java(user.getId())")
+    void updateUser(UserDto userDto, @MappingTarget User user);
 
-    List<CommentDto> advertListToAdsDtoList(List<Ad> ad);
+    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    void updateUser(RegisterDto registerDto, @MappingTarget User user);
 
-    void updateAdvert(CreateOrUpdateAdDto createAdsDto, @MappingTarget Ad ad);
-
-    default CommentsDto listAdsDto(List<Ad> ad) {
-        CommentsDto result = new CommentsDto();
-        result.setType(ad.size());
-        result.setResults(advertListToAdsDtoList(ad));
-        return result;
-    }
-
-    default String getUrlToImage(Ad ad) {
-        if (ad.getImage() == null) {
+    default String getUrlToImage(User user) {
+        if (user.getImage() == null){
             return null;
         }
-        return "/ads/" + ad.getId() + "/image";
+        return "/users/me/image";
     }
 }
