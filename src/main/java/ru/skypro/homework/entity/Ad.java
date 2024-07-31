@@ -30,14 +30,14 @@ public class Ad {
     @Column(name = "price")
     private int price;
 
-    @JoinColumn(name = "image_id", referencedColumnName = "id")
-    private Image image;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User author;
 
-    @OneToMany(mappedBy = "advert", cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private Image image;
+
+    @OneToMany(mappedBy = "ad", cascade = CascadeType.REMOVE)
     @JoinColumn(name = "comment_id")
     private List<Comment> comments;
 
