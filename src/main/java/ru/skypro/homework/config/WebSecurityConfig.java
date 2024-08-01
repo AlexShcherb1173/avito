@@ -1,7 +1,9 @@
 package ru.skypro.homework.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,6 +16,9 @@ import ru.skypro.homework.dto.Role;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
+/*@EnableWebMVC//Я не уверен что это нужно
+@ComponentScan({ "com.elennaro.sshwa.config", "com.elennaro.sshwa.controllers" })
+@Import({ AppSecurityConfig.class }))*/
 public class WebSecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
