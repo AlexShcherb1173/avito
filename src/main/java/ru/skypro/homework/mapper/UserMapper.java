@@ -14,17 +14,16 @@ public interface UserMapper {
 
     User userDtoToUser(UserDto userDto);
 
-    @Mapping(source = "username", target = "email")
+    @Mapping(source = "email", target = "email")
     @Mapping(expression = "java(getUrlToImageCE(user))", target = "image")
-    @Mapping(source = "roleDto", target = "role")
     UserDto userToUserDto(User user);
 
-    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "id", expression = "java(user.getId())")
     void updateUser(UserDto userDto, @MappingTarget User user);
 
-    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
     void updateUser(RegisterDto registerDto, @MappingTarget User user);
 

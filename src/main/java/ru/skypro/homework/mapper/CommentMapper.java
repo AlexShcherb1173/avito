@@ -32,15 +32,15 @@ public interface CommentMapper {
     }
 
     @Mapping(source = "id", target = "pk")
-    @Mapping(source = "author_id", target = "author")
-    @Mapping(source = "author_firstName", target = "authorFirstName")
+    @Mapping(source = "author.id", target = "author")
+    @Mapping(source = "author.firstName", target = "authorFirstName")
     @Mapping(expression = "java(getUrlToAvatar(comment))", target = "authorImage")
     CommentDto commentToCommentDto(Comment comment);
 
 
     @Mapping(source = "pk", target = "id")
-    @Mapping(source = "author", target = "author_id")
-    @Mapping(source = "authorFirstName", target = "author_firstName")
+    @Mapping(source = "author", target = "author.id")
+    @Mapping(source = "authorFirstName", target = "author.firstName")
     Comment commentDtoToComment(CommentDto commentDto);
 
     @Mapping(target = "createdAt", ignore = true)
