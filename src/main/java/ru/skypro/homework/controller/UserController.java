@@ -59,7 +59,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
     public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto updateUser) {
-        return ResponseEntity.ok("Информация успешна обнавлена");
+        return ResponseEntity.ok("Информация успешна обновлена");
     }
 
     @PatchMapping(path = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

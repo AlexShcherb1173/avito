@@ -6,8 +6,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDto;
 import ru.skypro.homework.service.impl.CommentsAdsServiceImpl;
 
@@ -35,15 +37,15 @@ public class CommentsAdsController {
 
     @PostMapping("/{id}/comments")
     @Operation(summary = "Добавление комментария к объявлению",
-            operationId = "addComment")
+            operationId = "createComment")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> addCommentsAds(@PathVariable Integer id,
-                                            @RequestBody CreateOrUpdateCommentDto createOrUpdateComment) {
-        return null;
+    public ResponseEntity<?> createComment(@PathVariable Integer id,
+                                            @RequestBody CommentDto commentDto) {
+        return new ResponseEntity<>(service.createComment(commentDto), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}/comments/{commentId}")

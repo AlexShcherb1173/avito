@@ -6,11 +6,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.AdvertsDto;
 import ru.skypro.homework.dto.CreateOrUpdateAdDto;
-import ru.skypro.homework.service.impl.AdsServiceImpl;
+import ru.skypro.homework.service.AdvertService;
 
 /**
  * Контроллер для работы с объявлениями
@@ -23,7 +24,7 @@ import ru.skypro.homework.service.impl.AdsServiceImpl;
 @RequiredArgsConstructor
 public class AdvertController {
 
-    private final AdsServiceImpl service;
+    private final AdvertService service;
 
     @GetMapping
     @Operation(summary = "Получение всех объявлений",
@@ -37,8 +38,8 @@ public class AdvertController {
     @Operation(summary = "Добавление объявления",
             operationId = "addAd")
     @ApiResponse(responseCode = "201", description = "Created")
-    public ResponseEntity<?> createAds(@RequestBody AdvertsDto ads) {
-        return null;
+    public ResponseEntity<?> createAdvert(@RequestBody CreateOrUpdateAdDto advert) {
+        return new ResponseEntity<>(service.createAdvert(advert), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
