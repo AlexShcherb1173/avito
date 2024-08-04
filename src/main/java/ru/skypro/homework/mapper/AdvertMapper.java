@@ -9,7 +9,7 @@ import ru.skypro.homework.entity.Advert;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
-public interface AdMapper {
+public interface AdvertMapper {
 
     Advert createAdsDtoToAd(CreateOrUpdateAdDto createOrUpdateAdDto);
 
