@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.AdvertsDto;
 import ru.skypro.homework.dto.CreateOrUpdateAdDto;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 
@@ -21,7 +21,7 @@ import ru.skypro.homework.service.impl.AdsServiceImpl;
 @RequestMapping("/ads")
 @Tag(name = "Объявления", description = "Эндпойнты для работы с объявлениями")
 @RequiredArgsConstructor
-public class AdsController {
+public class AdvertController {
 
     private final AdsServiceImpl service;
 
@@ -37,13 +37,13 @@ public class AdsController {
     @Operation(summary = "Добавление объявления",
             operationId = "addAd")
     @ApiResponse(responseCode = "201", description = "Created")
-    public ResponseEntity<?> createAds(@RequestBody AdsDto ads) {
+    public ResponseEntity<?> createAds(@RequestBody AdvertsDto ads) {
         return null;
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получение комментариев объявления",
-            operationId = "getAds")
+            operationId = "getAdverts")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -87,7 +87,7 @@ public class AdsController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    public ResponseEntity<?> getAdsAuthorizedUser(@RequestBody AdsDto ads) {
+    public ResponseEntity<?> getAdsAuthorizedUser(@RequestBody AdvertsDto ads) {
         return null;
     }
 

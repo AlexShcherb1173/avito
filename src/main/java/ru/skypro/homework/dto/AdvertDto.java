@@ -3,11 +3,9 @@ package ru.skypro.homework.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import java.awt.*;
-
 
 @Data
-public class AdDto {
+public class AdvertDto {
 
     @Schema(description = "id объявления")
     private int pk;

@@ -3,8 +3,8 @@ package ru.skypro.homework.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.skypro.homework.dto.RoleDto;
 
-import javax.management.relation.Role;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
@@ -37,13 +37,13 @@ public class User {
     private String phoneNumber;
 
     @Column(name = "role")
-    private Role role;
+    private RoleDto role;
 
     @Column(name = "image")
     private String image;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
-    private List<Ad> ads;
+    private List<Advert> adverts;
 
 
 
