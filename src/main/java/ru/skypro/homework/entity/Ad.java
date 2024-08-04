@@ -31,7 +31,7 @@ public class Ad {
     private int price;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "author_id")
     private User author;
 
     @JoinColumn(name = "image_id", referencedColumnName = "id")
