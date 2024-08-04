@@ -13,8 +13,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "adds")
-public class Ad {
+@Table(name = "advert")
+public class Advert {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,19 +34,18 @@ public class Ad {
     @JoinColumn(name = "author_id")
     private User author;
 
-    @JoinColumn(name = "image_id", referencedColumnName = "id")
-    private Image image;
+    @JoinColumn(name = "image_data", referencedColumnName = "id")
+    private byte[] image;
 
-    @OneToMany(mappedBy = "ad", cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "comment_id")
+    @OneToMany(mappedBy = "advert")
     private List<Comment> comments;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Ad ad = (Ad) o;
-        return id == ad.id && price == ad.price && Objects.equals(title, ad.title) && Objects.equals(description, ad.description) && Objects.equals(author, ad.author);
+        Advert advert = (Advert) o;
+        return id == advert.id && price == advert.price && Objects.equals(title, advert.title) && Objects.equals(description, advert.description) && Objects.equals(author, advert.author);
     }
 
     @Override

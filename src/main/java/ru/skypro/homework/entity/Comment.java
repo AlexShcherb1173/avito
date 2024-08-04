@@ -32,18 +32,18 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "advert_id", referencedColumnName = "id")
-    private Ad ad;
+    private Advert advert;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Comment comment = (Comment) o;
-        return id == comment.id && Objects.equals(createdAt, comment.createdAt) && Objects.equals(text, comment.text) && Objects.equals(author, comment.author) && Objects.equals(ad, comment.ad);
+        return id == comment.id && Objects.equals(createdAt, comment.createdAt) && Objects.equals(text, comment.text) && Objects.equals(author, comment.author) && Objects.equals(advert, comment.advert);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, createdAt, text, author, ad);
+        return Objects.hash(id, createdAt, text, author, advert);
     }
 }

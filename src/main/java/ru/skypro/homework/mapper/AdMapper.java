@@ -4,19 +4,19 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.entity.Ad;
+import ru.skypro.homework.entity.Advert;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface AdMapper {
 
-    Ad createAdsDtoToAd(CreateOrUpdateAdDto createOrUpdateAdDto);
+    Advert createAdsDtoToAd(CreateOrUpdateAdDto createOrUpdateAdDto);
 
     @Mapping(source = "id", target = "pk")
     @Mapping(source = "author.id", target = "author")
     @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
-    AdDto advertToAdsDto(Ad ad);
+    AdvertDto advertToAdsDto(Advert advert);
 
     @Mapping(source = "id", target = "pk")
     @Mapping(source = "author.firstName", target = "authorFirstName")
@@ -24,23 +24,23 @@ public interface AdMapper {
     @Mapping(source = "author.email", target = "email")
     @Mapping(source = "author.phoneNumber", target = "phone")
     @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
-    ExtendedAdDto adToAdsDto(Ad ad);
+    ExtendedAdDto adToAdsDto(Advert advert);
 
-    List<AdDto> adListToAdsDtoList(List<Ad> ad);
+    List<AdvertDto> adListToAdsDtoList(List<Advert> advert);
 
-    void updateAd(CreateOrUpdateAdDto createOrUpdateAdDto, @MappingTarget Ad ad);
+    void updateAd(CreateOrUpdateAdDto createOrUpdateAdDto, @MappingTarget Advert advert);
 
-    default AdsDto listToAdsDto(List<Ad> ad) {
-        AdsDto result = new AdsDto();
-        result.setCount(ad.size());
-        result.setResults(adListToAdsDtoList(ad));
+    default AdvertsDto listToAdsDto(List<Advert> advert) {
+        AdvertsDto result = new AdvertsDto();
+        result.setCount(advert.size());
+        result.setResults(adListToAdsDtoList(advert));
         return result;
     }
 
-    default String getUrlToImage(Ad ad) {
-        if (ad.getImage() == null) {
+    default String getUrlToImage(Advert advert) {
+        if (advert.getImage() == null) {
             return null;
         }
-        return "/ads/" + ad.getId() + "/image";
+        return "/ads/" + advert.getId() + "/image";
     }
 }

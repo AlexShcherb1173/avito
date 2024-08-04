@@ -4,10 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.entity.Ad;
 import ru.skypro.homework.entity.User;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -27,7 +24,7 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)
     void updateUser(RegisterDto registerDto, @MappingTarget User user);
 
-    default String getUrlToImage(User user) {
+    default String getUrlToImageCE(User user) {
         if (user.getImage() == null){
             return null;
         }

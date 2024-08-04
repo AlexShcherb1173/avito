@@ -8,7 +8,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import ru.skypro.homework.controller.CommentsAdsController;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class CommentsAdsControllerTest {
+public class CommentsAdvertControllerTest {
 
     @LocalServerPort
     private int port;
