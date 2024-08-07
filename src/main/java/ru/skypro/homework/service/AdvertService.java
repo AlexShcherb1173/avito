@@ -6,7 +6,11 @@ import ru.skypro.homework.dto.CreateOrUpdateAdDto;
 
 public interface AdvertService {
 
-    AdvertDto createAdvert(CreateOrUpdateAdDto createOrUpdateAdDto, MultipartFile file);
+    AdvertDto create(CreateOrUpdateAdDto createOrUpdateAdDto, MultipartFile file);
 
-    AdvertDto getAdvertById(Long id);
+    void delete(long id);
+
+    AdvertDto update(long id, CreateOrUpdateAdDto createOrUpdateAdDto);
+
+    AdvertDto getAdvertById(long id);
 }

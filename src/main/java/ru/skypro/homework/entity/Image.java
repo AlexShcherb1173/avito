@@ -18,7 +18,7 @@ public abstract class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    private int id;
+    private long id;
 
     private String imageDir;
     private String fileType;

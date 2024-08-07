@@ -1,0 +1,33 @@
+package ru.skypro.homework.component;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+import ru.skypro.homework.entity.Role;
+
+@Component
+public class AuthenticationComponent {
+
+    public Authentication getAuth() {
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    public boolean checkAuthNotEnough(String username) {
+        if (getAuth() == null) {
+            return true;
+        } else if (checkAdminRole()) {
+            return false;
+        } else {
+            return !checkUsername(username);
+        }
+    }
+
+    private boolean checkAdminRole() {
+        return getAuth().getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals(Role.ADMIN.getAuthority()));
+    }
+
+    private boolean checkUsername(String username) {
+        return getAuth().getName().equals(username);
+    }
+}
