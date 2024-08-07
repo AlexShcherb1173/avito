@@ -39,7 +39,7 @@ public class AdvertController {
             operationId = "addAd")
     @ApiResponse(responseCode = "201", description = "Created")
     public ResponseEntity<?> createAdvert(@RequestBody CreateOrUpdateAdDto advert) {
-        return new ResponseEntity<>(service.createAdvert(advert), HttpStatus.CREATED);
+        return null;
     }
 
     @GetMapping("/{id}")

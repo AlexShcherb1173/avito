@@ -42,6 +42,10 @@ public class User {
     @Column(name = "image")
     private String image;
 
+    @ManyToOne
+    @JoinColumn(name = "image_id")
+    private Avatar avatar;
+
     @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
     private List<Advert> adverts;
 
