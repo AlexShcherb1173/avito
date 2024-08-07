@@ -150,7 +150,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ad'
+                $ref: '#/components/schemas/Advert'
         '401':
           description: Unauthorized
   /ads/{id}/comments:
@@ -212,7 +212,7 @@ paths:
       tags:
         - Объявления
       summary: 'Получение информации об объявлении'
-      operationId: getAds
+      operationId: getAdverts
       parameters:
         - name: id
           in: path
@@ -275,7 +275,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ad'
+                $ref: '#/components/schemas/Advert'
         '403':
           description: Forbidden
         '401':
@@ -593,7 +593,7 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Ad'
+            $ref: '#/components/schemas/Advert'
     ExtendedAd:
       type: object
       properties:
