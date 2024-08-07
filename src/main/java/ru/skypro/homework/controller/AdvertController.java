@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.AdvertsDto;
 import ru.skypro.homework.dto.CreateOrUpdateAdDto;
 import ru.skypro.homework.service.AdvertService;
@@ -30,7 +31,7 @@ public class AdvertController {
     @Operation(summary = "Получение всех объявлений",
             operationId = "getAllAds")
     @ApiResponse(responseCode = "200", description = "OK")
-    public ResponseEntity<?> getAllAds() {
+    public ResponseEntity<?> getAllAdverts() {
         return null;
     }
 
@@ -38,8 +39,9 @@ public class AdvertController {
     @Operation(summary = "Добавление объявления",
             operationId = "addAd")
     @ApiResponse(responseCode = "201", description = "Created")
-    public ResponseEntity<?> createAdvert(@RequestBody CreateOrUpdateAdDto advert) {
-        return null;
+    public ResponseEntity<?> createA(@RequestPart CreateOrUpdateAdDto advert,
+                                     @RequestPart(name = "image") MultipartFile file) {
+        return new ResponseEntity<>(service.create(advert, file), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
@@ -50,8 +52,8 @@ public class AdvertController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> getInfoAds(@PathVariable Integer id) {
-        return ResponseEntity.ok("Пользователь получен");
+    public ResponseEntity<?> getInfoAdverts(@PathVariable Integer id) {
+        return null;
     }
 
     @DeleteMapping("{id}")
@@ -63,8 +65,9 @@ public class AdvertController {
             @ApiResponse(responseCode = "403", description = "Forbidden"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<?> deleteAd(@PathVariable Integer id) {
-        return null;
+    public ResponseEntity<?> deleteAdvert(@PathVariable long id) {
+        service.delete(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PatchMapping("/{id}")
@@ -76,9 +79,10 @@ public class AdvertController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<?> updateInfoAd(@PathVariable Integer id,
-                                          @RequestBody CreateOrUpdateAdDto createOrUpdateAd) {
-        return null;
+    public ResponseEntity<?> updateAdvert(@PathVariable long id,
+                                          @RequestBody CreateOrUpdateAdDto advert) {
+        return ResponseEntity.ok(service.update(id, advert));
+
     }
 
     @GetMapping("/me")
@@ -88,7 +92,7 @@ public class AdvertController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    public ResponseEntity<?> getAdsAuthorizedUser(@RequestBody AdvertsDto ads) {
+    public ResponseEntity<?> getAdvertsAuthorizedUser(@RequestBody AdvertsDto ads) {
         return null;
     }
 
@@ -101,7 +105,7 @@ public class AdvertController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not found")
     })
-    public ResponseEntity<?> UpdateAdsPicture(@PathVariable Integer id) {
+    public ResponseEntity<?> UpdateAdvertsPicture(@PathVariable Integer id) {
         return null;
     }
 }

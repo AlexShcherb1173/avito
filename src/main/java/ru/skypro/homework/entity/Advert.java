@@ -34,8 +34,9 @@ public class Advert {
     @JoinColumn(name = "author_id")
     private User author;
 
-    @JoinColumn(name = "image_data", referencedColumnName = "id")
-    private byte[] image;
+    @ManyToOne
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private Photo photo;
 
     @OneToMany(mappedBy = "advert")
     private List<Comment> comments;

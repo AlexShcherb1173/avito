@@ -2,6 +2,7 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import ru.skypro.homework.entity.Role;
 
 @Data
 public class RegisterDto {
@@ -32,5 +33,5 @@ public class RegisterDto {
 
     @Schema(description = "роль пользователя",
             allowableValues = {"USER", "ADMIN"})
-    private RoleDto role;
+    private Role role;
 }

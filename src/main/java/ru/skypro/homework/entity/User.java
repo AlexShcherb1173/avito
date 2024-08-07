@@ -3,7 +3,6 @@ package ru.skypro.homework.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.skypro.homework.dto.RoleDto;
 
 import javax.persistence.*;
 import java.util.List;
@@ -37,7 +36,7 @@ public class User {
     private String phoneNumber;
 
     @Column(name = "role")
-    private RoleDto role;
+    private Role role;
 
     @Column(name = "image")
     private String image;
