@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDto;
@@ -37,7 +38,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
     public ResponseEntity<?> setPassword(@RequestBody NewPasswordDto newPassword) {
-        return ResponseEntity.ok("Пароль успешно обновлен");
+        return ResponseEntity.ok(service.setPassword(newPassword));
     }
 
     @GetMapping("/me")
@@ -48,7 +49,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
     public ResponseEntity<?> getUser() {
-        return ResponseEntity.ok("Информация получена");
+        return ResponseEntity.ok(service.getCurrentUser());
     }
 
     @PatchMapping("/me")
@@ -58,8 +59,8 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
-    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto updateUser) {
-        return ResponseEntity.ok("Информация успешна обновлена");
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto updateUserDto) {
+        return ResponseEntity.ok(service.updateUser(updateUserDto));
     }
 
     @PatchMapping(path = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -70,7 +71,8 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
     })
     public ResponseEntity<?> updateUserImage(@RequestPart MultipartFile image) {
-        return ResponseEntity.ok("Аватарка успешно обновлена");
+        service.updateUserImage(image, SecurityContextHolder.getContext().getAuthentication().getName());
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -31,8 +31,8 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> getCommentsAds(@PathVariable Integer id) {
-        return null;
+    public ResponseEntity<?> getCommentsAds(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getComments(id));
     }
 
     @PostMapping("/{id}/comments")
@@ -43,9 +43,9 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> createComment(@PathVariable Integer id,
-                                            @RequestBody CommentDto commentDto) {
-        return new ResponseEntity<>(service.createComment(commentDto), HttpStatus.OK);
+    public ResponseEntity<?> createComment(@PathVariable Long id,
+                                            @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
+        return ResponseEntity.ok(service.createComment(id, createOrUpdateCommentDto));
     }
 
     @DeleteMapping("/{id}/comments/{commentId}")
@@ -57,10 +57,9 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> deleteComments(@PathVariable Integer adId,
-                                                 @PathVariable Integer commentId,
-                                                 @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
-        return null;
+    public ResponseEntity<?> deleteComments(@PathVariable Long id,
+                                                 @PathVariable Long commentId) {
+        return ResponseEntity.ok(service.deleteComment(id, commentId));
     }
 
     @PatchMapping("/{id}/comments/{commentId}")
@@ -72,10 +71,10 @@ public class CommentsAdsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
-    public ResponseEntity<?> updateComments(@PathVariable Integer adId,
-                                                 @PathVariable Integer commentId,
+    public ResponseEntity<?> updateComments(@PathVariable Long id,
+                                                 @PathVariable Long commentId,
                                                  @RequestBody CreateOrUpdateCommentDto createOrUpdateCommentDto) {
-        return null;
+        return ResponseEntity.ok(service.updateComment(id, commentId, createOrUpdateCommentDto));
     }
 
 }

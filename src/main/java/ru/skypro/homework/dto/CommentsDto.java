@@ -9,7 +9,7 @@ import java.util.List;
 public class CommentsDto {
 
     @Schema(description = "общее количество комментариев")
-    private int type;
+    private int count;
 
     @Schema
     private List<CommentDto> results;

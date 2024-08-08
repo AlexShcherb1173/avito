@@ -1,33 +1,29 @@
 package ru.skypro.homework.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.entity.User;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    User userDtoToUser(UserDto userDto);
+    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    @Mapping(source = "email", target = "email")
-    @Mapping(expression = "java(getUrlToImageCE(user))", target = "image")
-    UserDto userToUserDto(User user);
+    @Mapping(target = "email", source = "username")
+    User registerDTOToUser(RegisterDto registerDTO);
 
+    @Mapping(target = "image", expression = "java(user.getImage() != null ? \"/image/\" + user.getImage().getId() : null)")
+    UserDto toUserDTO(User user);
+
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "id", expression = "java(user.getId())")
-    void updateUser(UserDto userDto, @MappingTarget User user);
+    @Mapping(target = "image", ignore = true)
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "adverts", ignore = true)
+    @Mapping(target = "comments", ignore = true)
+    void updateUserDTOToUser(UpdateUserDto updateUserDTO, @MappingTarget User user);
 
-    @Mapping(target = "email", ignore = true)
-    @Mapping(target = "password", ignore = true)
-    void updateUser(RegisterDto registerDto, @MappingTarget User user);
-
-    default String getUrlToImageCE(User user) {
-        if (user.getImage() == null){
-            return null;
-        }
-        return "/users/me/image";
-    }
+    UpdateUserDto userToUpdateUserDTO(User user);
 }
