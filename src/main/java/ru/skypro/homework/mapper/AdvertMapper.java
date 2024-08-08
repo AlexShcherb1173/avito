@@ -1,46 +1,29 @@
 package ru.skypro.homework.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
+import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.entity.Advert;
-
-import java.util.List;
+import ru.skypro.homework.entity.*;
 
 @Mapper(componentModel = "spring")
 public interface AdvertMapper {
 
-    Advert createAdsDtoToAd(CreateOrUpdateAdDto createOrUpdateAdDto);
+    AdvertMapper INSTANCE = Mappers.getMapper(AdvertMapper.class);
 
-    @Mapping(source = "id", target = "pk")
     @Mapping(source = "author.id", target = "author")
-    @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
-    AdvertDto advertToAdsDto(Advert advert);
-
     @Mapping(source = "id", target = "pk")
-    @Mapping(source = "author.firstName", target = "authorFirstName")
-    @Mapping(source = "author.lastName", target = "authorLastName")
-    @Mapping(source = "author.email", target = "email")
-    @Mapping(source = "author.phoneNumber", target = "phone")
-    @Mapping(expression = "java(getUrlToImage(advert))", target = "image")
-    ExtendedAdDto adToAdsDto(Advert advert);
+    @Mapping(target = "image", expression = "java(\"/image/\" + advert.getImage().getId())")
+    AdvertDto adToAdDTO(Advert advert);
 
-    List<AdvertDto> adListToAdsDtoList(List<Advert> advert);
+    @Mapping(source = "user", target = "author")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "comments", ignore = true)
+    @Mapping(target = "image", ignore = true)
+    Advert createOrUpdateAdDTOToAd(CreateOrUpdateAdDto createOrUpdateAdDTO, User user);
 
-    void updateAd(CreateOrUpdateAdDto createOrUpdateAdDto, @MappingTarget Advert advert);
-
-    default AdvertsDto listToAdsDto(List<Advert> advert) {
-        AdvertsDto result = new AdvertsDto();
-        result.setCount(advert.size());
-        result.setResults(adListToAdsDtoList(advert));
-        return result;
-    }
-
-    default String getUrlToImage(Advert advert) {
-        if (advert.getPhoto() == null) {
-            return null;
-        }
-        return "/ads/" + advert.getId() + "/image";
-    }
+    @Mapping(source = "user.id", target = "pk")
+    @Mapping(source = "user.firstName", target = "authorFirstName")
+    @Mapping(source = "user.lastName", target = "authorLastName")
+    @Mapping(target = "image", expression = "java(\"/image/\" + advert.getImage().getId())")
+    ExtendedAdDto toExtendedAdDTO(Advert advert, User user);
 }

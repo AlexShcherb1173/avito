@@ -1,15 +1,15 @@
 package ru.skypro.homework.service;
 
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.Image;
-import ru.skypro.homework.entity.Photo;
-import ru.skypro.homework.entity.User;
 
-public abstract class ImageService {
-    public abstract Photo uploadPhoto(MultipartFile file);
+public interface ImageService {
 
-    public abstract Avatar uploadAvatar(User user, MultipartFile file);
+    public ResponseEntity<byte[]> getImage(Long id);
 
-    public abstract void deleteFile(Image image);
+    public Image createImage(MultipartFile image);
+
+    public void deleteImage(Long id);
 }

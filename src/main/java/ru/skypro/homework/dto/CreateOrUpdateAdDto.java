@@ -11,14 +11,13 @@ public class CreateOrUpdateAdDto {
             maxLength = 32)
     private String title;
 
-    @Schema(description = "описание объявления",
-            minLength = 8,
-            maxLength = 64)
-    private String description;
-
     @Schema(description = "цена объявления",
             minimum = "0",
             maximum = "10000000")
     private int price;
 
+    @Schema(description = "описание объявления",
+            minLength = 8,
+            maxLength = 64)
+    private String description;
 }

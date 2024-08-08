@@ -1,90 +1,55 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.entity.Avatar;
 import ru.skypro.homework.entity.Image;
-import ru.skypro.homework.entity.Photo;
-import ru.skypro.homework.entity.User;
 import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.ImageService;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Service
-public class ImageServiceImpl extends ImageService {
+public class ImageServiceImpl implements ImageService {
 
-    @Value("$path.to.photos.folder$")
-    private String photosDir;
+    @Autowired
+    private ImageRepository imageRepository;
 
-    @Value("$path.to.avatars.folder$")
-    private String avatarsDir;
+    @Autowired
+    private  UserRepository userRepository;
 
-    private final ImageRepository imageRepository;
-    private final UserRepository userRepository;
-
-    public ImageServiceImpl(ImageRepository imageRepository, UserRepository userRepository) {
-        this.imageRepository = imageRepository;
-        this.userRepository = userRepository;
+    @Override
+    public ResponseEntity<byte[]> getImage(Long id) {
+        Image image = imageRepository.findById(id).orElseThrow(RuntimeException::new);
+        byte[] imageBytes = image.getData();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(image.getMediaType()));
+        headers.setContentLength(imageBytes.length);
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(imageBytes);
     }
 
     @Override
-    public Photo uploadPhoto(MultipartFile file) {
+    public Image createImage(MultipartFile image) {
+        Image newImage = new Image();
         try {
-            Photo photo = new Photo(photosDir);
-            mapFileToImage(file, photo);
-            photo = imageRepository.save(photo);
-            upload(photo, file);
-            return photo;
+            newImage.setData(image.getBytes());
+            newImage.setMediaType(image.getContentType());
+            newImage.setFileSize(image.getSize());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        imageRepository.save(newImage);
+        return newImage;
     }
 
     @Override
-    public Avatar uploadAvatar(User user, MultipartFile file) {
-        try {
-            Avatar avatar = user.getAvatar();
-            if (avatar == null) {
-                avatar = new Avatar(avatarsDir);
-            }
-            mapFileToImage(file, avatar);
-            avatar = imageRepository.save(avatar);
-            upload(avatar, file);
-            user.setAvatar(avatar);
-            userRepository.save(user);
-            return avatar;
-        } catch (Exception e) {;
-            throw new RuntimeException(e);
-        }
-    }
-    @Override
-    public void deleteFile(Image image) {
-        if (image != null) {
-            try {
-                Files.deleteIfExists(image.getFilePath().toAbsolutePath().toFile().toPath());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    private void upload(Image image, MultipartFile file) throws IOException {
-        Path filePath = image.getFilePath();
-        Files.createDirectories(filePath.getParent());
-        Files.deleteIfExists(filePath);
-        Files.write(filePath, file.getBytes());
-    }
-    private void mapFileToImage(MultipartFile file, Image image) {
-        image.setFileType(file.getContentType());
-        image.setFileName(file.getOriginalFilename());
-        image.setFileExtension(StringUtils.getFilenameExtension(file.getOriginalFilename()));
-        image.setFileSize(file.getSize());
+    public void deleteImage(Long id) {
+        imageRepository.deleteById(id);
     }
 
 }

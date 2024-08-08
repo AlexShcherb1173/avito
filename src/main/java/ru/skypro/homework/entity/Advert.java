@@ -1,56 +1,34 @@
 package ru.skypro.homework.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.Data;
 import javax.persistence.*;
-import java.awt.*;
 import java.util.List;
-import java.util.Objects;
-
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 @Table(name = "advert")
 public class Advert {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private long id;
+    private Long id;
 
-    @Column(name = "title")
+    @Column(nullable = false)
     private String title;
 
-    @Column(name = "description")
+    @Column(nullable = false)
+    private Integer price;
+
+    @Column(nullable = false, length = 64)
     private String description;
 
-    @Column(name = "price")
-    private int price;
-
-    @ManyToOne
-    @JoinColumn(name = "author_id")
-    private User author;
-
-    @ManyToOne
-    @JoinColumn(name = "image_id", referencedColumnName = "id")
-    private Photo photo;
-
-    @OneToMany(mappedBy = "advert")
+    @OneToMany(mappedBy = "advert", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Advert advert = (Advert) o;
-        return id == advert.id && price == advert.price && Objects.equals(title, advert.title) && Objects.equals(description, advert.description) && Objects.equals(author, advert.author);
-    }
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private User author;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, title, description, price, author);
-    }
+    @OneToOne
+    @JoinColumn(name = "image")
+    private Image image;
 }

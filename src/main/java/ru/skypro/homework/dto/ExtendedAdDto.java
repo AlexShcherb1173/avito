@@ -7,19 +7,7 @@ import lombok.Data;
 public class ExtendedAdDto {
 
     @Schema(description = "id объявления")
-    private int pk;
-
-    @Schema(description = "заголовок объявления")
-    private String title;
-
-    @Schema(description = "описание объявления")
-    private String description;
-
-    @Schema(description = "цена объявления")
-    private int price;
-
-    @Schema(description = "ссылка на картинку объявления")
-    private String image;
+    private Long pk;
 
     @Schema(description = "имя автора объявления")
     private String authorFirstName;
@@ -27,9 +15,21 @@ public class ExtendedAdDto {
     @Schema(description = "фамилия автора объявления")
     private String authorLastName;
 
+    @Schema(description = "описание объявления")
+    private String description;
+
     @Schema(description = "логин автора объявления")
     private String email;
 
+    @Schema(description = "ссылка на картинку объявления")
+    private String image;
+
     @Schema(description = "телефон автора объявления")
     private String phone;
+
+    @Schema(description = "цена объявления")
+    private int price;
+
+    @Schema(description = "заголовок объявления")
+    private String title;
 }

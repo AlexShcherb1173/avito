@@ -8,7 +8,7 @@ import ru.skypro.homework.entity.Role;
 public class UserDto {
 
     @Schema(description = "id пользователя")
-    private int id;
+    private Long id;
 
     @Schema(description = "логин пользователя")
     private String email;
