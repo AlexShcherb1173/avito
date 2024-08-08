@@ -47,7 +47,7 @@ public class CommentsAdsServiceImpl implements CommentsAdsService {
     @Override
     public CommentDto createComment(Long id, CreateOrUpdateCommentDto createOrUpdateCommentDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(authentication.getName());
+        User user = userRepository.findByUsername(authentication.getName());
         Advert advert = advertRepository.findById(id).orElseThrow(RuntimeException::new);
 
         Comment comment = new Comment();
@@ -68,7 +68,7 @@ public class CommentsAdsServiceImpl implements CommentsAdsService {
     @Override
     public CommentDto updateComment(Long id, Long commentId, CreateOrUpdateCommentDto createOrUpdateCommentDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(authentication.getName());
+        User user = userRepository.findByUsername(authentication.getName());
 
         Comment comment = commentRepository.findById(commentId).orElseThrow(RuntimeException::new);
         comment.setText(createOrUpdateCommentDto.getText());
