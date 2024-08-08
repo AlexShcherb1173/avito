@@ -50,7 +50,7 @@ public class AdvertServiceImpl implements AdvertService {
     @Override
     public AdvertDto createAdvert(CreateOrUpdateAdDto createOrUpdateAdDto, MultipartFile image) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(auth.getName());
+        User user = userRepository.findByUsername(auth.getName());
         Advert advert = AdvertMapper.INSTANCE.createOrUpdateAdDTOToAd(createOrUpdateAdDto, user);
         advert.setImage(imageService.createImage(image));
         return AdvertMapper.INSTANCE.adToAdDTO(advertRepository.save(advert));
@@ -83,7 +83,7 @@ public class AdvertServiceImpl implements AdvertService {
 
     @Override
     public AdvertsDto getAllAdvertsByAuthor() {
-        User user = userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName());
+        User user = userRepository.findByUsername(SecurityContextHolder.getContext().getAuthentication().getName());
         List<AdvertDto> result = new ArrayList<>();
         advertRepository.findAllByAuthor(user).forEach(u -> result.add(AdvertMapper.INSTANCE.adToAdDTO(u)));
         AdvertsDto adsDTO = new AdvertsDto();

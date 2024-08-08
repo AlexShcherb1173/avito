@@ -10,9 +10,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import ru.skypro.homework.entity.Role;
-
+import javax.sql.DataSource;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -29,15 +31,20 @@ public class WebSecurityConfig {
             "/register"
     };
     @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user =
-                User.builder()
-                        .username("user@gmail.com")
-                        .password("password")
-                        .passwordEncoder(passwordEncoder::encode)
-                        .roles(Role.USER.name())
-                        .build();
-        return new InMemoryUserDetailsManager(user);
+    public UserDetailsManager userDetailsService(DataSource dataSource, PasswordEncoder passwordEncoder) {
+        JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
+
+        if (!userDetailsManager.userExists("user@gmail.com")) {
+            userDetailsManager.createUser(
+                    User.builder()
+                            .username("user@gmail.com")
+                            .password(passwordEncoder.encode("password"))
+                            .roles(Role.USER.name())
+                            .build()
+            );
+        }
+
+        return userDetailsManager;
     }
 
 

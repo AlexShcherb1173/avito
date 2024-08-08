@@ -1,17 +1,13 @@
 package ru.skypro.homework.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Data
+@Builder
 @Table(name = "users")
 public class User {
 
@@ -21,7 +17,7 @@ public class User {
     private Long id;
 
     @Column(name = "email")
-    private String email;
+    private String username;
 
     @Column(name = "password")
     private String password;

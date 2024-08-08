@@ -3,18 +3,22 @@
 
 --changeset n.surzhikov:initdb
 
-create table "user"
+CREATE TABLE users
 (
-    id SERIAL primary key,
-    email varchar (32),
-    password varchar (32),
-    firstname varchar (32),
-    lastname varchar (32),
-    phone_number varchar (32),
-    role varchar (32),
-    image varchar (32),
-    adverts varchar (32)
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(32) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    firstname VARCHAR(32),
+    lastname VARCHAR(32),
+    phone_number VARCHAR(32),
+    role VARCHAR(32),
+    enabled BOOLEAN NOT NULL DEFAULT TRUE
+);
 
+CREATE TABLE authorities (
+    username VARCHAR(50) NOT NULL,
+    authority VARCHAR(50) NOT NULL,
+    CONSTRAINT authorities_pkey PRIMARY KEY (username, authority)
 );
 
 create table advert
@@ -23,8 +27,8 @@ create table advert
     title varchar(128),
     description varchar(512),
     price decimal,
-    author_id bigint references "user"(id),
-    image_data bytea,
+    author_id bigint references "users"(id),
+    image bytea,
     comments varchar (512)
 );
 create table comments
@@ -32,9 +36,8 @@ create table comments
     id SERIAL primary key,
     created_at timestamp,
     text varchar (512),
-    author_id bigint references "user"(id),
+    author_id bigint references "users"(id),
     advert_id bigint references advert(id)
 
 
 );
-
