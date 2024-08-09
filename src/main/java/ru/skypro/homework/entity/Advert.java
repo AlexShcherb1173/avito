@@ -1,10 +1,15 @@
 package ru.skypro.homework.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.util.List;
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "advert")
 public class Advert {
 

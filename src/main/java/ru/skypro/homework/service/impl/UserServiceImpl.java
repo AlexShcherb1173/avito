@@ -27,14 +27,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = repository.findByUsername(authentication.getName());
+        User user = repository.findByEmail(authentication.getName());
         return UserMapper.INSTANCE.toUserDTO(user);
     }
 
     @Override
     public UserDto updateUser(UpdateUserDto updateUserDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = repository.findByUsername(authentication.getName());
+        User user = repository.findByEmail(authentication.getName());
         UserMapper.INSTANCE.updateUserDTOToUser(updateUserDto, user);
         return UserMapper.INSTANCE.toUserDTO(repository.save(user));
     }
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Void setPassword(NewPasswordDto newPasswordDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = repository.findByUsername(authentication.getName());
+        User user = repository.findByEmail(authentication.getName());
 
         if (user == null) {
             throw new RuntimeException("User not found");
@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserImage(MultipartFile image, String email) {
-        User user = repository.findByUsername(email);
+        User user = repository.findByEmail(email);
         if (user.getImage() == null) {
             user.setImage(imageService.createImage(image));
             repository.save(user);

@@ -81,7 +81,6 @@ public class AdvertController {
     public ResponseEntity<?> updateAdvert(@PathVariable Long id,
                                           @RequestBody CreateOrUpdateAdDto advert) {
         return ResponseEntity.ok(service.updateAdvert(id, advert));
-
     }
 
     @GetMapping("/me")
@@ -91,7 +90,7 @@ public class AdvertController {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "403", description = "Forbidden")
     })
-    public ResponseEntity<?> getAdvertsAuthorizedUser(@RequestBody AdvertsDto ads) {
+    public ResponseEntity<AdvertsDto> getAdvertsAuthorizedUser() {
         return ResponseEntity.ok(service.getAllAdvertsByAuthor());
     }
 
