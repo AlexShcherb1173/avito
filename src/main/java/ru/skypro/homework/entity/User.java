@@ -8,6 +8,8 @@ import java.util.List;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users")
 public class User {
 
@@ -16,16 +18,16 @@ public class User {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "email")
-    private String username;
+    @Column(name = "username")
+    private String email;
 
     @Column(name = "password")
     private String password;
 
-    @Column(name = "first_name")
+    @Column(name = "firstname")
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "lastname")
     private String lastName;
 
     @Column(name = "phone_number")
@@ -43,4 +45,7 @@ public class User {
     @OneToOne
     @JoinColumn(name = "image")
     private Image image;
+
+    @Column(name = "enabled")
+    private boolean isUser;
 }

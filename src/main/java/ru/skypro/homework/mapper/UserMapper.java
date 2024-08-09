@@ -10,14 +10,14 @@ public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    @Mapping(source = "username", target = "username")
+    @Mapping(source = "username", target = "email")
     User registerDTOToUser(RegisterDto registerDTO);
 
     @Mapping(target = "image", expression = "java(user.getImage() != null ? \"/image/\" + user.getImage().getId() : null)")
     UserDto toUserDTO(User user);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "username", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "image", ignore = true)
     @Mapping(target = "role", ignore = true)
