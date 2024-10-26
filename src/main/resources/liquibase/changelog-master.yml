@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file:
+        - liquibase/scripts/schema.sql
+  - include:
+      file:
+        - liquibase/scripts/change-type-role.sql
