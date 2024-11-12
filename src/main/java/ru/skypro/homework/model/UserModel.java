@@ -1,37 +1,48 @@
 package ru.skypro.homework.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import ru.skypro.homework.dto.Role;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name = "app_user")
 public class UserModel {
 
-    @Schema(description = "id пользователя")
     @Id
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id; //id пользователя
 
-    @Schema(description = "Логин пользователя")
-    private String email;
+    @Column(unique = true, nullable = false)
+    private String username; //логин пользователя
 
-    @Schema(description = "Имя пользователя")
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false)
     private String firstName;
 
-    @Schema(description = "Фамилия пользователя")
+    @Column(nullable = false)
     private String lastName;
 
-    @Schema(description = "Телефон пользователя")
-    private String phone;
-
-    @Schema(description = "Роль пользователя")
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Role role;
 
-    @Schema(description = "Ссылка на аватар пользователя")
-    private String image;
+    private String phone;
+    private String image; //ссылка на аватар
+
+    //1
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AdModel> adsList;
+
+    //2
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentModel> commentsList;
+
+    @OneToOne
+    @JoinColumn(name = "user_image_id", referencedColumnName = "imageId")
+    private ImageModel imageModel;
 }

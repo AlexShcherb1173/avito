@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.model.CommentModel;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class, ExtendedAdMapper.class})
+@Mapper(componentModel = "spring", uses = {UserMapper.class, AdMapper.class})
 public interface CommentMapper {
 
     @Schema(description = "Преобразование объекта модели Comment в объект DTO Comment")

@@ -29,8 +29,8 @@ public class CommentsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = ""))
     })
-    public ResponseEntity<?> getCommentsAd() {
-        log.info("Вы вошли в метод getCommentsAd");
+    public ResponseEntity<?> getCommentsAd(@PathVariable("id") int id) {
+        log.info("Метод getComments, класса CommentsController. Принято id: {}", id);
         return ResponseEntity.ok().build();
     }
 
@@ -45,7 +45,7 @@ public class CommentsController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = ""))
     })
     public ResponseEntity<?> addCommentsToAd(@PathVariable("id") int id) {
-        log.info("Вы вошли в метод addCommentsToAd");
+        log.info("Метод addComments, класса CommentsController. Принято (int) id: {}", id);
         return ResponseEntity.ok().build();
     }
 
@@ -59,7 +59,8 @@ public class CommentsController {
     })
     public ResponseEntity<?> removeComment(@PathVariable("adId") int adId,
                                            @PathVariable("commentId") int commentId) {
-        log.info("Вы вошли в метод removeComment");
+        log.info("Метод deleteCommentsAds, класса CommentsController.Приняты (int) adId: {}, (int) commentId: {}",
+                adId, commentId);
         return ResponseEntity.ok().build();
     }
 
@@ -77,7 +78,8 @@ public class CommentsController {
     public ResponseEntity<?> updateComment(@PathVariable("adId") int adId,
                                            @PathVariable("commentId") int commentId,
                                            @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        log.info("Вы вошли в метод updateComment");
+        log.info("Метод updateComment, класса CommentsController.Приняты (int) adId: {}, (int) commentId: {}, (object) createOrUpdateComment: {}",
+                adId, commentId, createOrUpdateComment);
         return ResponseEntity.ok().build();
     }
 }

@@ -1,33 +1,29 @@
 package ru.skypro.homework.model;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "comments")
 public class CommentModel {
 
-    @Schema(description = "id автора комментария")
-    private Integer author;
-
-    @Schema(description = "Ссылка на аватар автора комментария")
-    private String authorImage;
-
-    @Schema(description = "Имя создателя комментария")
-    private String authorFirstName;
-
-    @Schema(description = "Дата и время создания комментария в миллисекундах с 00:00:00 01.01.1970")
-    private Integer createdAt;
-
-    @Schema(description = "id комментария")
     @Id
-    private Integer pk;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer commentId; // ид комментария
+    private Integer author; // ид автора объявления
+    private String authorImage; // ссылка на аватар автора
+    private String authorFirstName; // имя создателя комментария
+    private Integer createAd; //дата и время создания комментарий
+    private String text; //текст комментарий
 
-    @Schema(description = "Текст комментария")
-    private String text;
+    //2
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserModel user;
+
+    //3
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ad_id")
+    private AdModel ad;
 }

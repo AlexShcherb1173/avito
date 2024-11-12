@@ -15,13 +15,19 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.model.ExtendedAdModel;
+import ru.skypro.homework.service.impl.AdServiceImpl;
 
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
 @Slf4j
 @Tag(name = "Объявления")
 public class AdController {
+
+    private final AdServiceImpl adServiceImpl;
+
+    public AdController(AdServiceImpl adServiceImpl) {
+        this.adServiceImpl = adServiceImpl;
+    }
 
     @Operation(summary = "Получение всех объявлений", tags = {"Объявления"})
     @GetMapping(path = "/ads")
@@ -32,7 +38,7 @@ public class AdController {
             })
     })
     public ResponseEntity<?> getAllAds() {
-        log.info("Вы вошли в метод getAllAds");
+        log.info("Метод getAllAds, класса AdController");
         return ResponseEntity.ok().build();
     }
 
@@ -47,7 +53,9 @@ public class AdController {
     })
     public ResponseEntity<?> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
                                    @RequestPart(value = "imagine", required = true) MultipartFile image) {
-        log.info("Вы вошли в метод addAd");
+        log.info("Метод addAds, класса AdController. Приняты: \nНовое объявление или обновление имеющегося {}\nИзображение объявления{}",
+                properties.toString(), image.getOriginalFilename());
+        adServiceImpl.addAd(properties);
         return ResponseEntity.ok().build();
     }
 
@@ -56,13 +64,13 @@ public class AdController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                     @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ExtendedAdModel.class)),
+                            schema = @Schema(implementation = Ad.class)),
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not found", content = @Content(mediaType = "")),
     })
     public ResponseEntity<?> getAds(@PathVariable int id) {
-        log.info("Вы вошли в метод getAdsById");
+        log.info("Метод getAdsById, класса AdController. Принят: \n(int) id {}", id);
         return ResponseEntity.ok().build();
     }
 
@@ -75,7 +83,7 @@ public class AdController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
     public ResponseEntity<?> removeAd(@PathVariable("id") int id) {
-        log.info("Вы вошли в метод deleteAdsById");
+        log.info("Метод deleteAdsById, класса AdController. Принят: \n(int) id {}", id);
         return ResponseEntity.ok().build();
     }
 
@@ -91,7 +99,8 @@ public class AdController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
     public ResponseEntity<?> updateAd(@PathVariable int id, @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        log.info("Вы вошли в метод updateAdsById");
+        log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nНовое объявление или обновление имеющегося {}",
+                id, createOrUpdateAd.toString());
         return ResponseEntity.ok().build();
     }
 
@@ -105,7 +114,7 @@ public class AdController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
     })
     public ResponseEntity<?> getAdsMe() {
-        log.info("Вы вошли в метод getAdsCurrentUser");
+        log.info("Метод getAdsCurrentUser, класса AdController.");
         return ResponseEntity.ok().build();
     }
 
@@ -122,7 +131,8 @@ public class AdController {
     })
     public ResponseEntity<?> updateImage(@PathVariable("id") int id,
                                          @RequestPart(value = "image", required = true) MultipartFile image) {
-        log.info("Вы вошли в метод updateAdsImage");
+        log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nИзображение объявления{}",
+                id, image.getOriginalFilename());
         return ResponseEntity.ok().build();
     }
 }
