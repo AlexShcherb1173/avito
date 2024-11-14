@@ -8,4 +8,6 @@ import ru.skypro.homework.model.UserModel;
 public interface UserRepository extends JpaRepository<UserModel, Long> {
 
     boolean existsByUsername(String username);
+
+    UserModel findByUsername(String username);
 }

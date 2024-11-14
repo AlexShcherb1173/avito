@@ -25,15 +25,24 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean login(String userName, String password) {
         if (!manager.userExists(userName)) {
+            log.warn("Попытка входа с несуществующим пользователем: {}", userName);
             return false;
         }
         UserDetails userDetails = manager.loadUserByUsername(userName);
-        return encoder.matches(password, userDetails.getPassword());
+        boolean passwordMatches = encoder.matches(password, userDetails.getPassword());
+        if (passwordMatches) {
+            log.info("Пользователь {} успешно вошел в систему", userName);
+        } else {
+            log.warn("Неверный пароль для пользователя {}", userName);
+        }
+        return passwordMatches;
     }
 
     @Override
     public boolean register(Register register) {
         if (manager.userExists(register.getUsername())) {
+            log.warn("Пользователь с таким именем {} уже существует",
+                    register.getUsername());
             return false;
         }
         manager.createUser(
@@ -43,8 +52,11 @@ public class AuthServiceImpl implements AuthService {
                         .username(register.getUsername())
                         .roles(register.getRole().name())
                         .build());
-        log.info("Информация о классе: {}", register.getClass());
-        log.info("Пользователь создан");
+        log.info("Пользователь {} создан с ролью {} ",
+                register.getUsername(),
+                register.getRole().name());
+        log.info("Информация о классе: {}",
+                register.getClass());
         return true;
     }
 

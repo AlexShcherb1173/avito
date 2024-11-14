@@ -26,6 +26,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
+   // @PreAuthorize("hasRole('ADMIN') or hasRole('USER') and @authService.isOwner(#authId, authentication.name))")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
@@ -33,10 +34,10 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody Login login) {
         log.info("Вы вошли в метод login");
         if (authService.login(login.getUsername(), login.getPassword())) {
-            log.info("Успешная авторизация");
+            log.info("Успешная авторизация пользователя: {}", login.getUsername());
             return ResponseEntity.ok().build();
         } else {
-            log.info("Такого пользователя не существует");
+            log.warn("Такого пользователя не существует: {}", login.getUsername());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }

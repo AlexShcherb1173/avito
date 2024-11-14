@@ -1,10 +1,12 @@
 package ru.skypro.homework.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Data
+@NoArgsConstructor
 @Entity
 public class CommentModel {
 
@@ -17,13 +19,19 @@ public class CommentModel {
     private Integer createAd; //дата и время создания комментарий
     private String text; //текст комментарий
 
+    private Integer adId; // ид объявления
+
     //2
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
 
     //3
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ad_id")
+    @JoinColumn(name = "ad_id", nullable = false)
     private AdModel ad;
+
+    public UserModel getOwner() {
+        return this.user; //Возвращаем объект пользователя, который является владельцем объявления
+    }
 }
