@@ -34,7 +34,7 @@ public class AdController {
     }
 
     @Operation(summary = "Получение всех объявлений", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN) or hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @GetMapping(path = "/ads")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -52,7 +52,7 @@ public class AdController {
     }
 
     @Operation(summary = "Добавление объявления", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN) or hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @PostMapping(path = "/ads", consumes = "multipart/from-data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = {
@@ -62,11 +62,12 @@ public class AdController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = ""))
     })
     public ResponseEntity<?> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
-                                   @RequestPart(value = "imagine", required = true) MultipartFile image) {
+                                   @RequestPart(value = "imagine", required = true) MultipartFile image,
+                                   @RequestPart String username) {
         log.info("Метод addAds, класса AdController. Приняты: \nНовое объявление {}\nИзображение объявления{}",
                 properties.toString(), image.getOriginalFilename());
         try {
-            adServiceImpl.addAd(properties, image);
+            adServiceImpl.addAd(properties, image, username);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Ошибка при добавлении объявления: {}", e.getMessage());
@@ -76,7 +77,7 @@ public class AdController {
 
     @Operation(summary = "Получение информации об объявлении", tags = {"Объявления"})
     @GetMapping(path = "/ads/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER') and @adService.isOwner(#id, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#id, authentication.name))")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                     @Content(mediaType = "application/json",
@@ -141,7 +142,7 @@ public class AdController {
     }
 
     @Operation(summary = "Получение объявлений авторизованного пользователя", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @GetMapping(path = "/ads/me")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -160,7 +161,7 @@ public class AdController {
     }
 
     @Operation(summary = "Обновление картинки объявления", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @PatchMapping(path = "/ads/{id}/image", consumes = "multipart/from-data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -172,13 +173,14 @@ public class AdController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
     public ResponseEntity<?> updateImage(@PathVariable("id") int id,
-                                         @RequestPart(value = "image", required = true) MultipartFile image) {
+                                         @RequestPart(value = "image", required = true) MultipartFile image,
+                                         @RequestPart String username) {
         log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nИзображение объявления{}",
                 id, image.getOriginalFilename());
         if (!adServiceImpl.existsById(id)) {
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
         }
-        adServiceImpl.updateImage(id, image);
+        adServiceImpl.updateImage(id, image, username);
         return ResponseEntity.ok().body("Изображение успешно обновлено");
     }
 }

@@ -16,33 +16,31 @@ public class UserModel {
     private Integer id; //id пользователя
 
     @Column(unique = true, nullable = false)
-    private String username; //логин пользователя
+    private String username; // Логин пользователя
 
     @Column(nullable = false)
-    private String password;
+    private String password; // Пароль пользователя
 
     @Column(nullable = false)
-    private String firstName;
+    private String firstName; // Имя пользователя
 
     @Column(nullable = false)
-    private String lastName;
+    private String lastName; // Фамилия пользователя
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role; // Роль пользователя
 
-    private String phone;
-    private String image; //ссылка на аватар
+    private String phone; // Телефон пользователя
+    private String image; // Ссылка на аватар
 
-    //1
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AdModel> adsList;
+    private List<AdModel> adsList; // Список объявлений пользователя
 
-    //2
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentModel> commentsList;
+    private List<CommentModel> commentsList; // Список комментариев пользователя
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_image_id", referencedColumnName = "imageId")
-    private ImageModel imageModel;
+    private ImageModel imageModel; // Связь с моделью изображения
 }

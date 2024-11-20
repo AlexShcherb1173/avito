@@ -2,12 +2,15 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import ru.skypro.homework.model.UserModel;
 
 import javax.persistence.Table;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Table(name = "app_user")
-public class User {
+public class User extends UserModel {
 
     @Schema(description = "id пользователя")
     private Integer id;
@@ -25,7 +28,7 @@ public class User {
     private String phone;
 
     @Schema(examples = {"USER", "ADMIN"}, description = "Роль пользователя")
-    private String role;
+    private Role role;
 
     @Schema(description = "Ссылка на аватар пользователя")
     private String image;

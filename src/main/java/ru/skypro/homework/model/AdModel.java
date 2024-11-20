@@ -11,33 +11,38 @@ import javax.persistence.Entity;
 @Data
 @NoArgsConstructor
 @Entity
+@Table(name = "ad_model")
 public class AdModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; //id объявления
-    private Integer author; //id автора
-    private String image; //ссылка на картинку объявления
-    private MultipartFile imageUpdate; //поле для обновления картинки
-    private Integer price; //цена объявления
-    private String title; //заголовок объявления
-    private String description; //описание объявления
+    private Integer adId; // id объявления
 
-    //2
+    private Integer author; // id автора
+    private String image; // Ссылка на картинку объявления
+    private Integer price; // Цена объявления
+    private String title; // Заголовок объявления
+    private String description; // Описание объявления
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserModel user; //связь
+    private UserModel user; // Связь
 
-    //3
     @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentModel> commentsList;
+    private List<CommentModel> commentsList; // Список комментариев
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "ad_image_id", referencedColumnName = "imageId")
-    private ImageModel imageModel;
+    private ImageModel imageModel; // Связь с моделью изображения
 
-    //Метод для получения владельца объявления
+    @Transient // Указывает, что это поле не должно сохраняться в базе данных
+    private MultipartFile imageUpdate; // Поле для обновления картинки
+
+    // Метод для получения владельца объявления
     public UserModel getOwner() {
-        return this.user; //Возвращаем объект пользователя, который является владельцем объявления
+        return this.user; // Возвращаем объект пользователя, который является владельцем объявления
     }
+
+    // Дополнительное поле для хранения пути обновленного изображения
+    private String imageUpdatePath;
 }

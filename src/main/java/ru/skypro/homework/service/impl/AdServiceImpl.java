@@ -2,26 +2,20 @@ package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.AdModel;
+import ru.skypro.homework.model.ImageModel;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @Slf4j
@@ -29,16 +23,15 @@ public class AdServiceImpl implements AdService {
 
     @Autowired
     private final AdRepository adRepository;
+    private final ImageServiceImpl imageService;
 
-    @Value("${image.upload.dir}")
-    private String uploadDir;
-
-    public AdServiceImpl(AdRepository adRepository) {
+    public AdServiceImpl(AdRepository adRepository, ImageServiceImpl imageService) {
         this.adRepository = adRepository;
+        this.imageService = imageService;
     }
 
-    public List<AdModel> getAllAds() {
-        return adRepository.findAll();
+    public void getAllAds() {
+        adRepository.findAll();
     }
 
     public void removeAd(Integer id) {
@@ -47,16 +40,16 @@ public class AdServiceImpl implements AdService {
         adRepository.delete(ad);
     }
 
-    public void addAd(CreateOrUpdateAd adProperties, MultipartFile image) throws IOException {
+    public void addAd(CreateOrUpdateAd adProperties, MultipartFile image, String username) throws IOException {
         AdModel ad = new AdModel();
         ad.setTitle(adProperties.getTitle());
         ad.setPrice(adProperties.getPrice());
         ad.setDescription(adProperties.getDescription());
         try {
-            String imageUrl = saveImage(image);
+            String imageUrl = imageService.saveImage(image, username);// Сохраняем изменения в бд
             ad.setImage(imageUrl); // Обновляем URL изображения
-            adRepository.save(ad); // Сохраняем изменения в бд
         } catch (IOException e) {
+            log.error("Ошибка при загрузке в методе addAd изображения: {}", e.getMessage());
             throw new RuntimeException("Ошибка при загрузке изображения", e);
         }
         adRepository.save(ad);
@@ -84,7 +77,7 @@ public class AdServiceImpl implements AdService {
         adRepository.save(ad);
     }
 
-    public AdModel getAdsMe(Integer id) {
+    public void getAdsMe(Integer id) {
         if (!adRepository.existsById(id)) {
             throw new EntityNotFoundException("Объявление с " + id + " не найдено.");
         }
@@ -97,40 +90,37 @@ public class AdServiceImpl implements AdService {
         if (!isOwner(id, currentUsername)) {
             throw new AccessDeniedException("У вас нет доступа к этому объявлению");
         }
-        return ad;
     }
 
-    public void updateImage(Integer id, MultipartFile imageUpdate) {
-        AdModel ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException("Объявление не найдено"));
+    public void updateImage(Integer id, MultipartFile imageUpdate, String username) {
+        AdModel ad = adRepository.findById(id).orElseThrow(() ->
+                new NotFoundException("Объявление не найдено"));
+        ImageModel imageModel = ad.getImageModel();
         if (imageUpdate != null && !imageUpdate.isEmpty()) { // Проверяем, что файл не пустой
-            try {
-                String imageUrl = saveImage(imageUpdate);
-                ad.setImage(imageUrl); // Обновляем URL изображения
-                adRepository.save(ad); // Сохраняем изменения в бд
-            } catch (IOException e) {
-                throw new RuntimeException("Ошибка при загрузке изображения", e);
-            }
-        } else {
+            log.error("Изображение не может быть пустым");
             throw new IllegalArgumentException("Изображение не может быть пустым");
         }
-    }
+        try {
+            String mediaType = imageUpdate.getContentType(); // Получаем тип медиафайла
+            if (mediaType == null || !mediaType.startsWith("image/")) {
+                log.error("Файл должен быть изображением, получен тип: {}", mediaType);
+                throw new IllegalArgumentException("Файл должен быть изображением");
+            }
 
-    // Логика для сохранения изображения
-    private String saveImage(MultipartFile imageUpdate) throws IOException {
-        String originalFilename = imageUpdate.getOriginalFilename(); // Создаем уникальное имя для изображения
-        if (originalFilename == null || originalFilename.isEmpty()) {
-            throw new IllegalArgumentException("Имя файла не может быть пустым");
+            String imageUrl = imageService.saveImage(imageUpdate, username);
+            long fileSize = imageUpdate.getSize();
+
+            ad.setImage(imageUrl); // Обновляем URL изображения
+            imageModel.setFilePath(imageUrl); // Обновляем путь к файлу
+            imageModel.setFileSize(fileSize); // Устанавливаем размер файла
+            imageModel.setMediaType(mediaType); // Устанавливаем тип файла
+
+            adRepository.save(ad); // Сохраняем изменения в бд
+            log.info("Изображение для объявления успешно обновлено с ID: {}", id);
+        } catch (IOException e) {
+            log.error("Ошибка при загрузке в методе updateImage изображения: {}", e.getMessage());
+            throw new RuntimeException("Ошибка при загрузке изображения", e);
         }
-
-        String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFilename;
-
-        Path filePath = Paths.get(uploadDir, uniqueFileName); // Определяем путь к файлу
-
-        Files.createDirectories(filePath.getParent()); // Создаем директорию, если она не существует
-
-        Files.copy(imageUpdate.getInputStream(), filePath); // Сохраняем файл
-
-        return "/images/" + uniqueFileName; // Возвращаем URL для доступа к изображению
     }
 
     //Метод проверки наличия объявления

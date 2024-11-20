@@ -26,19 +26,26 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-   // @PreAuthorize("hasRole('ADMIN') or hasRole('USER') and @authService.isOwner(#authId, authentication.name))")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
     })
     public ResponseEntity<?> login(@RequestBody Login login) {
         log.info("Вы вошли в метод login");
-        if (authService.login(login.getUsername(), login.getPassword())) {
-            log.info("Успешная авторизация пользователя: {}", login.getUsername());
-            return ResponseEntity.ok().build();
-        } else {
-            log.warn("Такого пользователя не существует: {}", login.getUsername());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (login == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный запрос");
+        }
+        try {
+            if (authService.login(login.getUsername(), login.getPassword())) {
+                log.info("Успешная авторизация пользователя: {}", login.getUsername());
+                return ResponseEntity.ok().build();
+            } else {
+                log.warn("Такого пользователя не существует: {}", login.getUsername());
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        } catch (Exception e) {
+            log.error("Ошибка аутентификации: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка аутентификации");
         }
     }
 

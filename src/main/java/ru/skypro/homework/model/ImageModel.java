@@ -11,19 +11,20 @@ import javax.persistence.Entity;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "image_model")
 public class ImageModel {
 
     @Id
-    @GeneratedValue
-    private Long imageId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long imageId; // id изображения
 
-    private String filePath; //путь файла
-    private long fileSize; //размер файла в байтах
-    private String mediaType; //тип медиа (например, image/jpeg, image/png и т. д.).
+    private String filePath; // Путь файла
+    private long fileSize; // Размер файла в байтах
+    private String mediaType; // Тип медиа (например, image/jpeg, image/png и т. д.).
 
     @Lob
-    private byte[] data;
+    private byte[] data; // Данные изображения
 
-    @OneToOne(mappedBy = "imageModel")
-    private AdModel adModel;
+    @OneToOne(mappedBy = "imageModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private AdModel adModel; // Связь с моделью объявления
 }

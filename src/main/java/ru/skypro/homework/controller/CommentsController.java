@@ -13,11 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.model.CommentModel;
 import ru.skypro.homework.service.impl.AdServiceImpl;
 import ru.skypro.homework.service.impl.CommentServiceImpl;
+
+import java.util.List;
 
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
@@ -35,7 +38,7 @@ public class CommentsController {
     }
 
     @Operation(summary = "Получение комментариев объявления", tags = {"Комментарии"})
-    @PreAuthorize("hasRole('ADMIN) or hasRole('USER') and @commentService.isOwner(#commentId, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @commentService.isOwner(#commentId, authentication.name))")
     @GetMapping(path = "/ads/{id}/comments")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -45,13 +48,14 @@ public class CommentsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = ""))
     })
-    public ResponseEntity<?> getCommentsAd(@PathVariable("id") int id) {
+    public ResponseEntity<List<CommentModel>> getCommentsAd(@PathVariable("id") int id) {
         log.info("Метод getComments, класса CommentsController. Принято id: {}", id);
-        return ResponseEntity.ok().build();
+        List<CommentModel> comments = commentService.getCommentsByAdId(id);
+        return ResponseEntity.ok(comments);
     }
 
     @Operation(summary = "Добавление комментария к объявлению", tags = {"Комментарии"})
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER') and @commentService.isOwner(#commentId, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @commentService.isOwner(#commentId, authentication.name))")
     @PostMapping(path = "/ads/{id}/comments")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "created", content = {
@@ -71,7 +75,7 @@ public class CommentsController {
     }
 
     @Operation(summary = "Удаление комментария", tags = {"Комментарии"})
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER') and @commentService.isOwner(#commentId, authentication.name))")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @commentService.isOwner(#commentId, authentication.name))")
     @DeleteMapping(path = "/ads/{adsId}/comments/{commentId}")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "No content", content = @Content(mediaType = "")),
@@ -95,6 +99,7 @@ public class CommentsController {
     }
 
     @Operation(summary = "Обновление комментария", tags = {"Комментарии"})
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @commentService.isOwner(#commentId, authentication.name))")
     @PatchMapping(path = "/ads/{adId}/comments/{commentId}")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -107,9 +112,16 @@ public class CommentsController {
     })
     public ResponseEntity<?> updateComment(@PathVariable("adId") int adId,
                                            @PathVariable("commentId") int commentId,
-                                           @RequestBody CreateOrUpdateComment createOrUpdateComment) {
+                                           @RequestBody CommentModel createOrUpdateComment) {
         log.info("Метод updateComment, класса CommentsController.Приняты (int) adId: {}, (int) commentId: {}, (object) createOrUpdateComment: {}",
                 adId, commentId, createOrUpdateComment);
+        if (adService.existsById(adId)) { //Проверка на наличие объявления
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        if (!commentService.existsById(commentId)) { //Проверка на наличие комментария
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        commentService.updateComment(adId, commentId, createOrUpdateComment);
         return ResponseEntity.ok().build();
     }
 }

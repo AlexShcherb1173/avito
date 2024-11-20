@@ -18,7 +18,7 @@ public class Ad {
 
     @Schema(description = "id объявления")
     @Id
-    private Integer pk;
+    private Integer adId;
 
     @Schema(description = "Цена объявления")
     private Integer price;
