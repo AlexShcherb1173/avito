@@ -18,7 +18,9 @@ public class AdMapper {
     private final UserRepository userRepository;
     private final AdRepository adRepository;
 
-    public AdEntity toAdEntity(CreateOrUpdateAd ad, String filePath, String username) {
+    public AdEntity toAdEntity(CreateOrUpdateAd ad,
+                               String filePath,
+                               String username) {
         if (ad == null) {
             throw new EntityNotFoundException("Переданный объект Ad is null");
         }

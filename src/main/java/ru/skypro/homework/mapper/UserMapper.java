@@ -14,7 +14,7 @@ public class UserMapper {
         }
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(register.getUsername());
-        userEntity.setPassword(register.getPassword()); // Надо хешировать
+        userEntity.setPassword(register.getPassword()); //надо хешировать
         userEntity.setFirstName(register.getFirstName());
         userEntity.setLastName(register.getLastName());
         userEntity.setPhone(register.getPhone());
@@ -28,13 +28,14 @@ public class UserMapper {
             throw new NullPointerException("Переданный объект userEntity is null");
         }
         User userDto = new User();
-        userDto.setId(userEntity.getId()); // Передача id
-        userDto.setEmail(userEntity.getUsername()); // В dto называние поля email
-        userDto.setFirstName(userEntity.getFirstName()); // Имя
-        userDto.setLastName(userEntity.getLastName()); // Фамилия
-        userDto.setPhone(userEntity.getPhone()); // Телефон
-        userDto.setRole(userEntity.getRole()); // Роль
-        userDto.setImage(userEntity.getImage()); // Ссылка на изображение
+        userDto.setId(userEntity.getId()); //передача id
+        userDto.setEmail(userEntity.getUsername()); //в dto называние поля email
+        userDto.setFirstName(userEntity.getFirstName()); //имя
+        userDto.setLastName(userEntity.getLastName()); //фамилия
+        userDto.setPhone(userEntity.getPhone()); //телефон
+        userDto.setRole(userEntity.getRole()); //роль
+        userDto.setImage(userEntity.getImage()); //ссылка на изображение
+
         return userDto;
     }
 }

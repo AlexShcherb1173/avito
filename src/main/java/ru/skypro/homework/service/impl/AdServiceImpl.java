@@ -40,13 +40,9 @@ public class AdServiceImpl implements AdService {
         return new Ads(adsList.size(), adsList.toArray(Ad[]::new));
     }
 
-//    public void removeAd(Integer id) {
-//        AdEntity ad = adRepository.findById(id)
-//                .orElseThrow(() -> new NotFoundException("Объявление не найдено"));
-//        adRepository.delete(ad);
-//    }
-
-    public Ad addAd(CreateOrUpdateAd adProperties, MultipartFile image, String username) throws IOException {
+    public Ad addAd(CreateOrUpdateAd adProperties,
+                    MultipartFile image,
+                    String username) throws IOException {
         log.info("Вошли в метод addAd сервиса AdServiceImpl. " +
                 "Получены данные (объект) createAD: {}." +
                 "Файл объявления {}." +
@@ -83,31 +79,14 @@ public class AdServiceImpl implements AdService {
         return new Ads(myAdsList.size(), myAdsList.toArray(Ad[]::new));
     }
 
-//    public void updateAd(Integer id, AdEntity adModel) {
-//        AdEntity ad = adRepository.findById(id)
-//                .orElseThrow(() -> new NotFoundException("Объявление с " + id + " не найдено."));
-//        if (adModel.getTitle() != null) {
-//            ad.setTitle(adModel.getTitle());
-//        }
-//        if (adModel.getDescription() != null) {
-//            ad.setDescription(adModel.getDescription());
-//        }
-//        if (adModel.getPrice() != null) {
-//            ad.setPrice(adModel.getPrice());
-//        }
-//        adRepository.save(ad);
-//    }
-
     public byte[] findAdImageByFilename(String fileName) throws IOException {
         log.info("Вошли в метод findAvatarImageByFilename сервиса AdServiceImpl, получен fileName (String): {}",
                 fileName);
         return Files.readAllBytes(Path.of("ad_images/" + fileName));
     }
 
-    public ExtendedAd getAdById(int id) {
-
+    public ExtendedAd getAdById(Integer id) {
         AdEntity adEntity = adRepository.findAdEntityById(id);
-
         return adMapper.toExtendedAd(adEntity);
     }
 
@@ -117,5 +96,54 @@ public class AdServiceImpl implements AdService {
             return fileName.substring(fileName.lastIndexOf(".") + 1);
         }
         throw new RuntimeException("Название файла не валидно");
+    }
+
+    public boolean existId(Integer id) {
+        log.info("Вошли в метод existId сервиса AdServiceImpl. Получен id (int): {}", id);
+        return adRepository.existsAdById(id);
+    }
+
+    public void deleteAdById(Integer id) {
+        log.info("Вошли в метод deleteById сервиса AdServiceImpl. Получен id (int): {}", id);
+        if (adRepository.existsAdById(id)) {
+            adRepository.deleteAdById(id);
+            log.info("Удаление выполнено успешно");
+        } else {
+            log.error("Удаление не выполнено, из-за отсутствия записи в таблице по id = {}", id);
+        }
+    }
+
+    public Ad updateInfoAboutAd(Integer id, CreateOrUpdateAd createOrUpdateAd) {
+        log.info("Вошли в метод updateInfoAboutId сервиса AdServiceImpl. Получен id (int): {}. " +
+                "Получен объект с данными объявления: {}", id, createOrUpdateAd);
+        log.info("Данные обновлены:{}", adRepository.updateInfoAboutAdById(id,
+                createOrUpdateAd.getDescription(),
+                createOrUpdateAd.getPrice(),
+                createOrUpdateAd.getTitle()));
+        log.info("Обновление данных выполнено успешно");
+
+        //log.error("Ошибка при обновлении данных");
+        return adMapper.toAdDto(adRepository.findAdEntityById(id));
+    }
+
+    public byte[] updateImageAd(Integer id, MultipartFile adImage) throws IOException {
+        log.info("Вошли в метод updateImageAd сервиса AdServiceImpl. Получены данные id объявлеия: {}. " +
+                "Файл объявления {}", id, adImage.getOriginalFilename());
+        UUID uuid = UUID.randomUUID();
+        String filePathString = "/ad_images/" + uuid + "." + getExtension(adImage);
+        Path filePath = Path.of("ad_images", uuid + "." + getExtension(adImage));
+
+        Files.createDirectories((filePath.getParent()));
+
+        try (InputStream is = adImage.getInputStream();
+             OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
+             BufferedInputStream bis = new BufferedInputStream(is, 1024);
+             BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
+        ) {
+            bis.transferTo(bos);
+            log.info("Картинка объявления успешно сохранёна на диск. Полное имя файла: {}", filePathString);
+        }
+        adRepository.saveNewAdImage(id, filePathString);
+        return Files.readAllBytes(filePath);
     }
 }

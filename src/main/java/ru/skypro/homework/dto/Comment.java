@@ -16,10 +16,10 @@ public class Comment {
     private String authorFirstName;
 
     @Schema(description = "Дата и время создания комментария в миллисекундах с 00:00:00 01.01.1970")
-    private Integer createAd;
+    private long createdAt;
 
     @Schema(description = "id комментария")
-    private Integer id;
+    private Integer pk;
 
     @Schema(description = "Текст комментария")
     private String text;

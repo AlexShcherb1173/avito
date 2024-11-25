@@ -1,14 +1,12 @@
 package ru.skypro.homework.model;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
 import javax.persistence.Entity;
 
 @Data
-@NoArgsConstructor
 @Entity
 public class AdEntity {
 

@@ -18,7 +18,7 @@ public class CommentEntity {
     private Integer author; // ид автора объявления
     private String authorImage; // ссылка на аватар автора
     private String authorFirstName; // имя создателя комментария
-    private Integer createAd; //дата и время создания комментарий
+    private long createdAt; //дата и время создания комментарий
     private String text; //текст комментарий
 
     @ManyToOne(fetch = FetchType.LAZY)

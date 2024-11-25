@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.model.AdEntity;
 import ru.skypro.homework.service.impl.AdServiceImpl;
 
@@ -58,9 +59,8 @@ public class AdController {
     public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
                                     @RequestPart(value = "imagine", required = true) MultipartFile image,
                                     Authentication authentication) throws IOException {
-        log.info("Метод addAds, класса AdController. Приняты: " +
-                        "Новое объявление {}. Изображение объявления{}",
-                        properties.toString(), image.getOriginalFilename());
+        log.info("Метод addAd, класса AdController. Приняты: Новое объявление или обновление имеющегося {}." +
+                "Изображение объявления {}", properties.toString(), image.getOriginalFilename());
         Ad ad = adServiceImpl.addAd(properties, image, authentication.getName());
         if (authentication == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -74,18 +74,20 @@ public class AdController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                     @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Ad.class)),
+                            schema = @Schema(implementation = ExtendedAd.class)),
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> getAds(@PathVariable Integer id) {
-        log.info("Метод getAdsById, класса AdController. Принят: \n(int) id {}", id);
-        if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
+    public ResponseEntity<ExtendedAd> getAds(@PathVariable Integer id, Authentication authentication) {
+        log.info("Метод getAdsById, класса AdController. Принят: (int) id {}", id);
+        if (authentication.getName() == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else if (adServiceImpl.existId(id)) {
+            return ResponseEntity.ok(adServiceImpl.getAdById(id));
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        AdEntity ad = adServiceImpl.getAds(id);
-        return ResponseEntity.ok(ad);
     }
 
     @Operation(summary = "Удаление объявления", tags = {"Объявления"})
@@ -96,13 +98,16 @@ public class AdController {
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> removeAd(@PathVariable("id") Integer id) {
-        log.info("Метод deleteAdsById, класса AdController. Принят: \n(int) id {}", id);
-        if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
+    public ResponseEntity<?> removeAd(@PathVariable("id") Integer id, Authentication authentication) {
+        log.info("Метод removeAdsById, класса AdController. Принят: (int) id {}", id);
+        if (authentication.getName() == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else if (adServiceImpl.existId(id)) {
+            adServiceImpl.deleteAdById(id);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        adServiceImpl.removeAd(id);
-        return ResponseEntity.ok().body("Объявление успешно удалено");
     }
 
     @Operation(summary = "Обновление информации в объявлении", tags = {"Объявления"})
@@ -116,19 +121,19 @@ public class AdController {
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> updateAd(@PathVariable Integer id, @RequestBody AdEntity adModel) {
-        log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nНовое объявление или обновление имеющегося {}",
-                id, adModel.toString());
-        if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
-        }
-        try {
-            adServiceImpl.updateAd(id, adModel);
-            return ResponseEntity.ok().body("Объявление успешно обновлено");
-        } catch (NotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<Ad> updateAd(@PathVariable Integer id, @RequestBody CreateOrUpdateAd createAd,
+                                       Authentication authentication) {
+        log.info("Метод updateAd, класса AdController. Приняты: (int) id объявления: {}." +
+                "Новое объявление или обновление имеющегося {}", id,
+                createAd.toString());
+        if (authentication.getName() == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else if (adServiceImpl.existId(id)) {
+            Ad ad = adServiceImpl.updateInfoAboutAd(id, createAd);
+            log.info("Получен объект Ad обратно в контроллер: {}", ad);
+            return new ResponseEntity<>(ad, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
@@ -141,35 +146,53 @@ public class AdController {
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> getAdsMe(@PathVariable Integer id) {
+    public ResponseEntity<Ads> getAdsMe(Authentication authentication) {
         log.info("Метод getAdsCurrentUser, класса AdController.");
-        if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
+        if (authentication == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else {
+            return ResponseEntity.ok(adServiceImpl.getAds(authentication));
         }
-        adServiceImpl.getAdsMe(id);
-        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "Обновление картинки объявления", tags = {"Объявления"})
     @PatchMapping(path = "/ads/{id}/image", consumes = "multipart/from-data")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = {
-                    @Content(mediaType = "application/octet-stream",
-                            array = @ArraySchema(schema = @Schema(type = "string", format = "byte")))
-            }),
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = @Content(mediaType = "application/octet-stream",
+                            array = @ArraySchema(schema = @Schema(type = "string", format = "byte")))),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> updateImage(@PathVariable("id") Integer id,
+    public ResponseEntity<byte[]> updateImage(@PathVariable("id") Integer id,
                                          @RequestPart(value = "image", required = true) MultipartFile image,
-                                         @RequestPart String username) {
-        log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nИзображение объявления{}",
+                                         Authentication authentication) throws IOException {
+        log.info("Метод addAds, класса AdController. Приняты: (int) id {}. Изображение объявления{}",
                 id, image.getOriginalFilename());
-        if (!adServiceImpl.existsById(id)) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
+        if (authentication.getName() == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else if (adServiceImpl.existId(id)) {
+            byte[] imageArrayBytes = adServiceImpl.updateImageAd(id, image);
+            log.info("Получен массив байт в контроллер: {}", imageArrayBytes[0]);
+            return new ResponseEntity<>(imageArrayBytes, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        adServiceImpl.updateImage(id, image, username);
-        return ResponseEntity.ok().body("Изображение успешно обновлено");
+    }
+
+    @GetMapping(value = "/ad_images/{fileName}",
+            produces = {MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_GIF_VALUE, "image/*"})
+    public ResponseEntity<byte[]> getAdImageByFilename(@PathVariable String fileName) throws IOException {
+        log.info("Вошли в метод getAdImageByFilename, класса UserController.");
+        byte[] adImageData = adServiceImpl.findAdImageByFilename(fileName);
+        log.info("Получен массив байт (выведем первый байт): {}", adImageData[0]);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .contentType(MediaType.IMAGE_JPEG)
+                .contentType(MediaType.IMAGE_GIF)
+                .body(adImageData);
     }
 }
