@@ -7,17 +7,29 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
+@Slf4j
 public class MyUserDetailsManager implements UserDetailsManager {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserEntity user = userRepository.findByUsername(username);
+        log.info("Получен пользователь из БД: {} | {}", user.getUsername(), user.getPassword());
+        if (user == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        return new MyUserDetails(user);
+    }
 
     @Override
     public void createUser(UserDetails user) {
@@ -42,15 +54,5 @@ public class MyUserDetailsManager implements UserDetailsManager {
     @Override
     public boolean userExists(String username) {
         return userRepository.findByUsername(username) != null;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity userEntity = userRepository.findByUsername(username);
-        if (userEntity == null) {
-            log.info("Пользователь не найден: {}", username);
-            throw new UsernameNotFoundException("Пользователь не найден");
-        }
-        return new MyUserDetails(userEntity);
     }
 }

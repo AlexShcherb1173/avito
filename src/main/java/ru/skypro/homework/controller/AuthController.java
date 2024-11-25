@@ -30,47 +30,28 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<String> login(@RequestBody Login login) {
-        log.info("Вы вошли в метод login");
-        if (login == null || login.getUsername() == null || login.getPassword() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный запрос");
-        }
-        try {
-            if (authService.login(login.getUsername(), login.getPassword())) {
-                log.info("Успешная авторизация пользователя: {}", login.getUsername());
-                return ResponseEntity.ok().build();
-            } else {
-                log.warn("Такого пользователя не существует: {}", login.getUsername());
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-        } catch (Exception e) {
-            log.error("Ошибка аутентификации: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка аутентификации");
+    public ResponseEntity<?> login(@RequestBody Login login) {
+        log.info("Вход в метод login, класса AuthController. Принят объект login: {}", login.toString());
+        if (authService.login(login.getUsername(), login.getPassword())) {
+            log.info("Успешная авторизация");
+            return ResponseEntity.ok().build();
+        } else {
+            log.info("Ошибка авторизации, такого пользователя нет");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     @PostMapping("/register")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "")),
-            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = ""))
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = "")),
+            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<String> register(@RequestBody Register register) {
-        log.info("Вы вошли в метод register");
-        if (register == null) {
-            log.warn("Неверный запрос: register не может быть null");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный запрос");
-        }
-        try {
-            if (authService.register(register)) {
-                log.info("Регистрация прошла успешно");
-                return ResponseEntity.status(HttpStatus.CREATED).body("Регистрация успешна");
-            } else {
-                log.warn("Регистрация не прошла: пользователь с таким username уже существует");
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Пользователь с таким username уже существует");
-            }
-        } catch (Exception e) {
-            log.error("Ошибка регистрации: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка регистрации");
+    public ResponseEntity<?> register(@RequestBody Register register) {
+        log.info("Вход в метод register, класса AuthController. Принят объект register: {}", register.toString());
+        if (authService.register(register)) {
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 }

@@ -16,31 +16,30 @@ public class UserEntity {
     private Integer id; //id пользователя
 
     @Column(unique = true, nullable = false)
-    private String username; // Логин пользователя
+    private String username; //логин пользователя
 
     @Column(nullable = false)
-    private String password; // Пароль пользователя
+    private String password;
 
     @Column(nullable = false)
-    private String firstName; // Имя пользователя
+    private String firstName;
 
     @Column(nullable = false)
-    private String lastName; // Фамилия пользователя
+    private String lastName;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role; // Роль пользователя
+    private Role role;
 
-    private String phone; // Телефон пользователя
-    private String image; // Ссылка на аватар
+    private String phone;
+    private String image; //ссылка на аватар
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AdEntity> adsList; // Список объявлений пользователя
+    private List<AdEntity> adsList;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentEntity> commentsList; // Список комментариев пользователя
+    private List<CommentEntity> commentsList;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY) //Spring Security не очень хочет, чтобы загрузка связных объектов была сразу
     @JoinColumn(name = "user_image_id", referencedColumnName = "imageId")
-    private ImageEntity imageEntity; // Связь с моделью изображения
+    private ImageEntity imageEntity;
 }

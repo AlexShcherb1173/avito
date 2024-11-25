@@ -17,7 +17,7 @@ public interface UserService {
 
     void updateUserAvatar(MultipartFile image, String username) throws IOException;
 
-    String getExtension(MultipartFile file);
+    byte[] findAvatarImageByFilename(String fileName) throws IOException;
 
-    byte[] findAvatarByFilename(String filename) throws IOException;
+    String getExtension(MultipartFile file);
 }

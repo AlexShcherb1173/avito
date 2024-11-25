@@ -14,18 +14,19 @@ import javax.persistence.Entity;
 public class ImageEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long imageId; // id изображения
+    @GeneratedValue
+    private Long imageId;
 
-    private String filePath; // Путь файла
-    private long fileSize; // Размер файла в байтах
-    private String mediaType; // Тип медиа (например, image/jpeg, image/png и т. д.).
+    private String filePath; //путь файла
+    private long fileSize; //размер файла в байтах
+    private String mediaType; //тип медиа (например, image/jpeg, image/png и т. д.).
 
     @Lob
-    private byte[] data; // Данные изображения
+    @Column(name = "data")
+    private byte[] data;
 
-    @OneToOne(mappedBy = "imageModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private AdEntity adEntity; // Связь с моделью объявления
+    @OneToOne(mappedBy = "imageEntity")
+    private AdEntity adEntity;
 
     @OneToOne(mappedBy = "imageEntity")
     private UserEntity UserEntity;

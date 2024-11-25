@@ -12,22 +12,23 @@ public class AdEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; // id объявления
+    private Integer id; //id объявления
+    private Integer author; //id автора
+    private String image; //ссылка на картинку объявления
+    private Integer price; //цена объявления
+    private String title; //заголовок объявления
+    private String description; //описание
 
-    private Integer author; // id автора
-    private String image; // Ссылка на картинку объявления
-    private Integer price; // Цена объявления
-    private String title; // Заголовок объявления
-    private String description; // Описание объявления
-
+    //2
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user; // Связь
+    @JoinColumn(name = "user_id")
+    private UserEntity user; //связь
 
+    //3
     @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentEntity> commentsList; // Список комментариев
+    private List<CommentEntity> commentsList;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "ad_image_id", referencedColumnName = "imageId")
-    private ImageEntity imageEntity; // Связь с моделью изображения
+    private ImageEntity imageEntity;
 }

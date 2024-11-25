@@ -30,22 +30,21 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     public void updatePassword(NewPassword newPassword, String username) {
-        log.info("Вошли в метод updatePassword сервиса UserServiceImpl. Приняты данные:" +
+        log.info("Вошли в метод setPassword сервиса UserServiceImpl. Приняты данные:" +
                         "старый пароль {} | новый пароль {} | имя пользователя {}",
-                newPassword.getCurrentPassword(), newPassword.getNewPassword(), username);
-
+                newPassword.getCurrentPassword(),
+                newPassword.getNewPassword(),
+                username);
         String oldPasswordFromDb = userRepository.findPasswordByUsername(username);
-        log.info("Получен хешированный пароль из БД по имени пользователя." +
+        log.info("Получен хешированный пароль из БД по имени пользователя. " +
                 "Хешированный пароль из БД: {}", oldPasswordFromDb);
-
-        if (passwordEncoder.matches(newPassword.getCurrentPassword(), oldPasswordFromDb) && // Сравниваем старый со старым из бд
-                (!passwordEncoder.matches(newPassword.getNewPassword(), oldPasswordFromDb)) && // Сравниваем новый со старым из бд
-                (newPassword.getNewPassword().length() >= 8)) { // Проверяем длину пароля, не менее 8 символов
-            log.info("Требования для смены пароля выполнены ");
+        if (passwordEncoder.matches(newPassword.getCurrentPassword(), oldPasswordFromDb) &&
+                (!passwordEncoder.matches(newPassword.getNewPassword(), oldPasswordFromDb)) &&
+                (newPassword.getNewPassword().length() >= 8))  {
+            log.info("Требования для смены пароля выполнены");
             userRepository.changePassword(passwordEncoder.encode(newPassword.getNewPassword()), username);
-            log.info("Пароль был успешно изменен");
+            log.info("Пароль был успешно изменён");
         } else {
-            log.info("Требования для смены пароля не выполнены");
             throw new SecurityException("Пароль не соответствует требованиям");
         }
     }
@@ -53,12 +52,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(String username) {
         UserEntity userEntity = userRepository.findByUsername(username);
-        return userMapper.toUserDto(userEntity);
+        User userDto = userMapper.toUserDto(userEntity);
+        return userDto;
     }
 
     @Override
-    public void updateUser(UpdateUser updateUser, String username) throws IOException {
-        log.info("Вошли в метод updateUserAvatar сервиса UserServiceImpl получен объект: {}", updateUser);
+    public void updateUser(UpdateUser updateUser, String username) {
+        log.info("Вошли в метод updateUser сервиса UserServiceImpl получен объект: {}", updateUser);
         userRepository.changeUserData(updateUser.getFirstName(),
                 updateUser.getLastName(),
                 updateUser.getPhone(),
@@ -82,16 +82,17 @@ public class UserServiceImpl implements UserService {
              BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
         ) {
             bis.transferTo(bos);
-            log.info("Файл успешно сохранен на диск, полное имя файла: {}", filePathString);
+            log.info("Файл успешно сохранён на диск. Полное имя файла: {}", filePathString);
         }
         userRepository.saveAvatarPath(filePathString, username);
         log.info("Путь картинки сохранён в столбец image, таблицы app_user");
     }
 
     @Override
-    public byte[] findAvatarByFilename(String filename) throws IOException {
-        log.info("Вошли в метод findAvatarImageByFilename сервиса UserServiceImpl, получен fileName (String): {}", filename);
-        return Files.readAllBytes(Path.of("avatar/" + filename));
+    public byte[] findAvatarImageByFilename(String fileName) throws IOException {
+        log.info("Вошли в метод findAvatarImageByFilename сервиса UserServiceImpl " +
+                "получен fileName (String): {}", fileName);
+        return Files.readAllBytes(Path.of("avatar/" + fileName));
     }
 
     @Override

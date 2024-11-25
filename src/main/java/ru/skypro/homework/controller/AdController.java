@@ -48,19 +48,19 @@ public class AdController {
     }
 
     @Operation(summary = "Добавление объявления", tags = {"Объявления"})
-    @PostMapping(path = "/ads", consumes = "multipart/from-data")
+    @PostMapping(path = "/ads", consumes = "multipart/form-data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = {
                     @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Ad.class))
             }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = ""))
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
     })
     public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
-                                    @RequestPart(value = "imagine", required = true) MultipartFile image,
+                                    @RequestPart(value = "image", required = true) MultipartFile image,
                                     Authentication authentication) throws IOException {
-        log.info("Метод addAd, класса AdController. Приняты: Новое объявление или обновление имеющегося {}." +
-                "Изображение объявления {}", properties.toString(), image.getOriginalFilename());
+        log.info("Метод addAd, класса AdController. Приняты: \nНовое объявление или обновление имеющегося {}" +
+                "\nИзображение объявления{}", properties.toString(), image.getOriginalFilename());
         Ad ad = adServiceImpl.addAd(properties, image, authentication.getName());
         if (authentication == null) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);

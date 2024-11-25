@@ -11,7 +11,7 @@ import javax.transaction.Transactional;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
-    UserEntity findByUsername(String username);
+    UserEntity findByUsername(String username); //похоже два одинаковых
 
     @Query(value = "SELECT password FROM app_user WHERE username=:username", nativeQuery = true)
     String findPasswordByUsername(String username);
@@ -23,8 +23,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE app_user SET first_name=:firstName, last_name=:lastName, phone=:phone WHERE username=:username",
-            nativeQuery = true)
+    @Query(value = "UPDATE app_user SET first_name=:firstName, last_name=:lastName, phone=:phone WHERE username=:username", nativeQuery = true)
     void changeUserData(String firstName, String lastName, String phone, String username);
 
     @Modifying
