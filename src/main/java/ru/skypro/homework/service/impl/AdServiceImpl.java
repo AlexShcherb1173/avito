@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.exception.NotFoundException;
-import ru.skypro.homework.model.AdModel;
-import ru.skypro.homework.model.ImageModel;
+import ru.skypro.homework.model.AdEntity;
+import ru.skypro.homework.model.ImageEntity;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
 
@@ -35,18 +35,18 @@ public class AdServiceImpl implements AdService {
     }
 
     public void removeAd(Integer id) {
-        AdModel ad = adRepository.findById(id)
+        AdEntity ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Объявление не найдено"));
         adRepository.delete(ad);
     }
 
     public void addAd(CreateOrUpdateAd adProperties, MultipartFile image, String username) throws IOException {
-        AdModel ad = new AdModel();
+        AdEntity ad = new AdEntity();
         ad.setTitle(adProperties.getTitle());
         ad.setPrice(adProperties.getPrice());
         ad.setDescription(adProperties.getDescription());
         try {
-            String imageUrl = imageService.saveImage(image, username);// Сохраняем изменения в бд
+            String imageUrl = imageService.saveImageToDisk(image, username);// Сохраняем изменения в бд
             ad.setImage(imageUrl); // Обновляем URL изображения
         } catch (IOException e) {
             log.error("Ошибка при загрузке в методе addAd изображения: {}", e.getMessage());
@@ -55,15 +55,15 @@ public class AdServiceImpl implements AdService {
         adRepository.save(ad);
     }
 
-    public AdModel getAds(Integer id) {
+    public AdEntity getAds(Integer id) {
         if (!adRepository.existsById(id)) {
             throw new EntityNotFoundException("Объявление с " + id + " не найдено.");
         }
         return adRepository.findById(id).orElse(null);
     }
 
-    public void updateAd(Integer id, AdModel adModel) {
-        AdModel ad = adRepository.findById(id)
+    public void updateAd(Integer id, AdEntity adModel) {
+        AdEntity ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Объявление с " + id + " не найдено."));
         if (adModel.getTitle() != null) {
             ad.setTitle(adModel.getTitle());
@@ -84,7 +84,7 @@ public class AdServiceImpl implements AdService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
 
-        AdModel ad = adRepository.findById(id).orElseThrow(() ->
+        AdEntity ad = adRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException("Владелец объявления с " + id + " не найден"));
 
         if (!isOwner(id, currentUsername)) {
@@ -93,9 +93,9 @@ public class AdServiceImpl implements AdService {
     }
 
     public void updateImage(Integer id, MultipartFile imageUpdate, String username) {
-        AdModel ad = adRepository.findById(id).orElseThrow(() ->
+        AdEntity ad = adRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Объявление не найдено"));
-        ImageModel imageModel = ad.getImageModel();
+        ImageEntity imageModel = ad.getImageModel();
         if (imageUpdate != null && !imageUpdate.isEmpty()) { // Проверяем, что файл не пустой
             log.error("Изображение не может быть пустым");
             throw new IllegalArgumentException("Изображение не может быть пустым");
@@ -107,7 +107,7 @@ public class AdServiceImpl implements AdService {
                 throw new IllegalArgumentException("Файл должен быть изображением");
             }
 
-            String imageUrl = imageService.saveImage(imageUpdate, username);
+            String imageUrl = imageService.saveImageToDisk(imageUpdate, username);
             long fileSize = imageUpdate.getSize();
 
             ad.setImage(imageUrl); // Обновляем URL изображения
@@ -130,7 +130,7 @@ public class AdServiceImpl implements AdService {
 
     //Метод для проверки, является ли пользователь владельцем объявления
     public boolean isOwner(Integer id, String username) {
-        AdModel ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException("Объявление с " + id + " не найдено"));
+        AdEntity ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException("Объявление с " + id + " не найдено"));
         return ad.getOwner().getUsername().equals(username);
     }
 }

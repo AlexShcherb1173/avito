@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "app_user")
-public class UserModel {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,12 +35,12 @@ public class UserModel {
     private String image; // Ссылка на аватар
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AdModel> adsList; // Список объявлений пользователя
+    private List<AdEntity> adsList; // Список объявлений пользователя
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentModel> commentsList; // Список комментариев пользователя
+    private List<CommentEntity> commentsList; // Список комментариев пользователя
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "user_image_id", referencedColumnName = "imageId")
-    private ImageModel imageModel; // Связь с моделью изображения
+    private ImageEntity imageEntity; // Связь с моделью изображения
 }

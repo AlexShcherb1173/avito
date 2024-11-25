@@ -11,8 +11,7 @@ import javax.persistence.Entity;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "image_model")
-public class ImageModel {
+public class ImageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,5 +25,8 @@ public class ImageModel {
     private byte[] data; // Данные изображения
 
     @OneToOne(mappedBy = "imageModel", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private AdModel adModel; // Связь с моделью объявления
+    private AdEntity adEntity; // Связь с моделью объявления
+
+    @OneToOne(mappedBy = "imageEntity")
+    private UserEntity UserEntity;
 }

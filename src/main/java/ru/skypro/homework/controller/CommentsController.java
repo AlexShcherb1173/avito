@@ -13,10 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
-import ru.skypro.homework.dto.CreateOrUpdateComment;
-import ru.skypro.homework.model.CommentModel;
+import ru.skypro.homework.model.CommentEntity;
 import ru.skypro.homework.service.impl.AdServiceImpl;
 import ru.skypro.homework.service.impl.CommentServiceImpl;
 
@@ -48,9 +46,9 @@ public class CommentsController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = ""))
     })
-    public ResponseEntity<List<CommentModel>> getCommentsAd(@PathVariable("id") int id) {
+    public ResponseEntity<List<CommentEntity>> getCommentsAd(@PathVariable("id") int id) {
         log.info("Метод getComments, класса CommentsController. Принято id: {}", id);
-        List<CommentModel> comments = commentService.getCommentsByAdId(id);
+        List<CommentEntity> comments = commentService.getCommentsByAdId(id);
         return ResponseEntity.ok(comments);
     }
 
@@ -60,17 +58,17 @@ public class CommentsController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "created", content = {
                     @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CommentModel.class))
+                            schema = @Schema(implementation = CommentEntity.class))
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = ""))
     })
-    public ResponseEntity<CommentModel> addCommentsToAd(@PathVariable("id") int id, @RequestBody CommentModel comment) {
+    public ResponseEntity<CommentEntity> addCommentsToAd(@PathVariable("id") int id, @RequestBody CommentEntity comment) {
         log.info("Метод addComments, класса CommentsController. Принято (int) id: {}", id);
         if (adService.existsById(id)) { // Проверка есть ли объявление или нет
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        CommentModel createdComment = commentService.addCommentToAd(id, comment);
+        CommentEntity createdComment = commentService.addCommentToAd(id, comment);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
 
@@ -104,7 +102,7 @@ public class CommentsController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                     @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CommentModel.class))
+                            schema = @Schema(implementation = CommentEntity.class))
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
@@ -112,7 +110,7 @@ public class CommentsController {
     })
     public ResponseEntity<?> updateComment(@PathVariable("adId") int adId,
                                            @PathVariable("commentId") int commentId,
-                                           @RequestBody CommentModel createOrUpdateComment) {
+                                           @RequestBody CommentEntity createOrUpdateComment) {
         log.info("Метод updateComment, класса CommentsController.Приняты (int) adId: {}, (int) commentId: {}, (object) createOrUpdateComment: {}",
                 adId, commentId, createOrUpdateComment);
         if (adService.existsById(adId)) { //Проверка на наличие объявления

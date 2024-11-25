@@ -1,16 +1,36 @@
 package ru.skypro.homework.mapper;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.mapstruct.Mapper;
 import ru.skypro.homework.dto.Comment;
-import ru.skypro.homework.model.CommentModel;
+import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.model.CommentEntity;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class, AdMapper.class})
-public interface CommentMapper {
+public class CommentMapper {
 
-    @Schema(description = "Преобразование объекта модели Comment в объект DTO Comment")
-    CommentModel toDTO(Comment model);
+    //из дто в сущность
+    public CommentEntity toCommentEntity(Comment comment) {
+        if (comment == null) {
+            throw new NullPointerException("Переданный объект comment is null");
+        }
+        CommentEntity commentEntity = new CommentEntity();
+        commentEntity.setAuthor(comment.getAuthor());
+        commentEntity.setAuthorImage(comment.getAuthorImage());
+        commentEntity.setAuthorFirstName(comment.getAuthorFirstName());
+        commentEntity.setCreateAd(comment.getCreateAd());
+        commentEntity.setText(comment.getText());
+        return commentEntity;
+    }
 
-    @Schema(description = "Преобразование объекта DTO Comment в объект модели Comment")
-    Comment toModel(CommentModel dto);
+    //из сущности в дто Comment
+    public Comment toCommentDto(CommentEntity commentEntity) {
+        if (commentEntity == null) {
+            throw new NotFoundException("Переданный объект commentEntity is null");
+        }
+        Comment comment = new Comment();
+        comment.setAuthor(commentEntity.getAuthor());
+        comment.setAuthorImage(commentEntity.getAuthorImage());
+        comment.setAuthorFirstName(commentEntity.getAuthorFirstName());
+        comment.setCreateAd(commentEntity.getCreateAd());
+        comment.setText(commentEntity.getText());
+        return comment;
+    }
 }

@@ -18,7 +18,7 @@ import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.exception.NotFoundException;
-import ru.skypro.homework.model.AdModel;
+import ru.skypro.homework.model.AdEntity;
 import ru.skypro.homework.service.impl.AdServiceImpl;
 
 @RestController
@@ -91,7 +91,7 @@ public class AdController {
         if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
         }
-        AdModel ad = adServiceImpl.getAds(id);
+        AdEntity ad = adServiceImpl.getAds(id);
         return ResponseEntity.ok(ad);
     }
 
@@ -125,7 +125,7 @@ public class AdController {
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> updateAd(@PathVariable int id, @RequestBody AdModel adModel) {
+    public ResponseEntity<?> updateAd(@PathVariable int id, @RequestBody AdEntity adModel) {
         log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nНовое объявление или обновление имеющегося {}",
                 id, adModel.toString());
         if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет

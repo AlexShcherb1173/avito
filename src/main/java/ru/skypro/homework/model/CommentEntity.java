@@ -9,7 +9,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "comment_model")
-public class CommentModel {
+public class CommentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,13 +23,13 @@ public class CommentModel {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserModel user;
+    private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ad_id", nullable = false)
-    private AdModel ad;
+    private AdEntity ad;
 
-    public UserModel getOwner() {
+    public UserEntity getOwner() {
         return this.user; //Возвращаем объект пользователя, который является владельцем объявления
     }
 }

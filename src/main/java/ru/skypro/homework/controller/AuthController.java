@@ -30,9 +30,9 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> login(@RequestBody Login login) {
+    public ResponseEntity<String> login(@RequestBody Login login) {
         log.info("Вы вошли в метод login");
-        if (login == null) {
+        if (login == null || login.getUsername() == null || login.getPassword() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный запрос");
         }
         try {
@@ -54,14 +54,23 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "400", description = "Bad request", content = @Content(mediaType = ""))
     })
-    public ResponseEntity<?> register(@RequestBody Register register) {
+    public ResponseEntity<String> register(@RequestBody Register register) {
         log.info("Вы вошли в метод register");
-        if (authService.register(register)) {
-            log.info("Регистрация прошла успешно");
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } else {
-            log.info("Регистрация не прошла");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (register == null) {
+            log.warn("Неверный запрос: register не может быть null");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный запрос");
+        }
+        try {
+            if (authService.register(register)) {
+                log.info("Регистрация прошла успешно");
+                return ResponseEntity.status(HttpStatus.CREATED).body("Регистрация успешна");
+            } else {
+                log.warn("Регистрация не прошла: пользователь с таким username уже существует");
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Пользователь с таким username уже существует");
+            }
+        } catch (Exception e) {
+            log.error("Ошибка регистрации: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка регистрации");
         }
     }
 }

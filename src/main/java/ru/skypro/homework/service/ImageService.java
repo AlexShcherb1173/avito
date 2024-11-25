@@ -8,5 +8,6 @@ public interface ImageService {
 
     String getExtension(MultipartFile file);
 
-    String saveImage(MultipartFile file, String username) throws IOException;
+    String saveImageToDisk(MultipartFile file, String username) throws IOException;
+
 }

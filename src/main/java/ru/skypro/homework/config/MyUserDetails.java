@@ -3,32 +3,32 @@ package ru.skypro.homework.config;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import ru.skypro.homework.model.UserModel;
+import ru.skypro.homework.model.UserEntity;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 
 public class MyUserDetails implements UserDetails {
 
-    private final UserModel userModel;
+    private final UserEntity userEntity;
 
-    public MyUserDetails(UserModel userModel) {
-        this.userModel = userModel;
+    public MyUserDetails(UserEntity userEntity) {
+        this.userEntity = userEntity;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + userModel.getRole()));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + userEntity.getRole()));
     }
 
     @Override
     public String getPassword() {
-        return userModel.getPassword();
+        return userEntity.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return userModel.getUsername();
+        return userEntity.getUsername();
     }
 
     @Override

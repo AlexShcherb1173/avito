@@ -1,12 +1,11 @@
 package ru.skypro.homework.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.skypro.homework.dto.Comment;
-import ru.skypro.homework.model.CommentModel;
+import ru.skypro.homework.model.CommentEntity;
 
 import java.util.List;
 
-public interface CommentRepository extends JpaRepository<CommentModel, Integer> {
+public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
 
-    List<CommentModel> findByAdAdId(Integer adId);
+    List<CommentEntity> findByAdId(Integer adId);
 }

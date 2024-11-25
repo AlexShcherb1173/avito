@@ -3,20 +3,17 @@ package ru.skypro.homework.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import ru.skypro.homework.model.UserModel;
-
-import javax.persistence.Table;
+import ru.skypro.homework.model.UserEntity;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@Table(name = "app_user")
-public class User extends UserModel {
+public class User extends UserEntity {
 
     @Schema(description = "id пользователя")
     private Integer id;
 
     @Schema(description = "Логин пользователя")
-    private String email;
+    private String username;
 
     @Schema(description = "Имя пользователя")
     private String firstName;
@@ -32,4 +29,6 @@ public class User extends UserModel {
 
     @Schema(description = "Ссылка на аватар пользователя")
     private String image;
+
+    private String email;
 }

@@ -7,43 +7,42 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.service.ImageService;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.UUID;
+import java.nio.file.StandardOpenOption;
 
 @Service
 @Slf4j
 @Transactional
 public class ImageServiceImpl implements ImageService {
 
-    @Value("${image.upload.dir}")
-    private String uploadDir;
+    @Value("avatar")
+    private String avatarsDir;
 
-    // Логика для сохранения изображения
     @Override
-    public String saveImage(MultipartFile imageUpdate, String username) throws IOException {
-        String originalFilename = imageUpdate.getOriginalFilename(); // Создаем уникальное имя для изображения
-        if (originalFilename == null || originalFilename.isEmpty()) {
-            log.error("Имя файла не может быть пустым");
-            throw new IllegalArgumentException("Имя файла не может быть пустым");
+    public String saveImageToDisk(MultipartFile file, String username) throws IOException {
+        log.info("Вошли в метод saveImageToDisk сервиса ImageServiceImpl. Получен файл для сохранения {} " +
+                "Вызван метод getExtension для получения типа файла {}", getExtension(file),
+                file.getOriginalFilename());
+        Path filePath = Path.of(avatarsDir, username + "." + getExtension(file)); // Определяем путь к файлу
+        Files.createDirectories((filePath.getParent())); // Создаем директории, если они не существуют
+        if (Files.exists(filePath)) {
+            log.info("Загружаемый файл с таким именем имелся в базе данных, предыдущий файл удалён");
+            Files.delete(filePath); // Удаляем предыдущий файл, если он существует
         }
 
-        String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFilename;
-
-        Path filePath = Paths.get(uploadDir, uniqueFileName); // Определяем путь к файлу
-
-        Files.createDirectories(filePath.getParent()); // Создаем директорию, если она не существует
-
-        try {
-            Files.copy(imageUpdate.getInputStream(), filePath); // Сохраняем файл
-            log.info("Изображение успешно сохранено {}", uniqueFileName);
+        try (var is = file.getInputStream();
+             OutputStream os = Files.newOutputStream(filePath, StandardOpenOption.CREATE_NEW);
+             BufferedInputStream bis = new BufferedInputStream(is, 1024);
+             BufferedOutputStream bos = new BufferedOutputStream(os, 1024)) {
+             bis.transferTo(bos);
         } catch (IOException e) {
-            log.error("Ошибка при сохранении изображения {}", e.getMessage());
+            log.error("Ошибка при сохранении изображения {}: {}", file.getOriginalFilename(), e.getMessage());
             throw e;
         }
-        return "/images/" + uniqueFileName; // Возвращаем URL для доступа к изображению
+        log.info("Изображение успешно сохранено {}", filePath);
+        return filePath.toString();
     }
 
     @Override

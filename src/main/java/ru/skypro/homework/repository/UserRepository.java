@@ -2,19 +2,18 @@ package ru.skypro.homework.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.skypro.homework.dto.User;
-import ru.skypro.homework.model.UserModel;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import ru.skypro.homework.model.UserEntity;
 
 import javax.transaction.Transactional;
 
 @Repository
-public interface UserRepository extends JpaRepository<UserModel, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
     boolean existsByUsername(String username);
 
-    UserModel findByUsername(String username);
+    UserEntity findByUsername(String username);
 
     @Query(value = "SELECT password FROM app_user WHERE username=:username", nativeQuery = true)
     String findPasswordByUsername(String username);
@@ -26,6 +25,7 @@ public interface UserRepository extends JpaRepository<UserModel, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "UPDATE app_user SET first_name=:firstName, last_name=:lastName, phone=:phone WHERE username=:username", nativeQuery = true)
+    @Query(value = "UPDATE app_user SET first_name=:firstName, last_name=:lastName, phone=:phone WHERE username=:username",
+            nativeQuery = true)
     void changeUserData(String firstName, String lastName, String phone, String username);
 }

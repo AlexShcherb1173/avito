@@ -1,76 +1,39 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.exception.NotFoundException;
-import ru.skypro.homework.exception.UnauthorizedException;
-import ru.skypro.homework.mapper.UserMapper;
-import ru.skypro.homework.model.UserModel;
+import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 
 @Service
 @Slf4j
-public class UserServiceImpl {
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
-    private final JdbcUserDetailsManager userDetailsManager;
     private final PasswordEncoder passwordEncoder;
     private final ImageServiceImpl imageService;
-    private final AuthenticationServiceImpl authenticationService;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper,
-                           JdbcUserDetailsManager userDetailsManager,
-                           PasswordEncoder passwordEncoder,
-                           ImageServiceImpl imageService,
-                           AuthenticationServiceImpl authenticationService) {
-        this.userRepository = userRepository;
-        this.userMapper = userMapper;
-        this.userDetailsManager = userDetailsManager;
-        this.passwordEncoder = passwordEncoder;
-        this.imageService = imageService;
-        this.authenticationService = authenticationService;
-    }
-
-    public void saveUserEntity(Register register) {
-        log.info("Вошли в метод saveUserEntity");
-        if (register == null) { // Проверяем, что регистрация не null
-            log.error("Переданный объект Register is null");
-            throw new NotFoundException("Такого пользователя нет");
-        }
-        if (userRepository.existsByUsername(register.getUsername())) { // Проверяем наличие пользователя с таким же email
-            log.error("Пользователь с таким email уже существует: {}", register.getUsername());
-            throw new NotFoundException("Пользователь с таким email уже существует");
-        }
-        String encodedPassword = passwordEncoder.encode(register.getPassword());
-        register.setPassword(encodedPassword); // Хешируем пароль перед сохранением
-        org.springframework.security.core.userdetails.UserDetails userDetails = //Создаем пользователя для JdbcUserDetailsManager
-                org.springframework.security.core.userdetails.User.withUsername(register.getUsername())
-                        .password(encodedPassword)
-                        .roles(Role.USER.name())
-                        .accountLocked(false)
-                        .disabled(false)
-                        .build();
-        userDetailsManager.createUser(userDetails); // Создаем пользователя в JdbcUserDetailsManager
-        userRepository.save(userMapper.toUserEntity(register)); // Сохраняем пользователя в базе данных
-        log.info("Пользователь успешно сохранен: {}", register.getUsername());
-    }
+    @Value("avatar")
+    private String avatarDir;
 
     public void updatePassword(NewPassword newPassword, String username) {
-        log.info("Вошли в метод setPassword сервиса UserServiceImpl\nПриняты данные:" +
+        log.info("Вошли в метод updatePassword сервиса UserServiceImpl. Приняты данные:" +
                         "старый пароль {} | новый пароль {} | имя пользователя {}",
         newPassword.getCurrentPassword(), newPassword.getNewPassword(), username);
 
         String oldPasswordFromDb = userRepository.findPasswordByUsername(username);
-        log.info("Получен хешированный пароль из БД по имени пользователя.\n" +
+        log.info("Получен хешированный пароль из БД по имени пользователя." +
                 "Хешированный пароль из БД: {}", oldPasswordFromDb);
 
         if (passwordEncoder.matches(newPassword.getCurrentPassword(), oldPasswordFromDb) && // Сравниваем старый со старым из бд
@@ -85,37 +48,23 @@ public class UserServiceImpl {
         }
     }
 
-    public User getCurrentUser() {
-        String username = authenticationService.getAuthenticatedUsername();
-        if (username == null) {
-            throw new UnauthorizedException("Пользователь не авторизован");
-        }
-        UserModel userEntity = userRepository.findByUsername(username);
+    @Override
+    public void getUser(UserEntity user) {
 
-        // Преобразуем сущность пользователя в модель
-        return userMapper.toModel(userEntity);
     }
 
-    public void updateUser(User updateUser, String username) {
-        log.info("Вошли в метод updateUser сервиса UserServiceImpl " +
-                " получен объект: {} ", updateUser);
-        UserModel userEntity = userRepository.findByUsername(username);
-        if (userEntity == null) {
-            throw new UnauthorizedException("Пользователь не найден");
-        }
-        userEntity.setFirstName(updateUser .getFirstName());
-        userEntity.setLastName(updateUser .getLastName());
-        userEntity.setPhone(updateUser .getPhone());
-        userRepository.save(userEntity);
+    @Override
+    public void updateUser(UpdateUser updateUser, String username) {
+        log.info("Вошли в метод updateUser сервиса UserServiceImpl получен объект: {}", updateUser);
+        userRepository.changeUserData(updateUser.getFirstName(),
+                updateUser.getLastName(),
+                updateUser.getPhone(),
+                username);
         log.info("Смена данных пользователя успешно завершена");
     }
 
-    public void updateUserImage(UserModel user, MultipartFile image) throws IOException {
-        log.info("Вошли в метод updateUserImage сервиса UserServiceImpl " + " полечен объект: {}", image.getOriginalFilename());
-        if (image.isEmpty()) {
-            throw new IllegalArgumentException("Файл не может быть пустым");
-        }
-        imageService.saveImage(image, user.getUsername());
-        log.info("Изображение для пользователя: {}, успешно обновлено", user.getUsername());
+    @Override
+    public void updateUserImage(MultipartFile image, String username) throws IOException {
+        imageService.saveImageToDisk(image, username);
     }
 }
