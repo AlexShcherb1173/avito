@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 
@@ -17,7 +16,6 @@ import ru.skypro.homework.repository.UserRepository;
 @RequiredArgsConstructor
 public class MyUserDetailsManager implements UserDetailsManager {
 
-    //private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 

@@ -13,7 +13,7 @@ public class User extends UserEntity {
     private Integer id;
 
     @Schema(description = "Логин пользователя")
-    private String username;
+    private String email;
 
     @Schema(description = "Имя пользователя")
     private String firstName;
@@ -29,6 +29,4 @@ public class User extends UserEntity {
 
     @Schema(description = "Ссылка на аватар пользователя")
     private String image;
-
-    private String email;
 }

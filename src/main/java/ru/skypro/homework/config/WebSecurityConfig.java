@@ -21,27 +21,10 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             "/v3/api-docs",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/avatar",
+            "/images"
     };
-
-//    @Bean
-//    public JdbcUserDetailsManager userDetailsManager(DataSource dataSource) {
-//        JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
-//
-//        // Проверка, существует ли пользователь
-//        if (!jdbcUserDetailsManager.userExists("user@gmail.com")) {
-//            String username = "user@gmail.com";
-//            String password = "hashed_password";
-//            String firstName = "Имя";
-//            String lastName = "Фамилия";
-//            String role = "USER";
-//            boolean enabled = true;
-//
-//            String sql = "INSERT INTO users (username, password, first_name, last_name, role, enabled) VALUES (?, ?, ?, ?, ?, ?)";
-//            jdbcUserDetailsManager.getJdbcTemplate().update(sql, username, password, firstName, lastName, role, enabled);
-//        }
-//        return jdbcUserDetailsManager;
-//    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -63,12 +46,4 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-//    @Override
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**") // Разрешаем CORS для всех путей
-//                .allowedOrigins("http://localhost:3000") // Разрешаем запросы с этого домена
-//                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS") // Разрешаем методы
-//                .allowCredentials(true); // Разрешаем отправку куки
-//    }
 }

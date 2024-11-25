@@ -2,7 +2,6 @@ package ru.skypro.homework.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.List;
@@ -32,16 +31,5 @@ public class AdEntity {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "ad_image_id", referencedColumnName = "imageId")
-    private ImageEntity imageModel; // Связь с моделью изображения
-
-    @Transient // Указывает, что это поле не должно сохраняться в базе данных
-    private MultipartFile imageUpdate; // Поле для обновления картинки
-
-    // Метод для получения владельца объявления
-    public UserEntity getOwner() {
-        return this.user; // Возвращаем объект пользователя, который является владельцем объявления
-    }
-
-    // Дополнительное поле для хранения пути обновленного изображения
-    private String imageUpdatePath;
+    private ImageEntity imageEntity; // Связь с моделью изображения
 }

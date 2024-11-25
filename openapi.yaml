@@ -10,7 +10,7 @@ paths:
       tags:
         - Пользователи
       summary: 'Обновление пароля'
-      operationId: setPassword
+      operationId: updatePassword
       requestBody:
         content:
           application/json:
@@ -42,7 +42,7 @@ paths:
       tags:
         - Пользователи
       summary: 'Обновление информации об авторизованном пользователе'
-      operationId: updateUser
+      operationId: updateUserAvatar
       requestBody:
         content:
           application/json:

@@ -8,10 +8,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
@@ -21,20 +22,18 @@ import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.AdEntity;
 import ru.skypro.homework.service.impl.AdServiceImpl;
 
+import java.io.IOException;
+
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
 @Slf4j
 @Tag(name = "Объявления")
+@RequiredArgsConstructor
 public class AdController {
 
     private final AdServiceImpl adServiceImpl;
 
-    public AdController(AdServiceImpl adServiceImpl) {
-        this.adServiceImpl = adServiceImpl;
-    }
-
     @Operation(summary = "Получение всех объявлений", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @GetMapping(path = "/ads")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -42,17 +41,12 @@ public class AdController {
                             schema = @Schema(implementation = Ads.class))
             })
     })
-    public ResponseEntity<?> getAllAds(Integer id) {
+    public ResponseEntity<Ads> getAllAds(Integer id) {
         log.info("Метод getAllAds, класса AdController");
-        if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
-        }
-        adServiceImpl.getAllAds();
-        return ResponseEntity.ok().build();
+        return new ResponseEntity<>(adServiceImpl.getAllAds(), HttpStatus.OK);
     }
 
     @Operation(summary = "Добавление объявления", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @PostMapping(path = "/ads", consumes = "multipart/from-data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = {
@@ -61,23 +55,22 @@ public class AdController {
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = ""))
     })
-    public ResponseEntity<?> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
-                                   @RequestPart(value = "imagine", required = true) MultipartFile image,
-                                   @RequestPart String username) {
-        log.info("Метод addAds, класса AdController. Приняты: \nНовое объявление {}\nИзображение объявления{}",
-                properties.toString(), image.getOriginalFilename());
-        try {
-            adServiceImpl.addAd(properties, image, username);
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            log.error("Ошибка при добавлении объявления: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ошибка при добавлении объявления");
+    public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
+                                    @RequestPart(value = "imagine", required = true) MultipartFile image,
+                                    Authentication authentication) throws IOException {
+        log.info("Метод addAds, класса AdController. Приняты: " +
+                        "Новое объявление {}. Изображение объявления{}",
+                        properties.toString(), image.getOriginalFilename());
+        Ad ad = adServiceImpl.addAd(properties, image, authentication.getName());
+        if (authentication == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else {
+            return new ResponseEntity<>(ad, HttpStatus.CREATED);
         }
     }
 
     @Operation(summary = "Получение информации об объявлении", tags = {"Объявления"})
     @GetMapping(path = "/ads/{id}")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#id, authentication.name))")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
                     @Content(mediaType = "application/json",
@@ -86,7 +79,7 @@ public class AdController {
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> getAds(@PathVariable int id) {
+    public ResponseEntity<?> getAds(@PathVariable Integer id) {
         log.info("Метод getAdsById, класса AdController. Принят: \n(int) id {}", id);
         if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
@@ -96,7 +89,6 @@ public class AdController {
     }
 
     @Operation(summary = "Удаление объявления", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @DeleteMapping(path = "/ads/{id}")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "No content", content = @Content(mediaType = "")),
@@ -104,7 +96,7 @@ public class AdController {
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> removeAd(@PathVariable("id") int id) {
+    public ResponseEntity<?> removeAd(@PathVariable("id") Integer id) {
         log.info("Метод deleteAdsById, класса AdController. Принят: \n(int) id {}", id);
         if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
@@ -114,7 +106,6 @@ public class AdController {
     }
 
     @Operation(summary = "Обновление информации в объявлении", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @PatchMapping(path = "/ads/{id}")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -125,7 +116,7 @@ public class AdController {
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> updateAd(@PathVariable int id, @RequestBody AdEntity adModel) {
+    public ResponseEntity<?> updateAd(@PathVariable Integer id, @RequestBody AdEntity adModel) {
         log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nНовое объявление или обновление имеющегося {}",
                 id, adModel.toString());
         if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
@@ -142,7 +133,6 @@ public class AdController {
     }
 
     @Operation(summary = "Получение объявлений авторизованного пользователя", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @GetMapping(path = "/ads/me")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -151,7 +141,7 @@ public class AdController {
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> getAdsMe(@PathVariable int id) {
+    public ResponseEntity<?> getAdsMe(@PathVariable Integer id) {
         log.info("Метод getAdsCurrentUser, класса AdController.");
         if (adServiceImpl.existsById(id)) { // Проверка есть ли объявление или нет
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Такого объявления не существует");
@@ -161,7 +151,6 @@ public class AdController {
     }
 
     @Operation(summary = "Обновление картинки объявления", tags = {"Объявления"})
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @adService.isOwner(#adId, authentication.name))")
     @PatchMapping(path = "/ads/{id}/image", consumes = "multipart/from-data")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = {
@@ -172,7 +161,7 @@ public class AdController {
             @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(mediaType = "")),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = "")),
     })
-    public ResponseEntity<?> updateImage(@PathVariable("id") int id,
+    public ResponseEntity<?> updateImage(@PathVariable("id") Integer id,
                                          @RequestPart(value = "image", required = true) MultipartFile image,
                                          @RequestPart String username) {
         log.info("Метод addAds, класса AdController. Приняты: \n(int) id {}\nИзображение объявления{}",

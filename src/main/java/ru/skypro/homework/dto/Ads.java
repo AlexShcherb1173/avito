@@ -8,6 +8,10 @@ public class Ads {
 
     @Schema(description = "Общее количество объявлений")
     private Integer count;
+    private Ad[] results;
 
-    private Ad ad;
+    public Ads(Integer count, Ad[] results) {
+        this.count = count;
+        this.results = results;
+    }
 }

@@ -1,136 +1,121 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.Ad;
+import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.AdEntity;
-import ru.skypro.homework.model.ImageEntity;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.dto.ExtendedAd;
 
-import javax.persistence.EntityNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class AdServiceImpl implements AdService {
 
     @Autowired
     private final AdRepository adRepository;
-    private final ImageServiceImpl imageService;
+    private final AdMapper adMapper;
 
-    public AdServiceImpl(AdRepository adRepository, ImageServiceImpl imageService) {
-        this.adRepository = adRepository;
-        this.imageService = imageService;
+    public Ads getAllAds() {
+        List<Ad> adsList = adRepository.findAll().stream()
+                .map(adEntity -> adMapper.toAdDto(adEntity))
+                .collect(Collectors.toList());
+        return new Ads(adsList.size(), adsList.toArray(Ad[]::new));
     }
 
-    public void getAllAds() {
-        adRepository.findAll();
+//    public void removeAd(Integer id) {
+//        AdEntity ad = adRepository.findById(id)
+//                .orElseThrow(() -> new NotFoundException("Объявление не найдено"));
+//        adRepository.delete(ad);
+//    }
+
+    public Ad addAd(CreateOrUpdateAd adProperties, MultipartFile image, String username) throws IOException {
+        log.info("Вошли в метод addAd сервиса AdServiceImpl. " +
+                "Получены данные (объект) createAD: {}." +
+                "Файл объявления {}." +
+                "Имя авторизированного пользователя: {}", adProperties, image.getOriginalFilename(), username);
+        UUID uuid = UUID.randomUUID();
+        String filePathString = "/ad_images" + uuid + "." + getExtension(image);
+        Path filePath = Path.of("ad_images", uuid + "." + getExtension(image));
+
+        Files.createDirectories((filePath.getParent()));
+
+        try (InputStream is = image.getInputStream();
+            OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
+            BufferedInputStream bis = new BufferedInputStream(is, 1024);
+            BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
+        ) {
+            bis.transferTo(bos);
+            log.info("Изображение объявления успешно сохранено на диск, полное имя файла: {}", filePathString);
+        }
+        AdEntity adEntity = adMapper.toAdEntity(adProperties, filePathString, username);
+        log.info("Получена сущность: {}", adEntity);
+        adRepository.save(adEntity);
+        log.info("Сущность сохранена в БД");
+
+        AdEntity adEntityBD = adRepository.findAdEntityByImage(filePathString);
+
+        return adMapper.toAdDto(adEntityBD);
     }
 
-    public void removeAd(Integer id) {
-        AdEntity ad = adRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Объявление не найдено"));
-        adRepository.delete(ad);
+    public Ads getAds(Authentication authentication) {
+        List<Ad> myAdsList = adRepository.findAll().stream()
+                .filter(adEntity -> adEntity.getUser().getUsername().equals(authentication.getName()))
+                .map(adEntity -> adMapper.toAdDto(adEntity))
+                .collect(Collectors.toList());
+        return new Ads(myAdsList.size(), myAdsList.toArray(Ad[]::new));
     }
 
-    public void addAd(CreateOrUpdateAd adProperties, MultipartFile image, String username) throws IOException {
-        AdEntity ad = new AdEntity();
-        ad.setTitle(adProperties.getTitle());
-        ad.setPrice(adProperties.getPrice());
-        ad.setDescription(adProperties.getDescription());
-        try {
-            String imageUrl = imageService.saveImageToDisk(image, username);// Сохраняем изменения в бд
-            ad.setImage(imageUrl); // Обновляем URL изображения
-        } catch (IOException e) {
-            log.error("Ошибка при загрузке в методе addAd изображения: {}", e.getMessage());
-            throw new RuntimeException("Ошибка при загрузке изображения", e);
-        }
-        adRepository.save(ad);
+//    public void updateAd(Integer id, AdEntity adModel) {
+//        AdEntity ad = adRepository.findById(id)
+//                .orElseThrow(() -> new NotFoundException("Объявление с " + id + " не найдено."));
+//        if (adModel.getTitle() != null) {
+//            ad.setTitle(adModel.getTitle());
+//        }
+//        if (adModel.getDescription() != null) {
+//            ad.setDescription(adModel.getDescription());
+//        }
+//        if (adModel.getPrice() != null) {
+//            ad.setPrice(adModel.getPrice());
+//        }
+//        adRepository.save(ad);
+//    }
+
+    public byte[] findAdImageByFilename(String fileName) throws IOException {
+        log.info("Вошли в метод findAvatarImageByFilename сервиса AdServiceImpl, получен fileName (String): {}",
+                fileName);
+        return Files.readAllBytes(Path.of("ad_images/" + fileName));
     }
 
-    public AdEntity getAds(Integer id) {
-        if (!adRepository.existsById(id)) {
-            throw new EntityNotFoundException("Объявление с " + id + " не найдено.");
-        }
-        return adRepository.findById(id).orElse(null);
+    public ExtendedAd getAdById(int id) {
+
+        AdEntity adEntity = adRepository.findAdEntityById(id);
+
+        return adMapper.toExtendedAd(adEntity);
     }
 
-    public void updateAd(Integer id, AdEntity adModel) {
-        AdEntity ad = adRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Объявление с " + id + " не найдено."));
-        if (adModel.getTitle() != null) {
-            ad.setTitle(adModel.getTitle());
+    public String getExtension(MultipartFile file) {
+        String fileName = file.getOriginalFilename();
+        if (fileName != null && !fileName.isBlank() && fileName.contains(".")) {
+            return fileName.substring(fileName.lastIndexOf(".") + 1);
         }
-        if (adModel.getDescription() != null) {
-            ad.setDescription(adModel.getDescription());
-        }
-        if (adModel.getPrice() != null) {
-            ad.setPrice(adModel.getPrice());
-        }
-        adRepository.save(ad);
-    }
-
-    public void getAdsMe(Integer id) {
-        if (!adRepository.existsById(id)) {
-            throw new EntityNotFoundException("Объявление с " + id + " не найдено.");
-        }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-
-        AdEntity ad = adRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException("Владелец объявления с " + id + " не найден"));
-
-        if (!isOwner(id, currentUsername)) {
-            throw new AccessDeniedException("У вас нет доступа к этому объявлению");
-        }
-    }
-
-    public void updateImage(Integer id, MultipartFile imageUpdate, String username) {
-        AdEntity ad = adRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Объявление не найдено"));
-        ImageEntity imageModel = ad.getImageModel();
-        if (imageUpdate != null && !imageUpdate.isEmpty()) { // Проверяем, что файл не пустой
-            log.error("Изображение не может быть пустым");
-            throw new IllegalArgumentException("Изображение не может быть пустым");
-        }
-        try {
-            String mediaType = imageUpdate.getContentType(); // Получаем тип медиафайла
-            if (mediaType == null || !mediaType.startsWith("image/")) {
-                log.error("Файл должен быть изображением, получен тип: {}", mediaType);
-                throw new IllegalArgumentException("Файл должен быть изображением");
-            }
-
-            String imageUrl = imageService.saveImageToDisk(imageUpdate, username);
-            long fileSize = imageUpdate.getSize();
-
-            ad.setImage(imageUrl); // Обновляем URL изображения
-            imageModel.setFilePath(imageUrl); // Обновляем путь к файлу
-            imageModel.setFileSize(fileSize); // Устанавливаем размер файла
-            imageModel.setMediaType(mediaType); // Устанавливаем тип файла
-
-            adRepository.save(ad); // Сохраняем изменения в бд
-            log.info("Изображение для объявления успешно обновлено с ID: {}", id);
-        } catch (IOException e) {
-            log.error("Ошибка при загрузке в методе updateImage изображения: {}", e.getMessage());
-            throw new RuntimeException("Ошибка при загрузке изображения", e);
-        }
-    }
-
-    //Метод проверки наличия объявления
-    public boolean existsById(Integer id) {
-        return !adRepository.existsById(id);
-    }
-
-    //Метод для проверки, является ли пользователь владельцем объявления
-    public boolean isOwner(Integer id, String username) {
-        AdEntity ad = adRepository.findById(id).orElseThrow(() -> new NotFoundException("Объявление с " + id + " не найдено"));
-        return ad.getOwner().getUsername().equals(username);
+        throw new RuntimeException("Название файла не валидно");
     }
 }

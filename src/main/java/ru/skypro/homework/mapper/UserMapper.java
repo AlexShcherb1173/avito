@@ -19,21 +19,22 @@ public class UserMapper {
         userEntity.setLastName(register.getLastName());
         userEntity.setPhone(register.getPhone());
         userEntity.setRole(register.getRole());
-        // Передача ссылки на аватар - не реализовал, но при регистрации сразу его добавить нельзя
         return userEntity;
     }
 
     // Маппинг из UserEntity в User DTO
     public User toUserDto(UserEntity userEntity) {
         if (userEntity == null) {
-            throw new NullPointerException("Переданный объект userUntuty is null");
+            throw new NullPointerException("Переданный объект userEntity is null");
         }
         User userDto = new User();
-        userDto.setEmail(userEntity.getUsername()); //в dto называние поля email
-        userDto.setFirstName(userEntity.getFirstName()); //имя
-        userDto.setLastName(userEntity.getLastName()); //фамилия
-        userDto.setPhone(userEntity.getPhone()); //телефон
-        userDto.setRole(userEntity.getRole()); //роль
+        userDto.setId(userEntity.getId()); // Передача id
+        userDto.setEmail(userEntity.getUsername()); // В dto называние поля email
+        userDto.setFirstName(userEntity.getFirstName()); // Имя
+        userDto.setLastName(userEntity.getLastName()); // Фамилия
+        userDto.setPhone(userEntity.getPhone()); // Телефон
+        userDto.setRole(userEntity.getRole()); // Роль
+        userDto.setImage(userEntity.getImage()); // Ссылка на изображение
         return userDto;
     }
 }
