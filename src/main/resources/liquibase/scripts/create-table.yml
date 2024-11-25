@@ -1,0 +1,64 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: mvoyteh
+      changes:
+            - sql:
+               CREATE TABLE avatar
+               (
+                 
+               id         BIGSERIAL PRIMARY KEY,
+               file_path  VARCHAR(255) NOT NULL UNIQUE,
+               file_size  BIGINT NOT NULL,
+               media_type VARCHAR(255) NOT NULL,
+               data       BYTEA NOT NULL
+               
+               );
+   
+               CREATE TABLE image
+               (
+
+               id         BIGSERIAL PRIMARY KEY,
+               file_path  VARCHAR(255) NOT NULL UNIQUE,
+               file_size  BIGINT NOT NULL,
+               media_type VARCHAR(255) NOT NULL,
+               data       BYTEA NOT NULL
+
+               );
+
+               CREATE TABLE users
+               (
+
+               id         BIGSERIAL PRIMARY KEY,
+               first_name VARCHAR(255) NOT NULL,
+               last_name  VARCHAR(255) NOT NULL,
+               email      VARCHAR(255) NOT NULL UNIQUE,
+               password   VARCHAR(255) NOT NULL,
+               phone      VARCHAR(255) UNIQUE,
+               role       VARCHAR(255) NOT NULL,
+               avatar_id  BIGINT REFERENCES avatar (id)
+
+               );
+
+               CREATE TABLE listing
+               (
+
+               id          BIGSERIAL PRIMARY KEY,
+               description VARCHAR(255) NOT NULL,
+               price       INT NOT NULL CHECK (price >= 0),
+               title       VARCHAR(255) NOT NULL,
+               image_id    BIGINT REFERENCES image (id),
+               author_id   BIGINT REFERENCES users (id)
+
+               );
+
+               CREATE TABLE comment
+               (
+
+               id          BIGSERIAL PRIMARY KEY,
+               created_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+               "text"        VARCHAR(255) NOT NULL,
+               pk_listing  BIGINT REFERENCES listing (id),
+               author_id   BIGINT REFERENCES users (id)
+
+               )

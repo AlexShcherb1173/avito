@@ -1,9 +1,8 @@
-package ru.skypro.homework.dto;
+package ru.skypro.homework.dto.user;
 
 import lombok.*;
 import ru.skypro.homework.validation.Regex;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -13,26 +12,17 @@ import javax.validation.constraints.Size;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Register {
-
-    @Email(regexp = Regex.EMAIL_REGEXP)
-    private String username;
+public class UpdateUser {
 
     @NotBlank
-    @Size(min = 8,max = 16)
-    private String password;
-
-    @NotBlank
-    @Size(min = 2, max = 16)
+    @Size(min = 2,max = 16)
     private String firstName;
 
     @NotBlank
-    @Size(min = 2, max = 16)
+    @Size(min = 2,max = 16)
     private String lastName;
 
     @Pattern(regexp = Regex.PHONE_REGEXP)
     private String phone;
-    private Role role;
-
 
 }
