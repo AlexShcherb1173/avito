@@ -1,9 +1,9 @@
-GET http://localhost:8080/ads/1/comments
+GET http://localhost:8080/ads/1/commentsDto
 Content-Type: application/json
 Authorization: Basic user@gmail.com password
 
 ###
-POST http://localhost:8080/login
+POST http://localhost:8080/loginDto
 Content-Type: application/json
 
 {
@@ -12,7 +12,7 @@ Content-Type: application/json
 }
 
 ###
-POST http://localhost:8080/register
+POST http://localhost:8080/registerDto
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
   "firstName": " asdad",
   "lastName": " asdad",
   "phone": " asdad",
-  "role": "USER"
+  "roleDto": "USER"
 }
 
 ###
@@ -56,7 +56,7 @@ Content-Type: application/json
 Authorization: Basic user@gmail.com password
 
 {
-  "newPassword": "password",
+  "newPasswordDto": "password",
   "currentPassword": "password1"
 }
 
