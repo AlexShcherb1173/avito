@@ -1,14 +1,14 @@
 GET http://localhost:8080/ads/1/comments
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
+Authorization: Basic user@mail.ru password
 
 ###
 POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-  "username": "user@gmail.com",
-  "password": "password"
+  "username": "user@mail.ru",
+  "password": "123123123"
 }
 
 ###
@@ -16,28 +16,28 @@ POST http://localhost:8080/register
 Content-Type: application/json
 
 {
-  "username": "user@gmail.com",
-  "password": "password",
+  "username": "asdad@mail.ru",
+  "password": "123123123",
   "firstName": " asdad",
   "lastName": " asdad",
   "phone": " asdad",
   "role": "USER"
 }
 
-###
+### pass hash $2y$10$5XeXclylYW6BkY/997mjtuFHoMphXa53mpWD4D.Jse53ych1/Ru9O
 GET http://localhost:8080/ads/me
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
+Authorization: Basic user@mail.ru 123123123
 
 ###
 GET http://localhost:8080/users/me
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
+Authorization: Basic user@mail.ru password
 
 ###
 PATCH http://localhost:8080/users/me
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
+Authorization: Basic user@mail.ru password
 
 {
   "phone": "33333",
@@ -48,12 +48,12 @@ Authorization: Basic user@gmail.com password
 ###
 GET http://localhost:8080/ads
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
+Authorization: Basic user@mail.ru password
 
 ###
 POST http://localhost:8080/users/set_password
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
+Authorization: Basic user@mail.ru password
 
 {
   "newPassword": "password",
@@ -63,7 +63,7 @@ Authorization: Basic user@gmail.com password
 ###
 POST http://localhost:8080/ads
 Content-Type: application/json
-Authorization: Basic user@gmail.com password
+Authorization: Basic user@mail.ru password
 
 {
   "price": 123,
