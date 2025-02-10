@@ -9,14 +9,19 @@
         <version>2.7.15</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>ru.ac</groupId>
-    <artifactId>secondhand</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <name>Second hand</name>
-    <description>Application for managing ads of selling things</description>
+
+    <groupId>ru.skypro</groupId>
+    <artifactId>ads</artifactId>
+    <version>0.0.1-SNAPSHOT
+    </version
+    >
+    <name>Ads application</name>
+    <description>Application for managing ads</description>
+
     <properties>
         <java.version>11</java.version>
     </properties>
+
     <dependencies>
         <!--suppress VulnerableLibrariesLocal -->
         <dependency>
