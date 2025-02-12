@@ -2,7 +2,9 @@ package ru.skypro.homework.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
+import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
+import ru.skypro.homework.dto.ExtendedAd;
 
 import java.io.IOException;
 import java.util.List;
@@ -13,13 +15,11 @@ public interface AdService {
 
     Ad createAd(CreateOrUpdateAd createAd, MultipartFile image, String userId) throws IOException;
 
-    List<Ad> getAdsByUser(String name);
+    Ads getAdsByUser(String name);
 
-    List<Ad> getAllAds();
+    Ads getAllAds();
 
-
-    Ad getAd(long id);
-
+    ExtendedAd getAd(long id);
 
     boolean removeAd(long id);
 

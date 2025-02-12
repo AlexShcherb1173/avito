@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
+import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
+import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Advertisement;
 import ru.skypro.homework.model.User;
@@ -40,9 +42,13 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
-    public List<Ad> getAllAds() {
+    public Ads getAllAds() {
         List<Advertisement> advertisements = advertisementRepository.findAll();
-        return adMapper.advertisementToAdList(advertisements);
+        return Ads.builder()
+                .count(advertisements.size())
+                .results(adMapper.advertisementToAdList(advertisements))
+                .build();
+
     }
 
     public Ad createAd(CreateOrUpdateAd dto, MultipartFile image, String username) {
@@ -61,9 +67,12 @@ public class AdServiceImpl implements AdService {
         return adMapper.advertisementToAd(savedAd);
     }
     @Override
-    public List<Ad> getAdsByUser(String username) {
-        List<Advertisement> ads = advertisementRepository.findByAuthorUsername(username);
-        return adMapper.advertisementToAdList(ads);
+    public Ads getAdsByUser(String username) {
+        List<Advertisement> advertisements = advertisementRepository.findByAuthorUsername(username);
+        return Ads.builder()
+                .count(advertisements.size())
+                .results(adMapper.advertisementToAdList(advertisements))
+                .build();
     }
 
     private String saveImage(MultipartFile file) {
@@ -81,10 +90,8 @@ public class AdServiceImpl implements AdService {
         }
     }
     @Override
-    public Ad getAd(long id) {
-        Advertisement advertisement = advertisementRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Advertisement not found"));
-        return adMapper.advertisementToAd(advertisement);
+    public ExtendedAd getAd(long id) {
+        return adMapper.advertisementToExtendedAd(advertisementRepository.findById(id).orElse(null));
     }
 
     @Override
