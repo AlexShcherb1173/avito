@@ -25,6 +25,8 @@ public interface AdService {
 
     Ad updateAd(long id, CreateOrUpdateAd dto);
 
+    boolean updateImage(long adId, MultipartFile image);
+
 
 //    Ad updateAd(int id, CreateOrUpdateAd adDto);
 //

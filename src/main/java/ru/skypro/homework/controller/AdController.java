@@ -58,9 +58,8 @@ public class AdController {
     }
 
     @Operation(summary = "Удаление объявления")
-    @PreAuthorize("@adService.isOwner(#id, authentication.name)")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeAd(@PathVariable int id) {
+    public ResponseEntity<?> removeAd(@PathVariable int id) {
         boolean removed = adService.removeAd(id);
         if (removed) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -69,7 +68,6 @@ public class AdController {
     }
 
     @Operation(summary = "Обновление информации об объявлении")
-    @PreAuthorize("@adService.isOwner(#id, authentication.name)")
     @PatchMapping("/{id}")
     public ResponseEntity<Ad> updateAd(@PathVariable int id,
                                        @RequestBody CreateOrUpdateAd properties) {
@@ -86,4 +84,14 @@ public class AdController {
         return ResponseEntity.ok(adService.getAd(id));
     }
 
+    @Operation(summary = "Обновление картинки объявления")
+    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateImage(@PathVariable int id,
+                                            @RequestPart("image") MultipartFile image) throws IOException {
+        boolean updated = adService.updateImage(id, image);
+        if (updated) {
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }

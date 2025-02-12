@@ -115,4 +115,19 @@ public class AdServiceImpl implements AdService {
         return adMapper.advertisementToAd(updatedAd);
     }
 
+    @Override
+    public boolean updateImage(long adId, MultipartFile image) {
+        Advertisement existingAd = advertisementRepository.findById(adId)
+                .orElseThrow(() -> new RuntimeException("Объявление не найдено"));
+
+        String newImagePath = saveImage(image);
+
+        existingAd.setImage(newImagePath);
+
+        advertisementRepository.save(existingAd);
+
+        return true;
+    }
+
+
 }
