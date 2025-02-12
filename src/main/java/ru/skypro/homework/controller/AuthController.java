@@ -2,9 +2,10 @@ package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +27,7 @@ public class AuthController {
     @PostMapping("/login")
     @ApiResponse(responseCode = "201", description = "OK")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public boolean login(@RequestBody LoginDTO loginDTO) {
+    public boolean login(@RequestBody @NotNull @Valid LoginDTO loginDTO) {
         return authService.login(loginDTO);
     }
 

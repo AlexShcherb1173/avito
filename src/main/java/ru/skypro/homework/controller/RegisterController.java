@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +19,7 @@ import ru.skypro.homework.service.AuthService;
 @RestController
 @RequiredArgsConstructor
 public class RegisterController {
+
     private final AuthService authService;
 
     @Tag(name = "Регистрация")
@@ -27,8 +27,7 @@ public class RegisterController {
     @PostMapping("/register")
     @ApiResponse(responseCode = "201", description = "Created")
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public Long registerId(@RequestBody @NotNull @Valid RegisterDTO registerDTO) {
-        log.info("Попытка регистрации пользователя: {}", registerDTO.getUsername());
+    public Long register(@RequestBody @NotNull @Valid RegisterDTO registerDTO) {
         return authService.registerId(registerDTO);
     }
 }
