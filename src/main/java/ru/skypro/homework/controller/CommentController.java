@@ -1,6 +1,8 @@
 package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.exceptions.AccessDeniedException;
 import ru.skypro.homework.dto.Comment;
@@ -8,6 +10,8 @@ import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
+
+import java.security.Principal;
 
 
 @RestController
@@ -29,9 +33,10 @@ public class CommentController {
 
     @Operation(summary = "Добавление комментария к объявлению")
     @PostMapping("/{id}/comments")
-    public Long addComment(@PathVariable("id") int adId,
-                           @RequestBody CreateOrUpdateComment createComment) {
-        return commentService.addComment(adId, createComment);
+    public Comment addComment(@PathVariable("id") Long adId,
+                           @RequestBody CreateOrUpdateComment createComment,
+                              @AuthenticationPrincipal UserDetails userDetails) {
+        return commentService.addComment(adId, createComment, userDetails.getUsername());
     }
 
     @Operation(summary = "Удаление комментария")

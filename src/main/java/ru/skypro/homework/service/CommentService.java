@@ -1,5 +1,7 @@
 package ru.skypro.homework.service;
 
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.exceptions.CommentNotFoundException;
 import ru.skypro.homework.dto.Comment;
@@ -9,63 +11,57 @@ import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Advertisement;
 import ru.skypro.homework.model.CommentEntity;
 import ru.skypro.homework.model.User;
+import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
+import ru.skypro.homework.repository.UserRepository;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
 
     private final List<Comment> comments = new ArrayList<>();
     private final CommentRepository commentRepository;
+    private final CommentMapper commentMapper;
+    private final UserRepository userRepository;
+    private final AdRepository adRepository;
 
-    public CommentService(CommentRepository commentRepository) {
-        this.commentRepository = commentRepository;
-    }
 
     public Comments getComments(int adId) {
-        List<CommentEntity> comments = commentRepository.findByAdvertisement_Id(adId);
-        Comments response = new Comments();
-        response.setCount(comments.size());
-        response.setResults(mapEntitiesToDTOs(comments));
-        return response;
+        List<Comment> commentList = commentRepository.findByAdvertisement_Id(adId)
+                .stream()
+                .map(commentMapper::toDto)
+                .collect(Collectors.toList());
+        return new Comments(commentList.size(), commentList);
     }
 
-    public Long addComment(int adId, CreateOrUpdateComment createComment) {
-        if (createComment.getText() == null || createComment.getText().isEmpty()) {
-            throw new IllegalArgumentException("Text of comment can't be empty.");
-        }
+    public Comment addComment(Long adId, CreateOrUpdateComment createComment, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
-        CommentEntity newComment = new CommentEntity();
-        newComment.setAuthor(new User());
-        newComment.setText(createComment.getText());
-        newComment.setAdvertisement(new Advertisement());
+        Advertisement advertisement = adRepository.findById(adId)
+                .orElseThrow(() -> new RuntimeException("Объявление не найдено"));
 
-        return commentRepository.save(newComment).getPk();
+        CommentEntity commentEntity = commentMapper.toEntity(createComment, user, advertisement);
+        return commentMapper.toDto(commentRepository.save(commentEntity));
     }
 
     public void deleteComment(int adId, Long commentId) {
         commentRepository.deleteById(commentId);
     }
 
-    public Comment updateComment(int adId, Long commentId, CreateOrUpdateComment updateComment) {
-        CommentEntity commentEntity = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CommentNotFoundException(commentId));
-        commentEntity.setText(updateComment.getText());
-        return mapEntityToDTO(commentRepository.save(commentEntity));
+    public Comment updateComment(long adId, long commentId, CreateOrUpdateComment commentDto) {
+        return commentRepository.findById(commentId)
+                .map(comment -> {
+                    comment.setText(commentDto.getText());
+                    return commentMapper.toDto(commentRepository.save(comment));
+                })
+                .orElseThrow(() -> new RuntimeException("Комментарий не найден"));
     }
 
-    private List<Comment> mapEntitiesToDTOs(List<CommentEntity> entities) {
-        List<Comment> comments = new ArrayList<>();
-        for (CommentEntity entity : entities) {
-            comments.add(mapEntityToDTO(entity));
-        }
-        return comments;
-    }
-
-    private Comment mapEntityToDTO(CommentEntity entity) {
-        return CommentMapper.INSTANCE.commentEntityToCommentDTO(entity);
-    }
 }
 

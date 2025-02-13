@@ -23,7 +23,7 @@ public class Advertisement {
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
-    @OneToMany(mappedBy = "advertisement", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "advertisement", cascade = CascadeType.PERSIST)
     private List<CommentEntity> comments;
 
 }
