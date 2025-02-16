@@ -4,8 +4,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -15,6 +18,9 @@ import java.util.Base64;
 
 @Component
 public class BasicAuthCorsFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -29,7 +35,7 @@ public class BasicAuthCorsFilter extends OncePerRequestFilter {
                 String username = values[0];
                 String password = values[1];
 
-                // ручная
+                // Поставим вручную аутентификацию, если это нужно
                 Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
