@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,8 +26,8 @@ public class RegisterController {
     @PostMapping("/register")
     @ApiResponse(responseCode = "201", description = "Created")
     @ApiResponse(responseCode = "400", description = "Bad Request")
-    public Long registerId(@RequestBody @NotNull @Valid RegisterDTO registerDTO) {
+    public boolean register(@RequestBody @NotNull @Valid RegisterDTO registerDTO) {
         log.info("Попытка регистрации пользователя: {}", registerDTO.getUsername());
-        return authService.registerId(registerDTO);
+        return authService.register(registerDTO);
     }
 }
