@@ -42,5 +42,5 @@ CREATE TABLE IF NOT EXISTS comments (
     author_id BIGINT,
     advertisement_id BIGINT,
     FOREIGN KEY (author_id) REFERENCES users(id),
-    FOREIGN KEY (advertisement_id) REFERENCES advertisements(id)
+    FOREIGN KEY (advertisement_id) REFERENCES advertisement(id)
 );
