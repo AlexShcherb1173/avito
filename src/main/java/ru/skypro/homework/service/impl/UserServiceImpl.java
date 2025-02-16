@@ -32,16 +32,23 @@ import java.security.Principal;
 @Slf4j
 @Service
 public class UserServiceImpl {
-    @Autowired
-    AvitoUserDetailsService avitoUserDetailsService;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    UserAvatarRepository userAvatarRepository;
-    @Autowired
-    PasswordEncoder encoder;
+
+    private final AvitoUserDetailsService avitoUserDetailsService;
+
+    private final UserRepository userRepository;
+
+    private final UserAvatarRepository userAvatarRepository;
+
+    private final PasswordEncoder encoder;
     @Value("${my.dir}")
     private String pathDir;
+
+    public UserServiceImpl(AvitoUserDetailsService avitoUserDetailsService, UserRepository userRepository, UserAvatarRepository userAvatarRepository, PasswordEncoder encoder) {
+        this.avitoUserDetailsService = avitoUserDetailsService;
+        this.userRepository = userRepository;
+        this.userAvatarRepository = userAvatarRepository;
+        this.encoder = encoder;
+    }
 
     public Long createUser(RegisterDTO registerDTO) {
         if (registerDTO.getUsername() != null && //дописать

@@ -1,6 +1,7 @@
 package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 
 import java.security.Principal;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/ads")
 @CrossOrigin(value = "http://localhost:3000")
@@ -43,6 +44,7 @@ public class CommentController {
     @DeleteMapping("/{id}/comments/{commentId}")
     public void deleteComment(@PathVariable("id") int adId,
                               @PathVariable("commentId") Long commentId) throws AccessDeniedException {
+        log.info("Запрос на удаление комментария с ID: {} для объявления с ID: {}", commentId, adId);
         commentService.deleteComment(adId, commentId);
     }
 
