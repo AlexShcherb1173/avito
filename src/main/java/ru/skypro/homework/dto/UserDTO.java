@@ -1,5 +1,6 @@
 package ru.skypro.homework.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @AllArgsConstructor
 public class UserDTO implements UserDetails {

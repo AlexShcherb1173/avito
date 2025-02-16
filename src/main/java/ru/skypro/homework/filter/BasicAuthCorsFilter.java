@@ -19,33 +19,12 @@ import java.util.Base64;
 @Component
 public class BasicAuthCorsFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest httpServletRequest,
+                                    HttpServletResponse httpServletResponse,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Basic ")) {
-            String base64Credentials = authHeader.substring("Basic ".length());
-            String credentials = new String(Base64.getDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
-            String[] values = credentials.split(":", 2);
-
-            if (values.length == 2) {
-                String username = values[0];
-                String password = values[1];
-
-                // Поставим вручную аутентификацию, если это нужно
-                Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
-        }
-        filterChain.doFilter(request, response);
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        // Опционально: определите, для каких запросов фильтр не должен применяться
-        return false; // Например, можно вернуть true для определенных URL-адресов
+        httpServletResponse.addHeader("Access-Control-Allow-Credentials", "true");
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 }
