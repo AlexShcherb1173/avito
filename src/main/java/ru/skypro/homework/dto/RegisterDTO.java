@@ -1,10 +1,13 @@
 package ru.skypro.homework.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
 @Data
-public class Register {
-
+@Validated
+public class RegisterDTO {
+    @NotBlank
     private String username;
     private String password;
     private String firstName;
