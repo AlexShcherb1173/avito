@@ -10,15 +10,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@Component
-public class BasicAuthCorsFilter extends OncePerRequestFilter {
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest httpServletRequest,
-                                    HttpServletResponse httpServletResponse,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
-        httpServletResponse.addHeader("Access-Control-Allow-Credentials", "true");
-        filterChain.doFilter(httpServletRequest, httpServletResponse);
-    }
+//@Component
+public class BasicAuthCorsFilter {
+    //extends OncePerRequestFilter {
+//
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest httpServletRequest,
+//                                    HttpServletResponse httpServletResponse,
+//                                    FilterChain filterChain)
+//            throws ServletException, IOException {
+//        httpServletResponse.addHeader("Access-Control-Allow-Credentials", "true");
+//        filterChain.doFilter(httpServletRequest, httpServletResponse);
+//    }
 }
