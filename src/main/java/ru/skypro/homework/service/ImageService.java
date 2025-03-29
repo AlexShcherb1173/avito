@@ -8,6 +8,4 @@ import java.nio.file.Path;
 
 public interface ImageService {
     Image addImage(int id, MultipartFile file) throws IOException;
-
-    byte[] generateImage(Path filePath) throws IOException;
 }

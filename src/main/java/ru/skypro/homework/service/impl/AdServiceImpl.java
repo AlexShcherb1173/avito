@@ -1,5 +1,6 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 /**
  * Сервисный класс для управления объявлениями.
  */
+@Slf4j
 @Service
 public class AdServiceImpl implements AdService {
 
@@ -134,6 +136,7 @@ public class AdServiceImpl implements AdService {
             imageRepository.delete(ad.getImage());
         }
         adRepository.delete(ad);
+        log.info("Удалено объявление: {}", ad);
     }
 
 
@@ -155,6 +158,7 @@ public class AdServiceImpl implements AdService {
         ad.setPrice(createOrUpdateAdDTO.getPrice());
         ad.setDescription(createOrUpdateAdDTO.getDescription());
         adRepository.save(ad);
+        log.info("Обновлено объявление: {}", ad);
         return adMapper.toDtoAdDTO(ad);
     }
 
@@ -202,9 +206,10 @@ public class AdServiceImpl implements AdService {
         Ad ad = adRepository.findById(id).orElseThrow(() -> new AdNotFoundException(id));
         int imageId = (ad.getImage() != null) ? ad.getImage().getId() : 0;
         try {
-            Image image = imageService.addImage(ad.getId(), imageFile);
+            Image image = imageService.addImage(id, imageFile);
             ad.setImage(image);
             adRepository.save(ad);
+            log.info("Обновлена картинка {} для объявления: {}", image, ad);
         } catch (IOException e) {
             throw new ImageNotSavedException("Ошибка при обновлении изображения");
         }

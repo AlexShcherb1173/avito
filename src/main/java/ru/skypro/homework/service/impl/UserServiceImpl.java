@@ -124,12 +124,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserAvatar(MultipartFile image, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        int id = 0;
-        if (user.getImage() != null) {
-            id = user.getImage().getId();
-        }
         try {
-            Image imageObj = imageService.addImage(id, image);
+            Image imageObj = imageService.addImage(user.getId(), image);
             user.setImage(imageObj);
             userRepository.save(user);
         } catch (IOException e) {
@@ -142,8 +138,8 @@ public class UserServiceImpl implements UserService {
      *
      * <p>Находит изображение по ID, считывает его из файловой системы и передает в выходной поток.</p>
      *
-     * @param id ID изображения пользователя
-     * @param response  HTTP-ответ, в который записывается изображение
+     * @param id       ID изображения пользователя
+     * @param response HTTP-ответ, в который записывается изображение
      * @throws IOException               если произошла ошибка при чтении файла
      * @throws UsernameNotFoundException если изображение не найдено
      */

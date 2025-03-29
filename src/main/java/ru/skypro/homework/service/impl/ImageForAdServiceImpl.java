@@ -6,10 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.ExtendedAdDTO;
 import ru.skypro.homework.model.Image;
 import ru.skypro.homework.repository.ImageRepository;
-import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.service.ImageService;
 
 import java.io.FileNotFoundException;
@@ -54,10 +52,11 @@ public class ImageForAdServiceImpl implements ImageService {
 
         String originalFilename = Objects.requireNonNull(file.getOriginalFilename(), "File name cannot be null");
         String extension = getExtension(originalFilename);
+
         LOGGER.info("Filename: {}", originalFilename);
         LOGGER.info("Extension: {}", extension);
 
-        Path filePath = Path.of(imageDir, adId + "." + extension);
+        Path filePath = Path.of(imageDir, "ad_" + adId + "." + extension);
 
         if (Files.exists(filePath)) {
             Files.delete(filePath);
@@ -66,7 +65,8 @@ public class ImageForAdServiceImpl implements ImageService {
         Files.createDirectories(filePath.getParent());
         Files.write(filePath, file.getBytes());
 
-        Image image = imageRepository.findById(adId).orElse(new Image());
+        Image image = imageRepository.findByFilePathContaining("ad_" + adId + ".")
+                .orElse(new Image());
         image.setFilePath(filePath.toString());
         image.setFileSize(file.getSize());
         image.setMediaType(file.getContentType());
@@ -76,22 +76,6 @@ public class ImageForAdServiceImpl implements ImageService {
 
         return image;
     }
-
-    /**
-     * Генерирует массив байтов изображения из файла.
-     *
-     * @param filePath Путь к файлу изображения.
-     * @return Массив байтов изображения.
-     * @throws IOException Если произошла ошибка при чтении файла.
-     */
-    @Override
-    public byte[] generateImage(Path filePath) throws IOException {
-        if (!Files.exists(filePath)) {
-            throw new FileNotFoundException("File not found: " + filePath);
-        }
-        return Files.readAllBytes(filePath);
-    }
-
 
     /**
      * Получает расширение файла по имени.
