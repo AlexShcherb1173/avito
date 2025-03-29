@@ -59,11 +59,12 @@ public class UserServiceImpl implements UserService {
      *
      * @param newPasswordDTO DTO с новым паролем
      * @param authentication объект аутентификации, содержащий email пользователя
-     * @throws UserNotFoundException если пользователь не найден
+     * @throws UsernameNotFoundException если пользователь не найден
      */
     @Override
     public void updatePassword(NewPasswordDTO newPasswordDTO, Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException(authentication.getName()));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
+                -> new UsernameNotFoundException("User not found"));
         user.setPassword(encoder.encode(newPasswordDTO.getNewPassword()));
         userRepository.save(user);
     }
@@ -81,7 +82,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDTO getUserInfo(Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException(authentication.getName()));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() ->
+                new UserNotFoundException(authentication.getName()));
         UserDTO userDTO = userMapper.toDtoUserDTO(user);
         if (userDTO.getImage() != null) {
             userDTO.setImage("/users/me/image/" + userDTO.getImage() + "/get");
@@ -102,7 +104,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UpdateUserDTO updateUser(UpdateUserDTO updateUserDTO, Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException(authentication.getName()));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
+                -> new UserNotFoundException(authentication.getName()));
         user.setFirstName(updateUserDTO.getFirstName());
         user.setPhone(updateUserDTO.getPhone());
         user.setLastName(updateUserDTO.getLastName());
@@ -124,13 +127,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void updateUserAvatar(MultipartFile image, Authentication authentication) {
-
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException(authentication.getName()));
-        int id = 0;
-        if (user.getImage() != null) {
-            id = user.getImage().getId();
-        }
-
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
+                -> new UsernameNotFoundException("User not found"));
         try {
             Image imageObj = imageService.addImage(user.getId(), image);
             user.setImage(imageObj);
