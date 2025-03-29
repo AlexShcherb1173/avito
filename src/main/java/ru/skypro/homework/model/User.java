@@ -89,7 +89,7 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", role=" + role +
-                ", image='" + image + '\'' +
+                ", image=" + image +
                 ", ads=" + ads +
                 ", comments=" + comments +
                 '}';
