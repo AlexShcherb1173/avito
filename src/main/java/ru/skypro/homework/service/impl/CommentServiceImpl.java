@@ -29,10 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, 
-                              CommentMapper commentMapper, 
-                              AdRepository adRepository, 
-                              UserRepository userRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, CommentMapper commentMapper, AdRepository adRepository, UserRepository userRepository) {
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
         this.adRepository = adRepository;
@@ -59,7 +56,6 @@ public class CommentServiceImpl implements CommentService {
      * @param adId    идентификатор объявления
      * @param comment объект CreateOrUpdateCommentDTO, содержащий данные для создания или обновления комментария
      * @return объект CommentDTO, представляющий добавленный комментарий
-     * @throws AdNotFoundException если обьявление не найдено
      */
     @Override
     public CommentDTO addComment(Integer adId, CreateOrUpdateCommentDTO comment) {
