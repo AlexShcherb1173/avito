@@ -59,7 +59,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param newPasswordDTO DTO с новым паролем
      * @param authentication объект аутентификации, содержащий email пользователя
-     * @throws UsernameNotFoundException если пользователь не найден
+     * @throws UserNotFoundException если пользователь не найден
      */
     @Override
     public void updatePassword(NewPasswordDTO newPasswordDTO, Authentication authentication) {
@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
      * @param updateUserDTO  DTO с новыми данными пользователя
      * @param authentication объект аутентификации, содержащий email пользователя
      * @return обновленный {@link UpdateUserDTO}
-     * @throws UsernameNotFoundException если пользователь не найден
+     * @throws UserNotFoundException если пользователь не найден
      */
     @Override
     public UpdateUserDTO updateUser(UpdateUserDTO updateUserDTO, Authentication authentication) {
@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param image          новое изображение пользователя
      * @param authentication объект аутентификации, содержащий email пользователя
-     * @throws UsernameNotFoundException если пользователь не найден
+     * @throws UserNotFoundException если пользователь не найден
      * @throws IOException               если произошла ошибка при сохранении изображения
      */
     @Override
@@ -146,7 +146,7 @@ public class UserServiceImpl implements UserService {
      * @param id ID изображения пользователя
      * @param response  HTTP-ответ, в который записывается изображение
      * @throws IOException               если произошла ошибка при чтении файла
-     * @throws UsernameNotFoundException если изображение не найдено
+     * @throws ImageNotFoundException если изображение не найдено
      */
     public void downloadAvatarFromFileSystem(int id, HttpServletResponse response)
             throws IOException {
