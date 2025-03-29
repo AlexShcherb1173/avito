@@ -15,6 +15,7 @@ public class CommentSecurityService {
 
     /**
      * Конструктор CommentSecurityService.
+     *
      * @param commentRepository репозиторий комментариев
      */
     public CommentSecurityService(CommentRepository commentRepository) {
@@ -23,6 +24,7 @@ public class CommentSecurityService {
 
     /**
      * Проверяет, является ли текущий пользователь владельцем комментария.
+     *
      * @param commentId идентификатор комментария
      * @return true, если пользователь является владельцем
      */
