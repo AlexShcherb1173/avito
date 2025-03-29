@@ -15,6 +15,7 @@ public class CommentSecurityService {
 
     /**
      * Конструктор CommentSecurityService.
+     *
      * @param commentRepository репозиторий комментариев
      */
     public CommentSecurityService(CommentRepository commentRepository) {
@@ -23,6 +24,7 @@ public class CommentSecurityService {
 
     /**
      * Проверяет, является ли текущий пользователь владельцем комментария.
+     *
      * @param commentId идентификатор комментария
      * @return true, если пользователь является владельцем
      */
@@ -32,6 +34,6 @@ public class CommentSecurityService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-        return comment.getAuthor().equals(currentUsername);
+        return comment.getAuthor().getEmail().equals(currentUsername);
     }
 }
