@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CommentDTO;
 import ru.skypro.homework.dto.CommentsDTO;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDTO;
+import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.exception.CommentNotFoundException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Comment;
@@ -28,7 +29,10 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, CommentMapper commentMapper, AdRepository adRepository, UserRepository userRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, 
+                              CommentMapper commentMapper, 
+                              AdRepository adRepository, 
+                              UserRepository userRepository) {
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
         this.adRepository = adRepository;
@@ -55,11 +59,12 @@ public class CommentServiceImpl implements CommentService {
      * @param adId    идентификатор объявления
      * @param comment объект CreateOrUpdateCommentDTO, содержащий данные для создания или обновления комментария
      * @return объект CommentDTO, представляющий добавленный комментарий
+     * @throws AdNotFoundException если обьявление не найдено
      */
     @Override
     public CommentDTO addComment(Integer adId, CreateOrUpdateCommentDTO comment) {
         Comment model = commentMapper.toModel(comment);
-        model.setAd(adRepository.findById(adId).orElseThrow());
+        model.setAd(adRepository.findById(adId).orElseThrow(() -> new AdNotFoundException(adId)));
         model.setAuthor(userRepository.findByEmail(SecurityContextHolder.
                         getContext().
                         getAuthentication().
