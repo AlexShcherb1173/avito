@@ -12,4 +12,15 @@ public class AdDTO {
     private Integer pk;
     private Integer price;
     private String title;
+
+    public AdDTO() {
+    }
+
+    public AdDTO(String title) {
+        this.title = title;
+    }
+
+    public AdDTO(String testAd, int i, String testDescription) {
+
+    }
 }
