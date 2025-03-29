@@ -28,12 +28,20 @@ public class AdSecurityService {
      * @param adId идентификатор объявления
      * @return true, если пользователь является владельцем
      */
+//    public boolean isOwner(Integer adId) {
+//        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+//
+//        Ad ad = adRepository.findById(adId)
+//                .orElseThrow(() -> new AdNotFoundException(adId));
+//
+//        return ad.getAuthor().equals(currentUsername);
+//    }
     public boolean isOwner(Integer adId) {
         String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Ad ad = adRepository.findById(adId)
                 .orElseThrow(() -> new AdNotFoundException(adId));
 
-        return ad.getAuthor().equals(currentUsername);
+        return ad.getAuthor().getEmail().equals(currentUsername);
     }
 }

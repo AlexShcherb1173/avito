@@ -32,6 +32,6 @@ public class CommentSecurityService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-        return comment.getAuthor().equals(currentUsername);
+        return comment.getAuthor().getEmail().equals(currentUsername);
     }
 }
