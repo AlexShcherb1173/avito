@@ -10,4 +10,10 @@ import java.util.List;
 public class CommentsDTO {
     private Integer count;
     private List<CommentDTO> results;
+
+    public CommentsDTO() {
+    }
+
+    public CommentsDTO(Integer count, List<CommentDTO> commentDTOS) {
+    }
 }

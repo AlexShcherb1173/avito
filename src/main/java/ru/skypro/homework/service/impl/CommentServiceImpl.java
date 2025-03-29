@@ -1,5 +1,6 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,7 +19,7 @@ import ru.skypro.homework.service.CommentService;
 
 import java.util.List;
 
-
+@Slf4j
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -70,6 +71,7 @@ public class CommentServiceImpl implements CommentService {
                         getName()).
                 orElseThrow(() -> new UsernameNotFoundException("User not found")));
         Comment savedModel = commentRepository.save(model);
+        log.info("Добавлен комментарий: {}", model);
         return commentMapper.toDtoCommentDTO(savedModel);
     }
 
@@ -85,6 +87,7 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
         commentRepository.delete(comment);
+        log.info("Удален комментарий: {}", comment);
     }
 
 
@@ -101,6 +104,7 @@ public class CommentServiceImpl implements CommentService {
         Comment existingComment = commentRepository.findById(commentId).orElseThrow();
         existingComment.setText(comment.getText());
         commentRepository.save(existingComment);
+        log.info("Обновлен комментарий: {}", existingComment);
         return commentMapper.toDtoCommentDTO(existingComment);
     }
 }

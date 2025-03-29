@@ -34,6 +34,6 @@ public class AdSecurityService {
         Ad ad = adRepository.findById(adId)
                 .orElseThrow(() -> new AdNotFoundException(adId));
 
-        return ad.getAuthor().equals(currentUsername);
+        return ad.getAuthor().getEmail().equals(currentUsername);
     }
 }

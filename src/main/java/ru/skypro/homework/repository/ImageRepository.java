@@ -10,4 +10,6 @@ import java.util.Optional;
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Integer> {
     Optional<Image> findById(int id);
+
+    Optional<Image> findByFilePathContaining(String filepath);
 }
