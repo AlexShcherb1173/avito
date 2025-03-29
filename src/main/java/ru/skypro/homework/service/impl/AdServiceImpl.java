@@ -232,7 +232,7 @@ public class AdServiceImpl implements AdService {
         try (InputStream is = Files.newInputStream(path);
              OutputStream os = response.getOutputStream()) {
             response.setStatus(200);
-            response.setContentType("image/jpg");
+            response.setContentType(image.getMediaType());
             response.setContentLength((int) image.getFileSize());
             is.transferTo(os);
         }

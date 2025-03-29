@@ -38,6 +38,6 @@ public interface CommentMapper {
     CommentsDTO toDtoCommentsDTO(Integer size, List<Comment> list);
 
     default String map(Image value) {
-        return value != null ? value.getFilePath() : null;
+        return value != null ? "/users/me/image/" + value.getId() + "/get" : null;
     }
 }

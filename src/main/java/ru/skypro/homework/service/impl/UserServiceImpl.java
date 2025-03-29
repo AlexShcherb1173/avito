@@ -142,22 +142,22 @@ public class UserServiceImpl implements UserService {
      *
      * <p>Находит изображение по ID, считывает его из файловой системы и передает в выходной поток.</p>
      *
-     * @param studentId ID изображения пользователя
+     * @param id ID изображения пользователя
      * @param response  HTTP-ответ, в который записывается изображение
      * @throws IOException               если произошла ошибка при чтении файла
      * @throws UsernameNotFoundException если изображение не найдено
      */
-    public void downloadAvatarFromFileSystem(int studentId, HttpServletResponse response)
+    public void downloadAvatarFromFileSystem(int id, HttpServletResponse response)
             throws IOException {
 
-        Image avatarOpt = imageRepository.findById(studentId).orElseThrow(() ->
+        Image avatarOpt = imageRepository.findById(id).orElseThrow(() ->
                 new UsernameNotFoundException("User not found"));
 
         Path path = Path.of(avatarOpt.getFilePath());
         try (InputStream is = Files.newInputStream(path);
              OutputStream os = response.getOutputStream();) {
             response.setStatus(200);
-            response.setContentType("image/jpg");
+            response.setContentType(avatarOpt.getMediaType());
             response.setContentLength((int) avatarOpt.getFileSize());
             is.transferTo(os);
         }
