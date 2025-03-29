@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDTO;
 import ru.skypro.homework.dto.UpdateUserDTO;
 import ru.skypro.homework.dto.UserDTO;
+import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.Image;
@@ -62,7 +63,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void updatePassword(NewPasswordDTO newPasswordDTO, Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
+                -> new UsernameNotFoundException("User not found"));
         user.setPassword(encoder.encode(newPasswordDTO.getNewPassword()));
         userRepository.save(user);
     }
@@ -80,7 +82,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserDTO getUserInfo(Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UserNotFoundException(authentication.getName()));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() ->
+                new UserNotFoundException(authentication.getName()));
         UserDTO userDTO = userMapper.toDtoUserDTO(user);
         if (userDTO.getImage() != null) {
             userDTO.setImage("/users/me/image/" + userDTO.getImage() + "/get");
@@ -97,11 +100,12 @@ public class UserServiceImpl implements UserService {
      * @param updateUserDTO  DTO с новыми данными пользователя
      * @param authentication объект аутентификации, содержащий email пользователя
      * @return обновленный {@link UpdateUserDTO}
-     * @throws UsernameNotFoundException если пользователь не найден
+     * @throws UserNotFoundException если пользователь не найден
      */
     @Override
     public UpdateUserDTO updateUser(UpdateUserDTO updateUserDTO, Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
+                -> new UserNotFoundException(authentication.getName()));
         user.setFirstName(updateUserDTO.getFirstName());
         user.setPhone(updateUserDTO.getPhone());
         user.setLastName(updateUserDTO.getLastName());
@@ -118,12 +122,13 @@ public class UserServiceImpl implements UserService {
      *
      * @param image          новое изображение пользователя
      * @param authentication объект аутентификации, содержащий email пользователя
-     * @throws UsernameNotFoundException если пользователь не найден
+     * @throws UserNotFoundException если пользователь не найден
      * @throws IOException               если произошла ошибка при сохранении изображения
      */
     @Override
     public void updateUserAvatar(MultipartFile image, Authentication authentication) {
-        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
+                -> new UsernameNotFoundException("User not found"));
         try {
             Image imageObj = imageService.addImage(user.getId(), image);
             user.setImage(imageObj);
@@ -141,13 +146,13 @@ public class UserServiceImpl implements UserService {
      * @param id       ID изображения пользователя
      * @param response HTTP-ответ, в который записывается изображение
      * @throws IOException               если произошла ошибка при чтении файла
-     * @throws UsernameNotFoundException если изображение не найдено
+     * @throws ImageNotFoundException если изображение не найдено
      */
     public void downloadAvatarFromFileSystem(int id, HttpServletResponse response)
             throws IOException {
 
         Image avatarOpt = imageRepository.findById(id).orElseThrow(() ->
-                new UsernameNotFoundException("User not found"));
+                new ImageNotFoundException(id));
 
         Path path = Path.of(avatarOpt.getFilePath());
         try (InputStream is = Files.newInputStream(path);

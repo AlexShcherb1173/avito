@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CommentDTO;
 import ru.skypro.homework.dto.CommentsDTO;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDTO;
+import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.exception.CommentNotFoundException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Comment;
@@ -59,7 +60,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDTO addComment(Integer adId, CreateOrUpdateCommentDTO comment) {
         Comment model = commentMapper.toModel(comment);
-        model.setAd(adRepository.findById(adId).orElseThrow());
+        model.setAd(adRepository.findById(adId).orElseThrow(() -> new AdNotFoundException(adId)));
         model.setAuthor(userRepository.findByEmail(SecurityContextHolder.
                         getContext().
                         getAuthentication().

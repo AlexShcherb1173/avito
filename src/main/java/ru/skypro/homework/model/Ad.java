@@ -1,9 +1,6 @@
 package ru.skypro.homework.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -65,13 +62,14 @@ public class Ad {
 
     @Override
     public String toString() {
-        return "Ad{" + "id=" + id
-                + ", author=" + author
-                + ", image=" + image
-                + ", comments=" + comments
-                + ", price=" + price
-                + ", title='" + title
-                + '\'' + ", description='"
-                + description + '\'' + '}';
+        return "Ad{" +
+                "id=" + id +
+                ", author=" + author +
+                ", image=" + image +
+                ", comments=" + comments +
+                ", price=" + price +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }
