@@ -1,9 +1,6 @@
 package ru.skypro.homework.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -51,11 +48,7 @@ public class Comment {
 
     @Override
     public String toString() {
-        return "Comment{" +
-                "id=" + id +
-                ", ad=" + ad +
-                ", author=" + author +
-                ", text='" + text + '\'' +
-                '}';
+        return "Comment{id=" + id +
+                ", text='" + text + "'}";
     }
 }
