@@ -6,6 +6,9 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.Objects;
 
+/**
+ * Сущность изображения (Image).
+ */
 @Setter
 @Getter
 @Entity

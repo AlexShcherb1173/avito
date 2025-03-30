@@ -1,13 +1,15 @@
 package ru.skypro.homework.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
+/**
+ * Сущность объявления (Ad).
+ */
 @Entity
 @Table(name = "ads")
 @NoArgsConstructor
@@ -27,6 +29,9 @@ public class Ad {
     @JoinColumn(name = "image_id")
     private Image image;
 
+    @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
     @Column(name = "price", nullable = false)
     private int price;
 
@@ -39,19 +44,20 @@ public class Ad {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Ad)) return false;
         Ad ad = (Ad) o;
         return price == ad.price
                 && Objects.equals(id, ad.id)
                 && Objects.equals(author, ad.author)
                 && Objects.equals(image, ad.image)
+                && Objects.equals(comments, ad.comments)
                 && Objects.equals(title, ad.title)
                 && Objects.equals(description, ad.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, author, image, price, title, description);
+        return Objects.hash(id, author, image, comments, price, title, description);
     }
 
     @Override
@@ -59,7 +65,8 @@ public class Ad {
         return "Ad{" +
                 "id=" + id +
                 ", author=" + author +
-                ", image='" + image + '\'' +
+                ", image=" + image +
+                ", comments=" + comments +
                 ", price=" + price +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +

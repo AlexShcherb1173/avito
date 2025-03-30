@@ -10,7 +10,9 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.Objects;
 
-
+/**
+ * Сущность пользователя (User).
+ */
 @Entity
 @Table(name = "users")
 @Getter
@@ -87,7 +89,7 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", role=" + role +
-                ", image='" + image + '\'' +
+                ", image=" + image +
                 ", ads=" + ads +
                 ", comments=" + comments +
                 '}';

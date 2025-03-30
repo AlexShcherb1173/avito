@@ -1,11 +1,9 @@
 package ru.skypro.homework.exception;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class UserNotFoundException extends RuntimeException {
-    public UserNotFoundException(int userId) {
-        super("Ad with id " + userId + " not found");
-    }
-}
+@ResponseStatus(HttpStatus.BAD_REQUEST )
+public class UserNotFoundException extends RuntimeException{
+    public UserNotFoundException(String userName) {
+        super("User with login " + userName + " not found");
+     }
+ }

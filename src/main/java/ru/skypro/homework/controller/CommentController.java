@@ -43,6 +43,7 @@ public class CommentController {
     @PreAuthorize(USER + " and @commentSecurityService.isOwner(#commentId) or " + ADMIN)
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Integer adId, @PathVariable Integer commentId) {
+        commentService.deleteComment(adId, commentId);
         return ResponseEntity.noContent().build();
     }
 

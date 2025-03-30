@@ -13,6 +13,9 @@ import ru.skypro.homework.dto.CreateOrUpdateAdDTO;
 import ru.skypro.homework.dto.ExtendedAdDTO;
 import ru.skypro.homework.service.AdService;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import static ru.skypro.homework.roles.RoleAuthority.*;
 
 @CrossOrigin(value = "http://localhost:3000")
@@ -76,6 +79,15 @@ public class AdController {
     @PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, path = "/{id}/image")
     public ResponseEntity<Void> updateImage(@PathVariable Integer id,
                                             @RequestPart("image") MultipartFile image) {
+        adService.updateAdImage(id, image);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Получить изображение объявления", description = "Позволяет получить изображение объявления")
+    @PreAuthorize(ALL)
+    @GetMapping(value = "/{id}/image/get")
+    public void downloadAvatarFromFileSystem(@PathVariable int id, HttpServletResponse response)
+            throws IOException {
+        adService.downloadAvatarFromFileSystem(id, response);
     }
 }

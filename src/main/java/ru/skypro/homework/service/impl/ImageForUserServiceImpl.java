@@ -1,42 +1,92 @@
 package ru.skypro.homework.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.model.Image;
 import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.ImageService;
-import ru.skypro.homework.service.UserService;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
-@Service
+/**
+ * Сервис для работы с изображениями пользователей.
+ * Реализует методы для добавления изображений и их обработки.
+ */
+
+@Service("userImageService")
 @Transactional
 public class ImageForUserServiceImpl implements ImageService {
 
-    @Value("${ad.image.dir.path}")
+    @Value("${users.image.dir.path}")
     private String imageDir;
-    private final UserService userService;
     private final ImageRepository imageRepository;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageForUserServiceImpl.class);
 
-    public ImageForUserServiceImpl(UserService userService, ImageRepository imageRepository) {
-        this.userService = userService;
+    public ImageForUserServiceImpl(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
     }
 
-    // Ждет готовности userService
 
+    /**
+     * Добавляет изображение для пользователя.
+     *
+     * @param userId Идентификатор пользователя.
+     * @param file   Файл изображения.
+     * @return Добавленное изображение.
+     * @throws IOException Если произошла ошибка при работе с файлом.
+     */
     @Override
-    public void addImage(int id, MultipartFile file) throws IOException {
+    public Image addImage(int userId, MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("File cannot be null or empty");
+        }
+
+        String originalFilename = Objects.requireNonNull(file.getOriginalFilename(), "File name cannot be null");
+        String extension = getExtension(originalFilename);
+
+        LOGGER.info("Filename: {}", originalFilename);
+        LOGGER.info("Extension: {}", extension);
+
+        Path filePath = Path.of(imageDir, "user_" + userId + "." + extension);
+
+        if (Files.exists(filePath)) {
+            Files.delete(filePath);
+        }
+
+        Files.createDirectories(filePath.getParent());
+        Files.write(filePath, file.getBytes());
+
+        Image image = imageRepository.findByFilePathContaining("user_" + userId + ".")
+                .orElse(new Image());
+        image.setFilePath(filePath.toString());
+        image.setFileSize(file.getSize());
+        image.setMediaType(file.getContentType());
+
+        imageRepository.save(image);
+        LOGGER.info("Image saved: id={}, path={}", image.getId(), image.getFilePath());
+
+        return image;
     }
 
-    @Override
-    public byte[] generateImage(Path filePath) throws IOException {
-        return new byte[0];
-    }
-
+    /**
+     * Получает расширение файла по имени.
+     *
+     * @param filename Имя файла.
+     * @return Расширение файла.
+     */
     private String getExtension(String filename) {
-        return null;
+        int lastDotIndex = filename.lastIndexOf(".");
+        if (lastDotIndex == -1) {
+            throw new IllegalArgumentException("Filename must contain an extension");
+        }
+        return filename.substring(lastDotIndex + 1);
     }
 }

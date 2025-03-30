@@ -5,9 +5,9 @@ import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.AdsDTO;
 import ru.skypro.homework.dto.CreateOrUpdateAdDTO;
 import ru.skypro.homework.dto.ExtendedAdDTO;
-import ru.skypro.homework.model.Ad;
 
-import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public interface AdService {
     AdsDTO getAllAds();
@@ -23,4 +23,6 @@ public interface AdService {
     AdsDTO getUserAds();
 
     void updateAdImage(Integer id, MultipartFile image);
+
+    void downloadAvatarFromFileSystem(int id, HttpServletResponse response) throws IOException;
 }

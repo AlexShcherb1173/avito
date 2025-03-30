@@ -5,27 +5,30 @@ import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.UpdateUserDTO;
 import ru.skypro.homework.dto.UserDTO;
-import ru.skypro.homework.model.Ad;
-import ru.skypro.homework.model.Comment;
+import ru.skypro.homework.model.Image;
 import ru.skypro.homework.model.User;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class UserMapperTest {
     private final UserMapper userMapper = Mappers.getMapper(UserMapper.class);
 
-    private User user;
+    private User author;
     private UserDTO userDTO;
     private UpdateUserDTO updateUserDTO;
 
     @BeforeEach
     void setUp() {
-        user = new User();
-        user.setId(99);
-        user.setPhone("91123455");
-        user.setLastName("Ivanov");
-        user.setFirstName("John");
-        user.setImage("avatar.jpg");
+        author = new User();
+        author.setId(99);
+        author.setPhone("91123455");
+        author.setLastName("Ivanov");
+        author.setFirstName("John");
+
+        Image authorImage = new Image();
+        authorImage.setFilePath("avatar.jpg");
+        author.setImage(authorImage);
 
         userDTO = new UserDTO();
         userDTO.setFirstName("John");
@@ -38,18 +41,18 @@ class UserMapperTest {
 
     @Test
     void testToDtoUserDTO() {
-        UserDTO mappedDto = userMapper.toDtoUserDTO(user);
+        UserDTO mappedDto = userMapper.toDtoUserDTO(author);
         assertNotNull(mappedDto);
-        assertEquals(user.getFirstName(), mappedDto.getFirstName());
-        assertEquals(user.getPhone(), mappedDto.getPhone());
+        assertEquals(author.getFirstName(), mappedDto.getFirstName());
+        assertEquals(author.getPhone(), mappedDto.getPhone());
     }
 
     @Test
     void testToDtoUpdateUserDTO() {
-        UpdateUserDTO mappedDto = userMapper.toDtoUpdateUserDTO(user);
+        UpdateUserDTO mappedDto = userMapper.toDtoUpdateUserDTO(author);
         assertNotNull(mappedDto);
-        assertEquals(user.getFirstName(), mappedDto.getFirstName());
-        assertEquals(user.getPhone(), mappedDto.getPhone());
+        assertEquals(author.getFirstName(), mappedDto.getFirstName());
+        assertEquals(author.getPhone(), mappedDto.getPhone());
     }
 
     @Test

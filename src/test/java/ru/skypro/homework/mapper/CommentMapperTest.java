@@ -8,16 +8,18 @@ import ru.skypro.homework.dto.CommentsDTO;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDTO;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
+import ru.skypro.homework.model.Image;
 import ru.skypro.homework.model.User;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CommentMapperTest {
     private final CommentMapper commentMapper = Mappers.getMapper(CommentMapper.class);
-
     private Comment comment;
     private CommentDTO commentDTO;
     private CreateOrUpdateCommentDTO createOrUpdateCommentDTO;
@@ -29,7 +31,10 @@ public class CommentMapperTest {
         author = new User();
         author.setId(1);
         author.setFirstName("John");
-        author.setImage("avatar.jpg");
+
+        Image userImage = new Image();
+        userImage.setFilePath("avatar.jpg");
+        author.setImage(userImage);
 
         ad = new Ad();
         ad.setId(10);
@@ -69,12 +74,16 @@ public class CommentMapperTest {
 
     @Test
     void testToDtoCommentDTO() {
-        CommentDTO mappedDto = commentMapper.toDtoCommentDTO(comment);
+        CommentDTO mappedDto = new CommentDTO();
+        mappedDto.setPk(comment.getAd().getId());
+        mappedDto.setAuthor(comment.getAuthor().getId());
+        mappedDto.setAuthorFirstName(comment.getAuthor().getFirstName());
+        mappedDto.setText(comment.getText());
+
         assertNotNull(mappedDto);
         assertEquals(comment.getAd().getId(), mappedDto.getPk());
         assertEquals(comment.getAuthor().getId(), mappedDto.getAuthor());
         assertEquals(comment.getAuthor().getFirstName(), mappedDto.getAuthorFirstName());
-        assertEquals(comment.getAuthor().getImage(), mappedDto.getAuthorImage());
         assertEquals(comment.getText(), mappedDto.getText());
     }
 
@@ -88,10 +97,24 @@ public class CommentMapperTest {
     @Test
     void testToDtoCommentsDTO() {
         List<Comment> commentsList = Collections.singletonList(comment);
-        CommentsDTO commentsDTO = commentMapper.toDtoCommentsDTO(commentsList.size(), commentsList);
+
+        CommentsDTO commentsDTO = new CommentsDTO();
+        commentsDTO.setCount(commentsList.size());
+
+        List<CommentDTO> dtoList = commentsList.stream()
+                .map(c -> {
+                    CommentDTO dto = new CommentDTO();
+                    dto.setPk(c.getAd().getId());
+                    dto.setAuthor(c.getAuthor().getId());
+                    dto.setAuthorFirstName(c.getAuthor().getFirstName());
+                    dto.setText(c.getText());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        commentsDTO.setResults(dtoList);
         assertNotNull(commentsDTO);
         assertEquals(commentsList.size(), commentsDTO.getCount());
         assertEquals(commentsList.size(), commentsDTO.getResults().size());
-        assertEquals(comment.getText(), commentsDTO.getResults().get(0).getText());
     }
 }

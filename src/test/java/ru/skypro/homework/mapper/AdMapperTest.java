@@ -4,127 +4,144 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.AdDTO;
-import ru.skypro.homework.dto.AdsDTO;
 import ru.skypro.homework.dto.CreateOrUpdateAdDTO;
 import ru.skypro.homework.dto.ExtendedAdDTO;
 import ru.skypro.homework.model.Ad;
-import ru.skypro.homework.model.Comment;
+import ru.skypro.homework.model.Image;
 import ru.skypro.homework.model.User;
 
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AdMapperTest {
-    private final AdMapper adMapper = Mappers.getMapper(AdMapper.class);
 
-    private Ad ad;
-    private AdDTO adDTO;
-    private CreateOrUpdateAdDTO createOrUpdateAdDTO;
-    private ExtendedAdDTO extendedAdDTO;
-    private User author;
+    private AdMapper adMapper;
 
     @BeforeEach
-    void setUp() {
-        author = new User();
-        author.setId(8);
-        author.setFirstName("John");
-        author.setLastName("Doe");
-        author.setEmail("john.doe@example.com");
-        author.setPhone("123456789");
-        author.setImage("avatar.jpg");
+    public void setUp() {
+        adMapper = Mappers.getMapper(AdMapper.class);
+    }
 
-        ad = new Ad();
-        ad.setId(6);
-        ad.setTitle("Объявление 1");
-        ad.setPrice(100);
-        ad.setAuthor(author);
-        ad.setImage("image.jpg");
+    @Test
+    public void testToModel_AdDTO() {
+        // Arrange
+        AdDTO adDTO = new AdDTO();
+        adDTO.setAuthor(1);
+        adDTO.setImage(String.valueOf(2));
+        adDTO.setPk(3);
+        adDTO.setTitle("Test Ad");
+        adDTO.setPrice((int) 100.0);
 
-        adDTO = new AdDTO();
-        adDTO.setPk(6);
-        adDTO.setTitle("Объявление 1");
-        adDTO.setPrice(100);
-        adDTO.setAuthor(8);
-        adDTO.setImage("image.jpg");
+        // Act
+        Ad ad = adMapper.toModel(adDTO);
 
-        createOrUpdateAdDTO = new CreateOrUpdateAdDTO();
-        createOrUpdateAdDTO.setTitle("Объявление 1");
+        // Assert
+        assertEquals(1, ad.getAuthor().getId());
+        assertEquals(2, ad.getImage().getId());
+        assertEquals(3, ad.getId());
+        assertEquals("Test Ad", ad.getTitle());
+        assertEquals(100.0, ad.getPrice());
+    }
 
-        extendedAdDTO = new ExtendedAdDTO();
-        extendedAdDTO.setPk(6);
-        extendedAdDTO.setTitle("Объявление 1");
-        extendedAdDTO.setPrice(100);
+    @Test
+    public void testToModel_CreateOrUpdateAdDTO() {
+        // Arrange
+        CreateOrUpdateAdDTO createOrUpdateAdDTO = new CreateOrUpdateAdDTO();
+        createOrUpdateAdDTO.setTitle("New Ad");
+        createOrUpdateAdDTO.setPrice((int) 150.0);
+
+        // Act
+        Ad ad = adMapper.toModel(createOrUpdateAdDTO);
+
+        // Assert
+        assertEquals("New Ad", ad.getTitle());
+        assertEquals(150.0, ad.getPrice());
+    }
+
+    @Test
+    public void testToModel_ExtendedAdDTO() {
+        // Arrange
+        ExtendedAdDTO extendedAdDTO = new ExtendedAdDTO();
+        extendedAdDTO.setPk(4);
         extendedAdDTO.setAuthorFirstName("John");
         extendedAdDTO.setAuthorLastName("Doe");
         extendedAdDTO.setEmail("john.doe@example.com");
+        extendedAdDTO.setImage(String.valueOf(5));
         extendedAdDTO.setPhone("123456789");
-        extendedAdDTO.setImage("image.jpg");
+        extendedAdDTO.setTitle("Extended Ad");
+        extendedAdDTO.setPrice((int) 200.0);
+
+        // Act
+        Ad ad = adMapper.toModel(extendedAdDTO);
+
+        // Assert
+        assertEquals(4, ad.getId());
+        assertEquals("John", ad.getAuthor().getFirstName());
+        assertEquals("Doe", ad.getAuthor().getLastName());
+        assertEquals("john.doe@example.com", ad.getAuthor().getEmail());
+        assertEquals(5, ad.getImage().getId());
+        assertEquals("123456789", ad.getAuthor().getPhone());
+        assertEquals("Extended Ad", ad.getTitle());
+        assertEquals(200.0, ad.getPrice());
     }
 
     @Test
-    void testToModelFromAdDTO() {
-        Ad mappedAd = adMapper.toModel(adDTO);
-        assertEquals(ad.getId(), mappedAd.getId());
-        assertEquals(ad.getTitle(), mappedAd.getTitle());
-        assertEquals(ad.getPrice(), mappedAd.getPrice());
-        assertEquals(ad.getImage(), mappedAd.getImage());
+    public void testToDtoAdDTO() {
+        // Arrange
+        Ad ad = new Ad();
+        ad.setId(6);
+
+        Image image = new Image();
+        image.setId(7);
+
+        ad.setImage(image);
+
+        User author = new User();
+        author.setId(8);
+        author.setFirstName("Alice");
+        author.setLastName("Smith");
+        author.setEmail("alice.smith@example.com");
+
+        ad.setAuthor(author);
+        ad.setTitle("Ad for Testing");
+        ad.setPrice((int) 300.0);
+
+        // Act
+        AdDTO adDTO = adMapper.toDtoAdDTO(ad);
+
+        // Assert
+        assertEquals(8, adDTO.getAuthor());
+        assertEquals("7", adDTO.getImage());
+        assertEquals(6, adDTO.getPk());
+        assertEquals("Ad for Testing", adDTO.getTitle());
+        assertEquals(300, adDTO.getPrice());
     }
 
     @Test
-    void testToModelFromCreateOrUpdateAdDTO() {
-        Ad mappedAd = adMapper.toModel(createOrUpdateAdDTO);
-        assertEquals(createOrUpdateAdDTO.getTitle(), mappedAd.getTitle());
-    }
+    public void testToDtoExtendedAdDTO() {
+        // Arrange
+        Ad ad = new Ad();
 
-    @Test
-    void testToModelFromExtendedAdDTO() {
-        Ad mappedAd = adMapper.toModel(extendedAdDTO);
-        assertEquals(extendedAdDTO.getPk(), mappedAd.getId());
-        assertEquals(extendedAdDTO.getTitle(), mappedAd.getTitle());
-        assertEquals(extendedAdDTO.getPrice(), mappedAd.getPrice());
-        assertEquals(extendedAdDTO.getImage(), mappedAd.getImage());
-        assertNotNull(mappedAd.getAuthor());
-        assertEquals(extendedAdDTO.getAuthorFirstName(), mappedAd.getAuthor().getFirstName());
-        assertEquals(extendedAdDTO.getAuthorLastName(), mappedAd.getAuthor().getLastName());
-    }
+        Image image = new Image();
+        image.setId(9);
 
-    @Test
-    void testToDtoAdDTO() {
-        AdDTO mappedDto = adMapper.toDtoAdDTO(ad);
-        assertEquals(ad.getId(), mappedDto.getPk());
-        assertEquals(ad.getTitle(), mappedDto.getTitle());
-        assertEquals(ad.getPrice(), mappedDto.getPrice());
-        assertEquals(ad.getImage(), mappedDto.getImage());
-        assertEquals(ad.getAuthor().getId(), mappedDto.getAuthor());
-    }
+        ad.setImage(image);
 
-    @Test
-    void testToDtoCreateOrUpdateAdDTO() {
-        CreateOrUpdateAdDTO mappedDto = adMapper.toDtoCreateOrUpdateAdDTO(ad);
-        assertEquals(ad.getTitle(), mappedDto.getTitle());
-    }
+        User author = new User();
+        author.setFirstName("Bob");
+        author.setLastName("Johnson");
+        author.setEmail("bob.johnson@example.com");
 
-    @Test
-    void testToDtoExtendedAdDTO() {
-        ExtendedAdDTO mappedDto = adMapper.toDtoExtendedAdDTO(ad);
-        assertEquals(ad.getId(), mappedDto.getPk());
-        assertEquals(ad.getTitle(), mappedDto.getTitle());
-        assertEquals(ad.getPrice(), mappedDto.getPrice());
-        assertEquals(ad.getImage(), mappedDto.getImage());
-        assertEquals(ad.getAuthor().getFirstName(), mappedDto.getAuthorFirstName());
-        assertEquals(ad.getAuthor().getLastName(), mappedDto.getAuthorLastName());
-        assertEquals(ad.getAuthor().getEmail(), mappedDto.getEmail());
-        assertEquals(ad.getAuthor().getPhone(), mappedDto.getPhone());
-    }
+        ad.setAuthor(author);
 
-    @Test
-    void testToAds() {
-        List<Ad> adsList = Collections.singletonList(ad);
-        AdsDTO adsDTO = adMapper.toAds(adsList.size(), adsList);
-        assertEquals(adsList.size(), adsDTO.getCount());
-        assertEquals(adsList.size(), adsDTO.getResults().size());
-        assertEquals(ad.getTitle(), adsDTO.getResults().get(0).getTitle());
+        ad.setId(10);
+        ad.setTitle("Extended Test Ad");
+        // Act
+        ExtendedAdDTO extendedAdDTO = adMapper.toDtoExtendedAdDTO(ad);
+        // Assert
+        assertEquals(10, extendedAdDTO.getPk());
+        assertEquals("Bob", extendedAdDTO.getAuthorFirstName());
+        assertEquals("Johnson", extendedAdDTO.getAuthorLastName());
+        assertEquals("bob.johnson@example.com", extendedAdDTO.getEmail());
+        assertEquals("9", extendedAdDTO.getImage());
     }
 }
