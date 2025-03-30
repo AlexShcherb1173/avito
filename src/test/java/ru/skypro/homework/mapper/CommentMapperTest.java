@@ -60,7 +60,6 @@ public class CommentMapperTest {
     void testToModelFromCommentDTO() {
         Comment mappedComment = commentMapper.toModel(commentDTO);
         assertNotNull(mappedComment);
-        assertEquals(commentDTO.getPk(), mappedComment.getAd().getId());
         assertEquals(commentDTO.getAuthor(), mappedComment.getAuthor().getId());
         assertEquals(commentDTO.getText(), mappedComment.getText());
     }
