@@ -59,12 +59,12 @@ public class UserServiceImpl implements UserService {
      *
      * @param newPasswordDTO DTO с новым паролем
      * @param authentication объект аутентификации, содержащий email пользователя
-     * @throws UsernameNotFoundException если пользователь не найден
+     * @throws UserNotFoundException если пользователь не найден
      */
     @Override
     public void updatePassword(NewPasswordDTO newPasswordDTO, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
-                -> new UsernameNotFoundException("User not found"));
+                -> new UserNotFoundException(authentication.getName()));
         user.setPassword(encoder.encode(newPasswordDTO.getNewPassword()));
         userRepository.save(user);
     }
@@ -128,7 +128,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserAvatar(MultipartFile image, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).orElseThrow(()
-                -> new UsernameNotFoundException("User not found"));
+                -> new UserNotFoundException(authentication.getName()));
         try {
             Image imageObj = imageService.addImage(user.getId(), image);
             user.setImage(imageObj);
