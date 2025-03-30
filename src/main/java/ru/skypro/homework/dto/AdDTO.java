@@ -1,9 +1,13 @@
 package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.skypro.homework.model.Image;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(name = "Ad")
 @Data
 public class AdDTO {
@@ -12,9 +16,6 @@ public class AdDTO {
     private Integer pk;
     private Integer price;
     private String title;
-
-    public AdDTO() {
-    }
 
     public AdDTO(String title) {
         this.title = title;
