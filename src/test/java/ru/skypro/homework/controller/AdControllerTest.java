@@ -1,7 +1,6 @@
 package ru.skypro.homework.controller;
 
-import org.apache.tomcat.util.http.parser.Authorization;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,51 +9,48 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.AdsDTO;
-import ru.skypro.homework.mapper.AdMapper;
-import ru.skypro.homework.model.Ad;
-import ru.skypro.homework.service.impl.AdServiceImpl;
+import ru.skypro.homework.service.AdService;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdControllerTest.class)
 @ActiveProfiles("test")
+@WebMvcTest(AdController.class)
 class AdControllerTest {
+
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private AdServiceImpl adService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    void setUp() {
-        //AdMapper adMapper = new AdMapper();
-        Ad ad1 = new Ad();
-        Ad ad2 = new Ad();
-        List<Ad> adsList = new ArrayList<>(List.of(ad1, ad2));
-    }
+    @MockBean
+    private AdService adService;
 
     @Test
-    @WithMockUser
-    @DisplayName("Корректно возвращает список объяввлений")
+    @DisplayName("Корректно получает все объявления")
+    @WithMockUser(roles = "USER")
     void test_getAllAds() throws Exception {
-        when(adService.getAllAds()).thenReturn(new AdsDTO());
+        //given
+        AdsDTO adsDTO = new AdsDTO();
+        adsDTO.setResults(List.of(new AdDTO(1, "images/ads/ad_1", 1, 1000, "Товар 1")));
+
+        //when
+        when(adService.getAllAds()).thenReturn(adsDTO);
+
+        //test and check
         mockMvc.perform(get("/ads"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count").exists());
+                .andExpect(jsonPath("$.results", hasSize(1)))
+                .andExpect(jsonPath("$.results[0].title", is("Товар 1")));
     }
 
-    @Test
-    void addAd() {
-    }
-
-    @Test
-    void getAd() {
-    }
 }
