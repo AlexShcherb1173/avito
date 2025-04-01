@@ -1,9 +1,12 @@
 package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.skypro.homework.model.Image;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(name = "ExtendedAd")
 @Data
 public class ExtendedAdDTO {

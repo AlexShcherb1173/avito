@@ -58,6 +58,17 @@ class UserControllerTest {
     }
 
     @Test
+    void setPassword_ShouldReturnBadRequest_WhenPasswordIsInvalid() throws Exception {
+        NewPasswordDTO newPasswordDTO = new NewPasswordDTO("", "newPassword");
+
+        mockMvc.perform(post("/users/set_password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(newPasswordDTO))
+                        .principal(authentication))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void getUserInfo_ShouldReturnUserDTO_WhenUserIsAuthenticated() throws Exception {
         UserDTO userDTO = new UserDTO("test@example.com", "John", "Doe", "1234567890");
         when(userService.getUserInfo(authentication)).thenReturn(userDTO);
@@ -65,7 +76,12 @@ class UserControllerTest {
         mockMvc.perform(get("/users/me")
                         .principal(authentication))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"))
+                .andExpect(jsonPath("$.phone").value("1234567890"));
+
         verify(userService).getUserInfo(authentication);
     }
 
