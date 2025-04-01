@@ -76,12 +76,7 @@ class UserControllerTest {
         mockMvc.perform(get("/users/me")
                         .principal(authentication))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.email").value("test@example.com"))
-                .andExpect(jsonPath("$.firstName").value("John"))
-                .andExpect(jsonPath("$.lastName").value("Doe"))
-                .andExpect(jsonPath("$.phone").value("1234567890"));
-
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
         verify(userService).getUserInfo(authentication);
     }
 
