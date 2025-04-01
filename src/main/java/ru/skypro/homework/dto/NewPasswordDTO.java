@@ -13,4 +13,11 @@ public class NewPasswordDTO {
 
     @Size(min = 8, max = 16, message = "Длина пароля должна быть от 8 до 16 символов")
     private String newPassword;
+
+    public NewPasswordDTO() {
+    }
+
+    public NewPasswordDTO(String oldPassword, String newPassword) {
+
+    }
 }
