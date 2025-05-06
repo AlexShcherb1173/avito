@@ -1,0 +1,249 @@
+databaseChangeLog:
+  - changeSet:
+      id: "1"
+      author: "ipesterev"
+      changes:
+        - createTable:
+            tableName: "users"
+            columns:
+              - column:
+                  name: "id"
+                  type: "serial"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    autoincrement: true
+              - column:
+                  name: "email"
+                  type: "varchar(255)"
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: "first_name"
+                  type: "varchar(16)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "last_name"
+                  type: "varchar(16)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "phone"
+                  type: "varchar(20)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "role"
+                  type: "varchar(10)"
+                  constraints:
+                    nullable: false
+                    check:
+              - column:
+                  name: "image"
+                  type: "varchar(255)"
+
+        - createTable:
+            tableName: "ads"
+            columns:
+              - column:
+                  name: "id"
+                  type: "serial"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    autoincrement: true
+              - column:
+                  name: "author_id"
+                  type: "int"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "image"
+                  type: "varchar(255)"
+              - column:
+                  name: "price"
+                  type: "int"
+                  constraints:
+                    nullable: false
+                    minValue: 0
+                    maxValue: 10000000
+              - column:
+                  name: "title"
+                  type: "varchar(32)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "description"
+                  type: "varchar(64)"
+                  constraints:
+                    nullable: false
+
+        - createTable:
+            tableName: "comments"
+            columns:
+              - column:
+                  name: "id"
+                  type: "serial"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    autoincrement: true
+              - column:
+                  name: "ad_id"
+                  type: "int"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "author_id"
+                  type: "int"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "text"
+                  type: "varchar(64)"
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: "ads"
+            baseColumnNames: "author_id"
+            referencedTableName: "users"
+            referencedColumnNames: "id"
+            constraintName: "fk_ads_author"
+
+        - addForeignKeyConstraint:
+            baseTableName: "comments"
+            baseColumnNames: "ad_id"
+            referencedTableName: "ads"
+            referencedColumnNames: "id"
+            constraintName: "fk_comments_ad"
+
+        - addForeignKeyConstraint:
+            baseTableName: "comments"
+            baseColumnNames: "author_id"
+            referencedTableName: "users"
+            referencedColumnNames: "id"
+            constraintName: "fk_comments_author"
+
+  - changeSet:
+      id: "2"
+      author: "vdineka"
+      changes:
+        - addColumn:
+            tableName: "users"
+            columns:
+              - column:
+                  name: "password"
+                  type: "VARCHAR(255)"
+                  constraints:
+                    - nullable: false
+                    - defaultValue: "default_hash"
+              - column:
+                  name: "enabled"
+                  type: "BOOLEAN"
+                  constraints:
+                    - nullable: false
+                    - defaultValue: true
+
+  - changeSet:
+      id: "3"
+      author: "bogomolova"
+      changes:
+        - createTable:
+            tableName: "images"
+            columns:
+              - column:
+                  name: "id"
+                  type: "serial"
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                    autoincrement: true
+              - column:
+                  name: "file_path"
+                  type: "varchar(255)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "file_size"
+                  type: "bigint"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "media_type"
+                  type: "varchar(100)"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: "user_id"
+                  type: "int"
+                  constraints:
+                    nullable: true
+              - column:
+                  name: "ad_id"
+                  type: "int"
+                  constraints:
+                    nullable: true
+
+        - addForeignKeyConstraint:
+            baseTableName: "images"
+            baseColumnNames: "user_id"
+            referencedTableName: "users"
+            referencedColumnNames: "id"
+            constraintName: "fk_images_user"
+            onDelete: "CASCADE"
+
+        - addForeignKeyConstraint:
+            baseTableName: "images"
+            baseColumnNames: "ad_id"
+            referencedTableName: "ads"
+            referencedColumnNames: "id"
+            constraintName: "fk_images_ad"
+            onDelete: "CASCADE"
+
+        - dropColumn:
+            tableName: "users"
+            columnName: "image"
+
+        - dropColumn:
+            tableName: "ads"
+            columnName: "image"
+
+        - addColumn:
+            tableName: "ads"
+            columns:
+              - column:
+                  name: "image_id"
+                  type: "int"
+                  constraints:
+                    nullable: true
+
+              - addForeignKeyConstraint:
+                  baseTableName: "ads"
+                  baseColumnNames: "image_id"
+                  referencedTableName: "images"
+                  referencedColumnNames: "id"
+                  constraintName: "fk_ads_image"
+                  onDelete: "CASCADE"
+  - changeSet:
+        id: "4"
+        author: "AFetisov"
+        changes:
+          - addColumn:
+              tableName: "users"
+              columns:
+                - column:
+                    name: "image_id"
+                    type: "int"
+                    constraints:
+                      nullable: true
+
+                - addForeignKeyConstraint:
+                    baseTableName: "users"
+                    baseColumnNames: "image_id"
+                    referencedTableName: "images"
+                    referencedColumnNames: "id"
+                    constraintName: "fk_users_image"
+                    onDelete: "CASCADE"
