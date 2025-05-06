@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: ipesterev
+      changes:
+  - include:
+      file: db/changelog/changelog.yml
