@@ -29,6 +29,7 @@ public class AuthServiceImpl implements AuthService {
         return encoder.matches(password, userDetails.getPassword());
     }
 
+
     @Override
     public boolean register(Register register) {
         if (manager.userExists(register.getUsername())) {
