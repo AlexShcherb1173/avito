@@ -13,8 +13,7 @@
 
   <groupId>ru.skypro</groupId>
   <artifactId>ads</artifactId>
-  <version>0.0.1-SNAPSHOT</version
-  >
+  <version>0.0.1-SNAPSHOT</version>
   <name>Ads application</name>
   <description>Application for managing ads</description>
 
@@ -62,6 +61,11 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-ui</artifactId>
+      <version>1.6.4</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -80,5 +84,6 @@
       </plugin>
     </plugins>
   </build>
+
 
 </project>
