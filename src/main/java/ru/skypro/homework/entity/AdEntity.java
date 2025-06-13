@@ -1,0 +1,29 @@
+package ru.skypro.homework.entity;
+
+
+import lombok.Data;
+
+import javax.persistence.*;
+import java.util.List;
+
+@Entity
+@Table(name = "ads")
+@Data
+public class AdEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+    private String title;
+    private Integer price;
+    private String image;
+    private String description;
+
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private UserEntity author;
+
+    @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<CommentEntity> comments;
+}
+

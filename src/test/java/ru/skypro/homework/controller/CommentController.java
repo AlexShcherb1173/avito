@@ -1,6 +1,7 @@
 package ru.skypro.homework.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Tag;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
@@ -17,19 +18,29 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping
+    // todo 200, 401, 404
     public Comments getComments(@PathVariable Integer id) {
         return commentService.getComments(id);
     }
 
     @PostMapping
-
+    @Operation(
+            summary = "Добавление комментария к объявлению",
+            operationId = "addComment"
+    )
+    // todo 200, 401, 404
     public Long addComment(
             @PathVariable Integer id,
-            @RequestBody CreateOrUpdateComment comment) {
+            @Valid @RequestBody CreateOrUpdateComment comment) {
         return commentService.addComment(id, comment);
     }
 
     @DeleteMapping("/{commentId}")
+    @Operation(
+            summary = "Удаление комментария",
+            operationId = "deleteComment"
+    )
+    // todo 204, 401, 403, 404
     public void deleteComment(
             @PathVariable Integer adId,
             @PathVariable Integer commentId
@@ -38,11 +49,15 @@ public class CommentController {
     }
 
     @PatchMapping("/{commentId}")
-
+    @Operation(
+            summary = "Обновление комментария",
+            operationId = "updateComment"
+    )
+    // todo 200, 401, 403, 404
     public Comment updateComment(
             @PathVariable Integer adId,
             @PathVariable Integer commentId,
-            @RequestBody CreateOrUpdateComment comment) {
+            @Valid @RequestBody CreateOrUpdateComment comment) {
         return commentService.updateComment(adId, commentId, comment);
     }
 }

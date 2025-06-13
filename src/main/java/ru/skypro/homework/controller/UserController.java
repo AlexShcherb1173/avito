@@ -24,7 +24,6 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Пользователь не найден");
         }
-
         userService.updatePassword(user, newPassword);
         return ResponseEntity.ok("Пароль успешно обновлен");
     }
@@ -34,7 +33,6 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-
         return ResponseEntity.ok(user);
     }
 
@@ -44,7 +42,6 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Пользователь не найден");
         }
-
         userService.updateUserInfo(user, updatedUserInfo);
         return ResponseEntity.ok("Информация о пользователе успешно обновлена");
     }
@@ -55,7 +52,6 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Пользователь не найден");
         }
-
         userService.updateUserImage(user, image);
         return ResponseEntity.ok("Аватар пользователя успешно обновлен");
     }
