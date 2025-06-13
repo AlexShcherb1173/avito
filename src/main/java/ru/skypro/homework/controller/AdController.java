@@ -2,7 +2,10 @@ package ru.skypro.homework.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
@@ -11,57 +14,63 @@ import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.service.AdService;
 
+import java.util.List;
+
 @RestController
-@CrossOrigin(value = "http://localhost:3000")
 @RequestMapping("/ads")
-@RequiredArgsConstructor
 public class AdController {
 
-    private final AdService adService;
+    @Autowired
+    private AdService adService; // Зависимость от сервиса
 
+    // Получение всех объявлений
     @GetMapping
-
-    public Ads getAllAds() {
-        return adService.getAllAds();
+    public ResponseEntity<List<Ad>> getAllAds() {
+        List<Ad> ads = adService.getAllAds().getResults();
+        return ResponseEntity.ok(ads);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-
-    public Ad addAd(@RequestPart(name = "properties") CreateOrUpdateAd createOrUpdateAd,
-                    @RequestPart(name = "image") MultipartFile image)
-    {
-        return adService.addAd(createOrUpdateAd);
+    // Добавление объявления
+    @PostMapping
+    public ResponseEntity<Ad> addAd(@RequestBody Ad ad) {
+        Ad newAd = adService.addAd(ad);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newAd);
     }
 
+    // Получение информации об объявлении
     @GetMapping("/{id}")
-
-    public ExtendedAd getAds(@PathVariable Integer id) {
-        return adService.getAd(id);
+    public ResponseEntity<? extends Object> getAdById(@PathVariable Long id) {
+        ExtendedAd ad = adService.getAdById(id);
+        return ad != null ? ResponseEntity.ok(ad) : ResponseEntity.notFound().build();
     }
 
+    // Удаление объявления
     @DeleteMapping("/{id}")
-
-    public void removeAd(@PathVariable Integer id) {
-        adService.deleteAd(id);
-    }    @PatchMapping("/{id}")
-
-      public Ad updateAds(@PathVariable Integer id,
-           @RequestBody CreateOrUpdateAd createOrUpdateAd
-    ) {
-        return adService.updateAd(id, createOrUpdateAd);
+    public ResponseEntity<Void> deleteAd(@PathVariable Long id) {
+        boolean isDeleted = adService.deleteAd(id);
+        return isDeleted ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
+    // Обновление информации об объявлении
+    @PatchMapping("/{id}")
+    public ResponseEntity<Ad> updateAd(@PathVariable Long id,
+                                       @RequestBody Ad updatedAd) {
+        Ad ad = adService.updateAd(id, updatedAd);
+        return ad != null ? ResponseEntity.ok(ad) : ResponseEntity.notFound().build();
+    }
+
+    // Получение объявлений авторизованного пользователя
     @GetMapping("/me")
-        public Ads getAdsMe(Authentication authentication) {
-        return adService.getAdsMe();
+    public ResponseEntity<List<Ad>> getMyAds() {
+        List<Ad> myAds = adService.getMyAds(); // !Реализуйте логику для получения объявлений текущего пользователя
+        return ResponseEntity.ok(myAds);
     }
 
+    // Обновление картинки объявления
     @PatchMapping("/{id}/image")
-
-    public void updateImage(
-            @PathVariable Integer id,
-            @RequestParam("image") MultipartFile image
-    ) {
-        adService.updateAdImage(id, image);
+    public ResponseEntity<Void> updateAdImage(@PathVariable Long id,
+                                              @RequestParam("image") MultipartFile image) {
+        boolean isUpdated = adService.updateAdImage(id, image);
+        return isUpdated ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 }

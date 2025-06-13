@@ -14,4 +14,8 @@ public interface UserService {
     UpdateUser updateUser(UpdateUser updateUser);
 
     void updateUserImage(User user, MultipartFile image);
+
+    void updateUserInfo(User user, User updatedUserInfo);
+
+    void updatePassword(User user, String newPassword);
 }

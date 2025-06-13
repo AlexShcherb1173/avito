@@ -22,7 +22,7 @@ public interface AppMapper {
     @Mapping(target = "image", ignore = true)
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "comments", ignore = true)
-    AdEntity createOrUpdateToAdEntity(CreateOrUpdateAd createOrUpdateAd);
+    AdEntity createOrUpdateToAdEntity(Ad createOrUpdateAd);
 
     @Mapping(source = "id", target = "pk")
     @Mapping(source = "author.id", target = "author")
