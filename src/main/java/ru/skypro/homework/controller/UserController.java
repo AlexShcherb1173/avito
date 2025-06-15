@@ -9,6 +9,7 @@ import ru.skypro.homework.dto.User;
 import ru.skypro.homework.service.UserService;
 
 @RestController
+@CrossOrigin(value = "http://localhost:3000")
 @RequestMapping("/users")
 public class UserController {
 

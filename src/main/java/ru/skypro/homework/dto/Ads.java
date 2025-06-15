@@ -10,7 +10,4 @@ public class Ads {
     private Integer cont; // Общее количество объявлений
     private List<Ad> results;
 
-    public Ads() {
-
-    }
 }

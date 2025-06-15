@@ -14,4 +14,8 @@ public class Comments {
     public Comments() {
 
     }
+
+    public void setResults(List<ru.skypro.homework.dto.Comment> listOfComments) {
+
+    }
 }

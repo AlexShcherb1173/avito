@@ -8,6 +8,4 @@ public class NewPassword {
     private String currentPassword; // Текущий пароль
     private String newPassword;     // Новый пароль
 
-    public NewPassword() {
-    }
 }

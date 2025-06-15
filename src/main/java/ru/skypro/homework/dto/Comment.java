@@ -1,6 +1,5 @@
 package ru.skypro.homework.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
@@ -13,7 +12,5 @@ public class Comment {
     private Integer pk;             // id комментария
     private String text;            // Текст комментария
 
-    public Comment() {
-
     }
-}
+
