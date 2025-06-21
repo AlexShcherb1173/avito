@@ -1,10 +1,12 @@
 package ru.skypro.homework.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Ads;
 
+@Slf4j
 @RestController
 @RequestMapping("/ads")
 public class AdsController {
