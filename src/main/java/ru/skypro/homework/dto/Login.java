@@ -1,10 +1,19 @@
 package ru.skypro.homework.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+/**
+ * Данные для входа пользователя
+ */
 @Data
+@Schema(description = "Данные для входа пользователя")
 public class Login {
+    @Schema(description = "Логин пользователя (email)",
+            example = "user@example.com")
+    private String username = "";
 
-    private String username;
-    private String password;
+    @Schema(description = "Пароль пользователя",
+            example = "myPassword123")
+    private String password = "";
 }
