@@ -1,7 +1,8 @@
-package ru.skypro.homework.dto;
+package ru.skypro.homework.dto.Registration;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import ru.skypro.homework.dto.Role;
 
 @Data
 /**

@@ -3,10 +3,9 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.Comment;
-import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.dto.CreateorUpdateComment;
-import ru.skypro.homework.dto.CreateorUpdateComment;
+import ru.skypro.homework.dto.Comments.Comment;
+import ru.skypro.homework.dto.Advertisement.CreateOrUpdateAd;
+import ru.skypro.homework.dto.Comments.CreateorUpdateComment;
 
 import java.util.Collections;
 import java.util.List;

@@ -5,9 +5,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.Password;
-import ru.skypro.homework.dto.UpdateUser;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.Registration.Password;
+import ru.skypro.homework.dto.Registration.UpdateUser;
+import ru.skypro.homework.dto.User.User;
 
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
