@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.UpdateUser;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.UpdateUserDto;
+import ru.skypro.homework.dto.UserDto;
 
 @Slf4j
 @RestController
@@ -19,16 +19,16 @@ public class UsersController {
 
     @GetMapping("me")
     public ResponseEntity<?> getCurrentUser() {
-        return ResponseEntity.ok(new User());
+        return ResponseEntity.ok(new UserDto());
     }
 
     @PatchMapping("me")
-    public ResponseEntity<?> updateUser(@RequestBody UpdateUser updateUser) {
+    public ResponseEntity<?> updateUser(@RequestBody UpdateUserDto updateUser) {
         return ResponseEntity.ok(updateUser);
     }
 
     @PatchMapping("me/image")
-    public ResponseEntity<?> updateImage(@RequestBody User user) {
+    public ResponseEntity<?> updateImage(@RequestBody UserDto user) {
         return ResponseEntity.ok(user);
     }
 
