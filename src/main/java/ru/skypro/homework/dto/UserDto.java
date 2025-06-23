@@ -16,17 +16,13 @@ public  class UserDto {
     @Schema(description = "id пользователя")
     private Integer id;
 
-    @Schema(description = "логин пользователя")
-    @NotBlank(message = "Username is required")
-    private String username;
-
     @Schema(description = "пароль пользователя")
     @NotBlank(message = "Password is required") // Валидация для пароля
     private String password;
 
     @Schema(description = "логин пользователя")
     @Email
-    private String email;
+    private String username;
 
     @Schema(description = "имя пользователя")
     private String firstName;

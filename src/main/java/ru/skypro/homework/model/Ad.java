@@ -54,7 +54,7 @@ public class Ad {
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     @Schema(description = "Автор объявления")
-    private User user; // Связь с пользователем
+    private User user;
 
     @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL)
     @Schema(description = "Список комментариев к объявлению")
@@ -62,7 +62,7 @@ public class Ad {
 
     @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL)
     @Schema(description = "Список изображений, связанных с объявлением")
-    private List<Image> images; // Список изображений, связанных с объявлением
+    private List<Image> images;
 
 
 }

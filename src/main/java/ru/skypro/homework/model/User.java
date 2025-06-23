@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
@@ -12,13 +14,14 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "users_profiles")
 @Schema(description = "Сущность пользователя, представляющая пользователя в системе")
 public class User {
 
@@ -32,7 +35,7 @@ public class User {
     @NotBlank(message = "Email обязателен")
     @Column(name = "email", nullable = false, unique = true)
     @Schema(description = "Email адрес пользователя", example = "user@example.com")
-    private String email;
+    private String username;
 
     @NotBlank(message = "Имя обязательно")
     @Size(min = 2, max = 16)
@@ -79,15 +82,16 @@ public class User {
     @Schema(description = "Пароль пользователя")
     private String password;
 
-    @NotBlank(message = "Имя пользователя обязательно")
-    @Size(min = 3, max = 16)
-    @Column(name = "username", nullable = false, unique = true)
-    @Schema(description = "Имя пользователя для входа в систему", example = "ivan123")
-    private String username;
-
     @Column(name = "is_authorize", nullable = false)
     @Schema(description = "Флаг, указывающий, авторизован ли пользователь", example = "true")
     private boolean isAuthorize;
 
+    public List<GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if (this.role != null) {
+            authorities.add(new SimpleGrantedAuthority(this.role.name()));
+        }
+        return authorities;
+    }
 
 }

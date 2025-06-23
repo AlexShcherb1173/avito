@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.Exception.UserNotFoundException;
@@ -32,14 +33,14 @@ public class AdsController {
     private final CommentService commentService;
 
     @GetMapping
-    public ResponseEntity<Collection<AdDto>> getAllAds(@RequestBody Ads ads) {
+    public ResponseEntity<Ads> getAllAds() {
         return ResponseEntity.status(HttpStatus.FOUND).body(adService.getAllAds());
     }
 
     @PostMapping
-    public ResponseEntity<AdDto> addAd(@RequestBody AdDto adDto) {
+    public ResponseEntity<AdDto> addAd(@RequestBody AdDto adDto, Authentication authentication) {
         log.info("Adding new ad: {}", adDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(adService.addAd(adDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adService.addAd(adDto,  authentication));
     }
 
     @GetMapping("{id}")

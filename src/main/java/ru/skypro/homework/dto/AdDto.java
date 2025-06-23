@@ -32,4 +32,7 @@ public class AdDto {
     @Schema(description = "заголовок объявления")
     @NotBlank
     private String title;
+
+    @NotBlank
+    private String description;
 }

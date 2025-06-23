@@ -1,6 +1,8 @@
 package ru.skypro.homework.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.AdDto;
 import ru.skypro.homework.model.Ad;
@@ -13,6 +15,7 @@ public interface AdMapper {
     /*
      Преобразование Ad в AdDTO
      */
+    @Mapping(target = "author", source = "user.id")
     AdDto toDto(Ad ad);
 
     /*

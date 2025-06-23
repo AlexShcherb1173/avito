@@ -34,8 +34,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-import static sun.font.CreatedFontTracker.MAX_FILE_SIZE;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -68,17 +66,18 @@ public class UsersServiceImpl implements UsersService {
         return userMapper.toUserDto(user);
     }
 
+    /// !!!
     @Override
     public void updateImage(Integer userId, MultipartFile file) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с Id " + userId + " не найден!"));
-        checkAndSaveImage(Objects.requireNonNull(file), user);
+
     }
 
+    /// !!!!!
     @Override
     public void updateImage(MultipartFile file) {
         User user = currentUserService.getCurrentUser();
-        checkAndSaveImage(Objects.requireNonNull(file), user);
     }
 
     @Override
@@ -88,12 +87,8 @@ public class UsersServiceImpl implements UsersService {
 
     @Override
     public User createUser(UserDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
-        }
-
         if (userRepository.existsByUsername(userDto.getUsername())) {
-            throw new IllegalArgumentException("Username already exists");
+            throw new IllegalArgumentException("Email already exists");
         }
 
         User user = new User();
@@ -103,86 +98,9 @@ public class UsersServiceImpl implements UsersService {
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
         user.setRole(userDto.getRole());
-        user.setEmail(userDto.getEmail());
 
-        log.info("Creating user with username: {}, email: {}, role: {}", user.getUsername(), user.getEmail(), user.getRole());
+        log.info("Creating user with username: {}, email: {}, role: {}", user.getUsername(), user.getUsername(), user.getRole());
         return userRepository.save(user);
-    }
-    @Value("${file.upload.directory}")
-    private String uploadDirectory;
-
-    public void checkAndSaveImage(MultipartFile file, User user) {
-        try {
-            // Валидация файла
-            if (file.isEmpty()) {
-                throw new IllegalArgumentException("Файл не может быть пустым");
-            }
-
-            if (file.getSize() > MAX_FILE_SIZE) {
-                throw new IllegalArgumentException("Размер файла превышает допустимый лимит");
-            }
-
-            // Безопасное получение имени файла
-            String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-            String fileExtension = getFileExtension(originalFilename);
-            String safeFilename = UUID.randomUUID() + "." + fileExtension; // Генерируем уникальное имя
-
-            Path uploadPath = Paths.get(uploadDirectory).toAbsolutePath().normalize();
-            Path filePath = uploadPath.resolve(safeFilename);
-
-            // Создаем директории, если их нет
-            Files.createDirectories(uploadPath);
-
-            // Проверяем безопасность пути
-            if (!filePath.normalize().startsWith(uploadPath)) {
-                throw new SecurityException("Попытка сохранить файл вне целевой директории");
-            }
-
-            // Сохраняем файл
-            try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-            }
-            ImageDto image = new ImageDto();
-            image.setImageUrl(safeFilename);
-            image.setUserId(user.getId());
-            try {
-                image.setData(file.getBytes());
-            } catch (IOException e) {
-                log.error("Ошибка чтения файла для пользователя {}: {}", user.getId(), e.getMessage());
-                throw new RuntimeException("Ошибка четения файла поробуйте снова.", e);
-            }
-
-            // Сохраняем информацию в БД
-            imageService.saveToDatabase(image, filePath, file);
-
-            log.info("Аватар успешно обновлён для пользователя ID {}. Файл: {}",
-                    user.getId(), safeFilename);
-
-        } catch (EntityNotFoundException e) {
-            log.error("Пользователь не найден ID: {}. Ошибка: {}", user.getId(), e.getMessage());
-            throw new UserNotFoundException("Пользователь не найден", e);
-        } catch (IOException e) {
-            log.error("Ошибка ввода-вывода при сохранении аватара для пользователя ID {}: {}",
-                    user.getId(), e.getMessage());
-            throw new FileStorageException("Ошибка при сохранении файла", e);
-        } catch (Exception e) {
-            log.error("Неожиданная ошибка при обновлении аватара для пользователя ID {}: {}",
-                    user.getId(), e.getMessage());
-            throw new ServiceException("Ошибка при обновлении аватара", e);
-        }
-
-        }
-    private static String getFileExtension(String filename) {
-        // Находим индекс последней точки в имени файла
-        int dotIndex = filename.lastIndexOf('.');
-
-        // Если точка не найдена или находится в начале/конце имени - ошибка
-        if (dotIndex <= 0 || dotIndex == filename.length() - 1) {
-            throw new IllegalArgumentException("Файл не имеет расширения или имя некорректно");
-        }
-
-        // Возвращаем подстроку после последней точки
-        return filename.substring(dotIndex + 1);
     }
 
 

@@ -3,12 +3,14 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.Exception.AdNotFoundException;
 import ru.skypro.homework.Exception.UserNotFoundException;
 import ru.skypro.homework.dto.AdDto;
+import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
@@ -17,7 +19,6 @@ import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
-import ru.skypro.homework.service.ImageService;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -32,12 +33,11 @@ public class AdServiceImpl implements AdsService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
     private final CurrentUserService currentUserService;
-    private final ImageService imageService;
 
     @Override
     @Transactional
-    public AdDto addAd(AdDto adDto) {
-        User user = userRepository.findById(adDto.getAuthor())
+    public AdDto addAd(AdDto adDto, Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName())
                 .orElseThrow(() -> new UserNotFoundException("User  not found"));
 
         Ad ad = new Ad();
@@ -45,6 +45,7 @@ public class AdServiceImpl implements AdsService {
         ad.setPrice(adDto.getPrice());
         ad.setImage(adDto.getImage());
         ad.setUser (user);
+        ad.setDescription(adDto.getDescription());
 
         Ad savedAd = adRepository.save(ad);
         return adMapper.toDto(savedAd);
@@ -81,14 +82,17 @@ public class AdServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdDto> getAllAds() {
+    public Ads getAllAds() {
         Collection<Ad> ads = adRepository.findAll();
         if (ads.isEmpty()) {
             throw new AdNotFoundException("Ad not found");
         }
-        return adRepository.findAll().stream()
+        Ads allAds = new Ads();
+        allAds.setCount(ads.size());
+        allAds.setResults(adRepository.findAll().stream()
                 .map(adMapper::toDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        return allAds;
     }
 
     @Override

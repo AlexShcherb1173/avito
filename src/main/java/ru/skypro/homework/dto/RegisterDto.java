@@ -40,10 +40,6 @@ public class RegisterDto {
     @NonNull
     private Role role;
 
-    @Schema(description = "адрес электронной почты пользователя")
-    @NotBlank
-    @Pattern(regexp = "^[A-Za-z0-9+_.-]+@(.+)$", message = "Неверный формат email")
-    private String email;
 
     @JsonCreator
     public RegisterDto(
@@ -52,14 +48,13 @@ public class RegisterDto {
             @JsonProperty("firstName") String firstName,
             @JsonProperty("lastName") String lastName,
             @JsonProperty("phone") String phone,
-            @JsonProperty("role") Role role,
-            @JsonProperty("email") String email) {
+            @JsonProperty("role") Role role
+    ) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
         this.role = role;
-        this.email = email;
     }
 }
