@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,35 +16,28 @@ import ru.skypro.homework.dto.User.User;
 @RequestMapping("/users")
 public class UserController {
 
-    /**
-     * Смена пароля
-     */
+
+    @Tag(name = "Смена пароля", description = "Смена пароля")
     @PostMapping("/set_password")
-    public ResponseEntity<?> setPassword(@RequestBody Password newPassword) {
-        return ResponseEntity.ok().build();
+    public Password setPassword(@RequestBody Password newPassword) {
+        return newPassword;
     }
 
-    /**
-     * Получение информации о текущем пользователе
-     */
+    @Operation(summary = "Получение информации о пользователе")
     @GetMapping("/me")
-    public ResponseEntity<User> getUser() {
+    public User getUser() {
         User emptyUser = new User();
-        return ResponseEntity.ok(emptyUser);
+        return emptyUser;
     }
 
-    /**
-     * Обновление информации о пользователе
-     */
+    @Operation(summary = "Обновление информации о пользователе")
     @PatchMapping("/me")
-    public ResponseEntity<User> updateUser(@RequestBody UpdateUser updateUser) {
+    public User updateUser(@RequestBody UpdateUser updateUser) {
         User emptyUser = new User();
-        return ResponseEntity.ok(emptyUser);
+        return emptyUser;
     }
 
-    /**
-     * Обновление аватара пользователя
-     */
+    @Operation(summary = "Обновление аватара пользователя")
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateUserImage(@RequestParam("image") MultipartFile image) {
         return ResponseEntity.ok().build();

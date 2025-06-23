@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,41 +20,32 @@ import java.util.List;
 @RequestMapping("/ads/{adId}/comments")
 public class CommentsController {
 
-    /**
-     * Получение комментариев объявления
-     */
+
+    @Operation(summary = "получение все комментариев")
     @GetMapping
-    public ResponseEntity<List<Comment>> getComments(@PathVariable Integer adId) {
-        return ResponseEntity.ok(Collections.emptyList());
+    public List<Comment> getComments(@PathVariable Integer adId) {
+        return Collections.emptyList();
     }
 
-    /**
-     * Добавление комментария
-     */
+    @Operation(summary = "Добавление комментария")
     @PostMapping
-    public ResponseEntity<Comment> addComment(@PathVariable Integer adId,
+    public Comment addComment(@PathVariable Integer adId,
                                               @RequestBody CreateOrUpdateAd comment) {
-        Comment emptyComment = new Comment();
-        return ResponseEntity.ok(emptyComment);
+        return new Comment();
     }
 
-    /**
-     * Удаление комментария
-     */
+    @Operation(summary = "Удаление комментария")
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Integer adId,
                                            @PathVariable Integer commentId) {
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Обновление комментария
-     */
+    @Operation(summary = "Обновление комментария")
     @PatchMapping("/{commentId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Integer adId,
+    public Comment updateComment(@PathVariable Integer adId,
                                                  @PathVariable Integer commentId,
                                                  @RequestBody CreateorUpdateComment comment) {
-        Comment emptyComment = new Comment();
-        return ResponseEntity.ok(emptyComment);
+        return new Comment();
     }
 }
