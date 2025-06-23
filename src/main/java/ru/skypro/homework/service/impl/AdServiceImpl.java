@@ -22,6 +22,7 @@ import ru.skypro.homework.service.AdsService;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,11 +75,12 @@ public class AdServiceImpl implements AdsService {
     @PreAuthorize("hasRole('ADMIN') or @adSecurity.isAdOwner(#id, authentication.name)")
     @Override
     @Transactional
-    public void deleteAd(Integer id) {
+    public boolean deleteAd(Integer id, Authentication authentication) {
         if (!adRepository.existsById(id)) {
             throw new AdNotFoundException("Ad not found");
         }
         adRepository.deleteById(id);
+        return true;
     }
 
     @Override
@@ -102,11 +104,17 @@ public class AdServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdDto> getAdsByUserId() {
-        User user = currentUserService.getCurrentUser();
-        return adRepository.findAdsByUserId(user.getId()).stream()
+    public Ads getAdsByUserId(Authentication authentication) {
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        Ads ads = new Ads();
+        ads.setResults(adRepository.findAdsByUserId(user.getId()).stream()
                 .map(adMapper::toDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
+        ads.setCount(adRepository.findAdsByUserId(user.getId()).size());
+
+        return ads;
     }
 
     @Override

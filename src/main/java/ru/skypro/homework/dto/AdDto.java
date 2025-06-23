@@ -13,26 +13,29 @@ import javax.validation.constraints.Positive;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdDto {
+
+    @Schema(description = "id объявления")
+    private Integer pk;
+
     @Schema(description = "id автора объявления")
     @NonNull
     @Positive
     private Integer author;
 
-    @Schema(description = "ссылка на картинку объявления")
-    private String image;
-
-    @Schema(description = "id объявления")
-    private Integer pk;
+    @Schema(description = "заголовок объявления")
+    @NotBlank
+    private String title;
 
     @Schema(description = "цена объявления")
     @NonNull
     @Positive
     private Integer price;
 
-    @Schema(description = "заголовок объявления")
-    @NotBlank
-    private String title;
-
     @NotBlank
     private String description;
+
+    @Schema(description = "ссылка на картинку объявления")
+    private String image;
+
+
 }

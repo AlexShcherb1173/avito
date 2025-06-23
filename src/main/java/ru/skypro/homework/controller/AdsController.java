@@ -34,12 +34,11 @@ public class AdsController {
 
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
-        return ResponseEntity.status(HttpStatus.FOUND).body(adService.getAllAds());
+        return ResponseEntity.status(HttpStatus.OK).body(adService.getAllAds());
     }
 
     @PostMapping
     public ResponseEntity<AdDto> addAd(@RequestBody AdDto adDto, Authentication authentication) {
-        log.info("Adding new ad: {}", adDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(adService.addAd(adDto,  authentication));
     }
 
@@ -49,8 +48,11 @@ public class AdsController {
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<AdDto> deleteAds(@PathVariable("id") int id) {
-        return ResponseEntity.status(HttpStatus.OK).body(adService.getAdById(id));
+    public ResponseEntity<AdDto> deleteAds(@PathVariable("id") int id, Authentication authentication) {
+        if(adService.deleteAd(id, authentication)){
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @PatchMapping("{id}")
@@ -59,8 +61,8 @@ public class AdsController {
     }
 
     @GetMapping("me")
-    public ResponseEntity<Collection<AdDto>> getAdsUser() {
-        return ResponseEntity.status(HttpStatus.OK).body(adService.getAdsByUserId());
+    public ResponseEntity<Ads> getAdsUser(Authentication authentication) {
+        return ResponseEntity.status(HttpStatus.OK).body(adService.getAdsByUserId(authentication));
     }
 
     @PatchMapping("{id}/image")
@@ -87,4 +89,5 @@ public class AdsController {
     public ResponseEntity<?> updateAdsComment(@PathVariable("adId") int adId, @PathVariable("commentId") int commentId) {
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
+
 }
