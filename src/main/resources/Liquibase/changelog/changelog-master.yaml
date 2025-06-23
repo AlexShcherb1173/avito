@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: kirillkrivobokov
+      changes:
+        - sqlFile:
+            path: liquibase/scripts/index-practice.sql
+            relativeToChangelogFile: false

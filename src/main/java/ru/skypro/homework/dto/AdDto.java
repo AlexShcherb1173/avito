@@ -1,0 +1,41 @@
+package ru.skypro.homework.dto;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Positive;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AdDto {
+
+    @Schema(description = "id объявления")
+    private Integer pk;
+
+    @Schema(description = "id автора объявления")
+    @NonNull
+    @Positive
+    private Integer author;
+
+    @Schema(description = "заголовок объявления")
+    @NotBlank
+    private String title;
+
+    @Schema(description = "цена объявления")
+    @NonNull
+    @Positive
+    private Integer price;
+
+    @NotBlank
+    private String description;
+
+    @Schema(description = "ссылка на картинку объявления")
+    private String image;
+
+
+}
