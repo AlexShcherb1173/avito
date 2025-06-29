@@ -7,5 +7,4 @@ import javax.persistence.EntityNotFoundException;
 
 @Service
 public class AdvertisementService {
-
 }

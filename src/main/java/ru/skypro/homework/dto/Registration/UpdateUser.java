@@ -14,4 +14,5 @@ public class UpdateUser {
     @Schema(description = "Телефон в формате +7XXXYYYZZZZ",
             example = "+79991234567")
     private String phone = "";
+
 }

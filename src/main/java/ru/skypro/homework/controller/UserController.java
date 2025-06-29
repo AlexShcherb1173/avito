@@ -16,7 +16,6 @@ import ru.skypro.homework.dto.User.UserDTO;
 @RequestMapping("/users")
 public class UserController {
 
-
     @Tag(name = "Смена пароля", description = "Смена пароля")
     @PostMapping("/set_password")
     public Password setPassword(@RequestBody Password newPassword) {

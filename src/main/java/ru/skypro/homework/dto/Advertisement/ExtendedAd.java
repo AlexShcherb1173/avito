@@ -42,4 +42,6 @@ public class ExtendedAd {
 
     @Schema(description = "Заголовок объявления")
     private String title = "";
+
 }
+

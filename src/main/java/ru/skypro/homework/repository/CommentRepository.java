@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<Comment,Long> {
     List<Comment> findByAdvertisementId(Long adId);  // Все комментарии объявления
     Optional<Comment> findByIdAndAuthorId(Long id, Long authorId); // Для проверки владельца
+
 }

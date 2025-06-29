@@ -31,6 +31,7 @@ public class AuthController {
         }
     }
 
+
     @Tag(name = "Регистрация")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {

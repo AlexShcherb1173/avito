@@ -35,5 +35,4 @@ public class CommentDTO {
     @Schema(description = "Текст комментария")
     private String text = "";
 
-
 }

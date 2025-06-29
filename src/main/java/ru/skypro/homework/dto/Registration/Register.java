@@ -35,4 +35,5 @@ public class Register {
             allowableValues = {"USER", "ADMIN"},
             defaultValue = "USER")
     private Role role = Role.USER ;
+
 }

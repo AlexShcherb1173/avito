@@ -81,4 +81,5 @@ public class User {
     public int hashCode() {
         return Objects.hash(id, email, firstName, lastName, phone, role, advertisements, comments, image);
     }
+
 }

@@ -20,7 +20,6 @@ import java.util.List;
 @RequestMapping("/ads/{adId}/comments")
 public class CommentsController {
 
-
     @Operation(summary = "получение все комментариев")
     @GetMapping
     public List<CommentDTO> getComments(@PathVariable Long adId) {

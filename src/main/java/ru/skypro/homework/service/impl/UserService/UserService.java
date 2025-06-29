@@ -6,5 +6,4 @@ import ru.skypro.homework.repository.UserRepository;
 
 @Service
 public class UserService {
-
 }

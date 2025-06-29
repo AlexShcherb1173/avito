@@ -66,4 +66,5 @@ public class Advertisement {
                 ", imagePath='" + imagePath + '\'' +
                 '}';
     }
+
 }

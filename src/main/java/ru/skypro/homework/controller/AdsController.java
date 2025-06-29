@@ -30,7 +30,6 @@ public class AdsController {
         return new AdDTO();
     }
 
-
     @Operation(summary = "Получение информации об объявлении")
     @GetMapping("/{id}")
     public ExtendedAd getAd(@PathVariable Long id) {

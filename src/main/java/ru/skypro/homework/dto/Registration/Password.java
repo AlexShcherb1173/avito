@@ -17,6 +17,5 @@ public class Password {
     @Schema(description = "Новый пароль",
             example = "newPassword456")
     private String newPassword;
-
 }
 

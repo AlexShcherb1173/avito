@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface AdvertisementRepository extends JpaRepository<Advertisement,Long> {
     List<Advertisement> findByAuthorId(Long authorId);  // Для получения объявлений пользователя
     Optional<Advertisement> findByIdAndAuthorId(Long id, Long authorId); // Для проверки владельца
+
 }

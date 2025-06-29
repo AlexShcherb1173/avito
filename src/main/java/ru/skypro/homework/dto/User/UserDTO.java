@@ -43,5 +43,4 @@ public class UserDTO {
     @Schema(description = "Ссылка на аватар",
             example = "/users/image/123")
     private String image = "";
-
 }

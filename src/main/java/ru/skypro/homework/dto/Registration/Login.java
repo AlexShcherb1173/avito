@@ -16,4 +16,5 @@ public class Login {
     @Schema(description = "Пароль пользователя",
             example = "myPassword123")
     private String password = "";
+
 }

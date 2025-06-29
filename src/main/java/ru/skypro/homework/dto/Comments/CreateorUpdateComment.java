@@ -19,5 +19,6 @@ public class CreateorUpdateComment {
                 minLength = 8,
                 maxLength = 255)
         private String text = "";
+
 }
 

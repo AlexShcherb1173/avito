@@ -30,4 +30,5 @@ public class CreateOrUpdateAd {
     @Schema(description = "Подробное описание",
             maxLength = 1000)
     private String description = "";
+
 }
