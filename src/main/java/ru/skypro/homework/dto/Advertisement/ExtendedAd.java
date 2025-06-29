@@ -1,17 +1,23 @@
 package ru.skypro.homework.dto.Advertisement;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Полная информация об объявлении
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Полная информация об объявлении")
 public class ExtendedAd {
 
     @Schema(description = "ID объявления")
-    private Integer pk = 0;
+    private Long pk ;
 
     @Schema(description = "Имя автора")
     private String authorFirstName = "";

@@ -17,5 +17,5 @@ public class Ads {
     private Integer count = 0;
 
     @Schema(description = "Список объявлений")
-    private List<Ad> results = Collections.emptyList();
+    private List<AdDTO> results = Collections.emptyList();
 }

@@ -1,18 +1,25 @@
 package ru.skypro.homework.dto.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jdk.jshell.Snippet;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.skypro.homework.dto.Role;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Информация о пользователе системы")
 /**
  * Информация о пользователе
  */
-public class User {
+public class UserDTO {
 
     @Schema(description = "ID пользователя")
-    private Integer id = 0;
+    private Long id;
 
     @Schema(description = "Email пользователя")
     private String email = "";
@@ -22,6 +29,9 @@ public class User {
 
     @Schema(description = "Фамилия пользователя")
     private String lastName = "";
+
+    @Schema(description = "Пароль пользователя")
+    public String password = "";
 
     @Schema(description = "Телефон в формате +7XXXYYYZZZZ")
     private String phone = "";

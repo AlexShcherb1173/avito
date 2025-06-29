@@ -1,6 +1,9 @@
 package ru.skypro.homework.dto.Comments;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -9,10 +12,13 @@ import java.time.LocalDateTime;
  */
 @Schema(description = "Информация о комментарии к объявлению")
 @Data
-public class Comment {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CommentDTO {
 
     @Schema(description = "ID автора комментария")
-    private Integer author = 0;
+    private Long author ;
 
     @Schema(description = "Ссылка на аватар автора")
     private String authorImage = "";
@@ -24,8 +30,10 @@ public class Comment {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Schema(description = "ID комментария")
-    private Integer pk = 0;
+    private Long pk ;
 
     @Schema(description = "Текст комментария")
     private String text = "";
+
+
 }

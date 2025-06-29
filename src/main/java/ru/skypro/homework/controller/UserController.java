@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Registration.Password;
 import ru.skypro.homework.dto.Registration.UpdateUser;
-import ru.skypro.homework.dto.User.User;
+import ru.skypro.homework.dto.User.UserDTO;
 
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
@@ -25,15 +25,15 @@ public class UserController {
 
     @Operation(summary = "Получение информации о пользователе")
     @GetMapping("/me")
-    public User getUser() {
-        User emptyUser = new User();
+    public UserDTO getUser() {
+        UserDTO emptyUser = new UserDTO();
         return emptyUser;
     }
 
     @Operation(summary = "Обновление информации о пользователе")
     @PatchMapping("/me")
-    public User updateUser(@RequestBody UpdateUser updateUser) {
-        User emptyUser = new User();
+    public UserDTO updateUser(@RequestBody UpdateUser updateUser) {
+        UserDTO emptyUser = new UserDTO();
         return emptyUser;
     }
 
