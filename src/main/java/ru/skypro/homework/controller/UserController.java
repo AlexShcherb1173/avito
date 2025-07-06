@@ -28,12 +28,11 @@ public class UserController {
      * Обновляет пароль текущего пользователя.
      *
      * @param newPassword - объект с текущим и новым паролем
-     * @return true если пароль успешно обновлен
      */
     @Operation(summary = "Обновление пароля")
     @PostMapping("/set_password")
-    public boolean updatePassword(@RequestBody NewPassword newPassword) {
-        return userService.updatePassword(newPassword);
+    public void updatePassword(@RequestBody NewPassword newPassword) {
+        userService.updatePassword(newPassword);
     }
 
     /**

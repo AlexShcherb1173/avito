@@ -90,15 +90,14 @@ class UserServiceImplTest {
      * Тест успешного обновления пароля пользователя.
      */
     @Test
-    void updatePassword_WithValidPassword_ShouldReturnTrue() {
+    void updatePassword_WithValidPassword_ShouldUpdatePassword() {
         when(securityService.getCurrentUser()).thenReturn(testUser);
         when(passwordEncoder.matches("oldPassword", "encodedPassword")).thenReturn(true);
         when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
         when(userRepository.save(any(UserEntity.class))).thenReturn(testUser);
 
-        boolean result = userService.updatePassword(testNewPassword);
+        userService.updatePassword(testNewPassword);
 
-        assertTrue(result);
         verify(securityService).getCurrentUser();
         verify(passwordEncoder).matches("oldPassword", "encodedPassword");
         verify(passwordEncoder).encode("newPassword");

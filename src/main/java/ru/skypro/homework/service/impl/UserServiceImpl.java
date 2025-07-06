@@ -57,13 +57,12 @@ public class UserServiceImpl implements UserService {
      * обновляет его на новый с применением шифрования.
      *
      * @param newPassword - объект с текущим и новым паролем
-     * @return true если пароль успешно обновлен
      * @throws UserNotFoundException    если текущий пользователь не найден в базе данных
      * @throws InvalidPasswordException если текущий пароль указан неверно
      * @see NewPassword
      */
     @Override
-    public boolean updatePassword(NewPassword newPassword) {
+    public void updatePassword(NewPassword newPassword) {
         UserEntity userEntity = securityService.getCurrentUser();
 
         // Проверяем текущий пароль
@@ -74,8 +73,6 @@ public class UserServiceImpl implements UserService {
         // Обновляем пароль
         userEntity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
         userRepository.save(userEntity);
-        
-        return true;
     }
 
     /**
