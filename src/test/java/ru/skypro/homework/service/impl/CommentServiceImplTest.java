@@ -49,8 +49,8 @@ public class CommentServiceImplTest {
     @InjectMocks
     CommentServiceImpl commentService;
 
-    UserEntity testUser;
-    AdEntity testAd;
+    UserEntity testUserEntity;
+    AdEntity testAdEntity;
     CommentEntity testCommentEntity;
     Comment testCommentDTO;
     Comments testCommentsDTO;
@@ -61,32 +61,32 @@ public class CommentServiceImplTest {
      */
     @BeforeEach
     void setUp() {
-        testUser = new UserEntity();
-        testUser.setId(1);
-        testUser.setFirstName("Antony");
-        testUser.setLastName("Mackey");
-        testUser.setEmail("anmac@example.com");
-        testUser.setPassword("password");
-        testUser.setPhoneNumber("+9876543210");
-        testUser.setRole(Role.USER);
-        testUser.setImagePath("/avatar.jpg");
+        testUserEntity = new UserEntity();
+        testUserEntity.setId(1);
+        testUserEntity.setFirstName("Antony");
+        testUserEntity.setLastName("Mackey");
+        testUserEntity.setEmail("anmac@example.com");
+        testUserEntity.setPassword("password");
+        testUserEntity.setPhoneNumber("+9876543210");
+        testUserEntity.setRole(Role.USER);
+        testUserEntity.setImagePath("/avatar.jpg");
 
-        testAd = new AdEntity();
-        testAd.setId(1);
-        testAd.setAuthor(testUser);
-        testAd.setTitle("Test Ad");
-        testAd.setDescription("Test Ad Description");
-        testAd.setImagePath("/avatar.jpg");
-        testAd.setPrice(10000);
+        testAdEntity = new AdEntity();
+        testAdEntity.setId(1);
+        testAdEntity.setAuthor(testUserEntity);
+        testAdEntity.setTitle("Test Ad");
+        testAdEntity.setDescription("Test Ad Description");
+        testAdEntity.setImagePath("/avatar.jpg");
+        testAdEntity.setPrice(10000);
 
         testCommentEntity = new CommentEntity();
         testCommentEntity.setId(1);
         testCommentEntity.setText("text");
-        testCommentEntity.setAuthor(testUser);
+        testCommentEntity.setAuthor(testUserEntity);
         testCommentEntity.setCreatedAt(LocalDateTime.now());
-        testCommentEntity.setAd(testAd);
+        testCommentEntity.setAd(testAdEntity);
 
-        testAd.setCommentsInAd(Set.of(testCommentEntity));
+        testAdEntity.setCommentsInAd(Set.of(testCommentEntity));
 
         testCommentDTO = new Comment();
         testCommentDTO.setAuthor(testCommentEntity.getAuthor().getId());
@@ -106,11 +106,12 @@ public class CommentServiceImplTest {
      */
     @Test
     void shouldReturnResultOfGetCommentsWhenCommentsExist() {
+        when(adRepository.findById(1)).thenReturn(Optional.of(testAdEntity));
         when(commentRepository.getAmountCommentsByAdID(1))
                 .thenReturn(1);
         when(commentRepository.getListCommentEntityByAdID(1))
                 .thenReturn(List.of(testCommentEntity));
-        when(commentMapper.toCommentDto(testCommentEntity)).thenReturn(testCommentDTO);
+        when(commentMapper.toCommentDto(any(CommentEntity.class))).thenReturn(testCommentDTO);
 
         Comments result = commentService.getComments(1);
 
@@ -143,16 +144,39 @@ public class CommentServiceImplTest {
     @Test
     void shouldReturnResultOfAddCommentWhenCommentWasAdded() {
         when(adRepository.findById(1))
-                .thenReturn(Optional.of(testAd));
+                .thenReturn(Optional.of(testAdEntity));
         when(securityService.getCurrentUser())
-                .thenReturn(testUser);
-        when(commentMapper.toCommentEntity(testCreateOrUpdateComment, testUser, testAd))
+                .thenReturn(testUserEntity);
+        when(commentMapper.toCommentEntity(
+                any(CreateOrUpdateComment.class),
+                any(UserEntity.class),
+                any(AdEntity.class)))
                 .thenReturn(testCommentEntity);
         when(commentRepository.save(any(CommentEntity.class)))
                 .thenReturn(testCommentEntity);
-        when(commentMapper.toCommentDto(testCommentEntity)).thenReturn(testCommentDTO);
+        when(commentMapper.toCommentDto(any(CommentEntity.class))).thenReturn(testCommentDTO);
 
         assertEquals(testCommentDTO, commentService.addComment(1, "text"));
+    }
 
+    @Test
+    void shouldReturnResultOfAddCommentWhenAddDoNotExists() {
+        when(adRepository.findById(2)).thenThrow(AdNotFoundException.class);
+
+        assertThrows(AdNotFoundException.class, () -> adRepository.findById(2));
+    }
+
+    @Test
+    void shouldReturnResultOfDeleteCommentWhenCommentWadDeleted() {
+        when(adRepository.findById(1))
+                .thenReturn(Optional.of(testAdEntity));
+        when(commentRepository.findById(1))
+                .thenReturn(Optional.of(testCommentEntity));
+        when(securityService.isOwnerOfComment(testCommentEntity))
+                .thenReturn(true);
+
+        commentService.deleteComment(1, 1);
+
+        verify(securityService).checkPermissionToDeleteComment(testCommentEntity);
     }
 }
