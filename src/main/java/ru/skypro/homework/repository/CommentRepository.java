@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment,Long> {
-    List<Comment> findByAdvertisementId(Long adId);  // Все комментарии объявления
-    Optional<Comment> findByIdAndAuthorId(Long id, Long authorId); // Для проверки владельца
 
+    List<Comment> findByAd_Id(Long adId);
+    Optional<Comment> findByIdAndAuthor_Id(Long commentId, Long authorId);
 }

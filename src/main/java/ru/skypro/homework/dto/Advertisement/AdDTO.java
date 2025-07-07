@@ -1,6 +1,5 @@
 package ru.skypro.homework.dto.Advertisement;
 import io.swagger.v3.oas.annotations.media.Schema;
-import liquibase.pro.packaged.L;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

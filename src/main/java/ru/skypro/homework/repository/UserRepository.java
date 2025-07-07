@@ -2,13 +2,13 @@ package ru.skypro.homework.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import ru.skypro.homework.entity.User;
+import ru.skypro.homework.entity.UserEntity;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User,Long> {
-    Optional<User> findByEmail(String email);  // Для аутентификации
-    boolean existsByEmail(String email);      // Для проверки при регистрации
+public interface UserRepository extends JpaRepository<UserEntity,Long> {
+    Optional<UserEntity> findByEmail(String email);  // Для аутентификации
 
+    boolean existsByEmail(String username);
 }

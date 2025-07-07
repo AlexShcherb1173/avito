@@ -4,18 +4,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-/**
- * Задание И смена паролЯ
- */
 @Schema(description = "Данные для смены пароля пользователя")
 public class Password {
 
-    @Schema(description = "Текущий пароль",
-            example = "oldPassword123")
+    @Schema(minLength = 8,
+            maxLength = 16,
+            description = "Текущий пароль",
+            example = "password")
     private String currentPassword;
 
-    @Schema(description = "Новый пароль",
-            example = "newPassword456")
+    @Schema(minLength = 8,
+            maxLength = 16,
+            description = "Новый пароль",
+            example = "password1")
     private String newPassword;
 }
 

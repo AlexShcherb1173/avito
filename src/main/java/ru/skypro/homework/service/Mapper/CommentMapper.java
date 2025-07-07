@@ -1,27 +1,21 @@
-package ru.skypro.homework.service.impl.CommentService;
+package ru.skypro.homework.service.Mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.Comments.CommentDTO;
-import ru.skypro.homework.dto.Comments.CreateorUpdateComment;
+import ru.skypro.homework.dto.Comments.CreateOrUpdateComment;
 import ru.skypro.homework.entity.Advertisement;
 import ru.skypro.homework.entity.Comment;
-import ru.skypro.homework.entity.User;
+import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.repository.AdvertisementRepository;
 import ru.skypro.homework.repository.UserRepository;
 
-import javax.persistence.EntityNotFoundException;
-import java.time.LocalDateTime;
-
 @Component
-
+@RequiredArgsConstructor
 public class CommentMapper {
     private final UserRepository userRepository;
     private final AdvertisementRepository adRepository;
 
-    public CommentMapper(UserRepository userRepository, AdvertisementRepository adRepository) {
-        this.userRepository = userRepository;
-        this.adRepository = adRepository;
-    }
 
     public CommentDTO toDto(Comment comment) {
         return CommentDTO.builder()
@@ -34,11 +28,11 @@ public class CommentMapper {
                 .build();
     }
 
-    public Comment toEntity(CreateorUpdateComment dto, User author, Advertisement ad) {
+    public Comment toEntity(CreateOrUpdateComment dto, UserEntity author, Advertisement ad) {
         return Comment.builder()
                 .author(author)
                 .ad(ad)
-                .createdAt(LocalDateTime.now())
+                .createdAt(System.currentTimeMillis())
                 .text(dto.getText())
                 .build();
     }

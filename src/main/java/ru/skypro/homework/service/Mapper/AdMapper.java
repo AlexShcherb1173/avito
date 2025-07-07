@@ -1,4 +1,4 @@
-package ru.skypro.homework.service.impl.AdvertisementService;
+package ru.skypro.homework.service.Mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -6,9 +6,7 @@ import ru.skypro.homework.dto.Advertisement.AdDTO;
 import ru.skypro.homework.dto.Advertisement.CreateOrUpdateAd;
 import ru.skypro.homework.dto.Advertisement.ExtendedAd;
 import ru.skypro.homework.entity.Advertisement;
-import ru.skypro.homework.entity.User;
-import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.service.impl.UserService.UserMapper;
+import ru.skypro.homework.entity.UserEntity;
 
 @Component
 @RequiredArgsConstructor
@@ -42,7 +40,7 @@ public class AdMapper {
     }
 
     // CreateOrUpdateAd → Advertisement (для создания/обновления)
-    public Advertisement toAdvertisement(CreateOrUpdateAd dto, User author) {
+    public Advertisement toAdvertisement(CreateOrUpdateAd dto, UserEntity author) {
         return Advertisement.builder()
                 .title(dto.getTitle())
                 .description(dto.getDescription())

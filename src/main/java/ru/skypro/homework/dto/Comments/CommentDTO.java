@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * Информация о комментарии
- */
+
 @Schema(description = "Информация о комментарии к объявлению")
 @Data
 @Builder
@@ -21,18 +19,18 @@ public class CommentDTO {
     private Long author ;
 
     @Schema(description = "Ссылка на аватар автора")
-    private String authorImage = "";
+    private String authorImage;
 
     @Schema(description = "Имя автора")
-    private String authorFirstName = "";
+    private String authorFirstName;
 
     @Schema(description = "Дата и время создания")
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private long createdAt ;
 
     @Schema(description = "ID комментария")
     private Long pk ;
 
     @Schema(description = "Текст комментария")
-    private String text = "";
+    private String text ;
 
 }

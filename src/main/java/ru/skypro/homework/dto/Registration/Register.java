@@ -5,9 +5,6 @@ import lombok.Data;
 import ru.skypro.homework.dto.Role;
 
 @Data
-/**
- * Данные для регистрации нового пользователя
- */
 public class Register {
 
     @Schema(description = "Email пользователя",
@@ -15,7 +12,7 @@ public class Register {
     private String username = "";
 
     @Schema(description = "Пароль пользователя",
-            example = "myPassword123",
+            example = "password",
             minLength = 8)
     private String password = "";
 

@@ -6,9 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Полная информация об объявлении
- */
+
 @Data
 @Builder
 @NoArgsConstructor

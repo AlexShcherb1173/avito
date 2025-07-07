@@ -6,14 +6,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Comments.CommentDTO;
 import ru.skypro.homework.dto.Advertisement.CreateOrUpdateAd;
-import ru.skypro.homework.dto.Comments.CreateorUpdateComment;
+import ru.skypro.homework.dto.Comments.CreateOrUpdateComment;
 
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Контроллер для работы с комментариями
- */
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @Tag(name = "Комментарии")
@@ -29,7 +26,7 @@ public class CommentsController {
     @Operation(summary = "Добавление комментария")
     @PostMapping
     public CommentDTO addComment(@PathVariable Long adId,
-                                 @RequestBody CreateOrUpdateAd comment) {
+                                 @RequestBody CreateOrUpdateComment comment) {
         return new CommentDTO();
     }
 
@@ -44,7 +41,7 @@ public class CommentsController {
     @PatchMapping("/{commentId}")
     public CommentDTO updateComment(@PathVariable Long adId,
                                     @PathVariable Long commentId,
-                                    @RequestBody CreateorUpdateComment comment) {
+                                    @RequestBody CreateOrUpdateComment comment) {
         return new CommentDTO();
     }
 }

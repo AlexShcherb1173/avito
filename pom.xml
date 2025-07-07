@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.15</version>
+    <version>3.4.5</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -64,8 +64,8 @@
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
-      <artifactId>springdoc-openapi-ui</artifactId>
-      <version>1.7.0</version>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>2.5.0</version>
     </dependency>
     <!-- PostgreSQL -->
     <dependency>
@@ -89,6 +89,11 @@
       <artifactId>mapstruct-processor</artifactId>
       <version>1.5.5.Final</version>
       <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>8.0.1.Final</version>
     </dependency>
   </dependencies>
   <build>
