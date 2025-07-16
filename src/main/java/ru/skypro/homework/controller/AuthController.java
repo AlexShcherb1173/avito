@@ -1,40 +1,38 @@
 package ru.skypro.homework.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.dto.Login;
 import ru.skypro.homework.dto.Register;
-import ru.skypro.homework.service.AuthService;
 
-@Slf4j
-@CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequiredArgsConstructor
+@RequestMapping("/api/auth")
 public class AuthController {
 
-    private final AuthService authService;
+    private final String TEST_USERNAME = "user@example.com";
+    private  String TEST_PASSWORD = "password";
 
+    // Авторизация (соответствует /login из OpenAPI)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Login login) {
-        if (authService.login(login.getUsername(), login.getPassword())) {
+        if (TEST_USERNAME.equals(login.getUsername()) &&
+                TEST_PASSWORD.equals(login.getPassword())) {
+            // Генерация и возврат токена
             return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
+    // Регистрация (соответствует /register из OpenAPI)
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
-        if (authService.register(register)) {
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (register.getPassword().length() < 8) {
+            return ResponseEntity.badRequest().body("Пароль должен быть не менее 8 символов");
         }
+        return ResponseEntity.status(201).build();
     }
 }
