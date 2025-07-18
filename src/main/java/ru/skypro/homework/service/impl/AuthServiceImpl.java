@@ -1,47 +1,51 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.entity.Users;
+import ru.skypro.homework.repository.UsersRepository;
 import ru.skypro.homework.service.AuthService;
 
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager manager;
-    private final PasswordEncoder encoder;
-
-    public AuthServiceImpl(UserDetailsManager manager,
-                           PasswordEncoder passwordEncoder) {
-        this.manager = manager;
-        this.encoder = passwordEncoder;
-    }
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
-            return false;
+    public boolean authenticate(String username, String password) {
+        try {
+            Optional<Users> user = usersRepository.findByEmail(username);
+            if (user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())) {
+                return true;
+            }
+        } catch (UsernameNotFoundException ex) {
+            System.out.println(ex.getMessage());
         }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        return encoder.matches(password, userDetails.getPassword());
+        return false;
     }
 
     @Override
     public boolean register(Register register) {
-        if (manager.userExists(register.getUsername())) {
-            return false;
+        if (usersRepository.existsByEmail(register.getEmail())) {
+            return false; // Такой пользователь уже существует
         }
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
-                        .username(register.getUsername())
-                        .roles(register.getRole().name())
-                        .build());
+
+        Users user = new Users();
+        user.setEmail(register.getEmail());
+        user.setPassword(passwordEncoder.encode(register.getPassword()));
+        user.setFirstName(register.getFirstName());
+        user.setLastName(register.getLastName());
+        user.setPhone(register.getPhone());
+        user.setRole(register.getRole());
+
+        usersRepository.save(user);
         return true;
     }
-
 }

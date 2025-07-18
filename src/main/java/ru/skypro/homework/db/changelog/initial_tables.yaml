@@ -1,0 +1,176 @@
+databaseChangeLog:
+  # 1. Сначала создаем таблицу image (без внешних зависимостей)
+  - changeSet:
+      id: 1
+      author: skypro
+      changes:
+        - createTable:
+            tableName: image
+            columns:
+              - column:
+                  name: image_id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: data
+                  type: oid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: media_type
+                  type: varchar(50)
+
+  # 2. Создаем таблицу users (пока без image_id)
+  - changeSet:
+      id: 2
+      author: skypro
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: varchar(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: role
+                  type: varchar(5)
+                  constraints:
+                    nullable: false
+
+  # 3. Добавляем image_id в users после создания обеих таблиц
+  - changeSet:
+      id: 3
+      author: skypro
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: image_id
+                  type: integer
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_users_image
+                    referencedTableName: image
+                    referencedColumnNames: image_id
+
+  # 4. Создаем таблицу ads
+  - changeSet:
+      id: 4
+      author: skypro
+      changes:
+        - createTable:
+            tableName: ads
+            columns:
+              - column:
+                  name: ad_id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    references: users(id)
+                    foreignKeyName: fk_ads_author
+              - column:
+                  name: title
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image_id
+                  type: integer
+                  constraints:
+                    nullable: true
+                    foreignKeyName: fk_ads_image
+                    referencedTableName: image
+                    referencedColumnNames: image_id
+        - sql:
+            sql: "ALTER TABLE ads ADD CONSTRAINT chk_ads_price CHECK (price >= 0 AND price <= 10000000)"
+
+  # 5. Создаем таблицу comments
+  - changeSet:
+      id: 5
+      author: skypro
+      changes:
+        - createTable:
+            tableName: comments
+            columns:
+              - column:
+                  name: comment_id
+                  type: serial
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    references: users(id)
+                    foreignKeyName: fk_comments_author
+              - column:
+                  name: ad_id
+                  type: integer
+                  constraints:
+                    nullable: false
+                    references: ads(ad_id)
+                    foreignKeyName: fk_comments_ad
+              - column:
+                  name: text
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
