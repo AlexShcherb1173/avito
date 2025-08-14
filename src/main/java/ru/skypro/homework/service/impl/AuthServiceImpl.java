@@ -1,47 +1,56 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.entity.Users;
+import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.repository.UsersRepository;
 import ru.skypro.homework.service.AuthService;
 
+import java.util.Optional;
+
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-
-    private final UserDetailsManager manager;
-    private final PasswordEncoder encoder;
-
-    public AuthServiceImpl(UserDetailsManager manager,
-                           PasswordEncoder passwordEncoder) {
-        this.manager = manager;
-        this.encoder = passwordEncoder;
-    }
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Override
-    public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
-            return false;
+    public boolean login(String username, String password) {
+        log.info("Attempting authentication for user: {}", username);
+        Optional<Users> user = usersRepository.findByEmail(username);
+        if (user.isPresent() && passwordEncoder.matches(password, user.get().getPassword())) {
+            log.info("Authentication successful for user: {}", username);
+            return true;
         }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        return encoder.matches(password, userDetails.getPassword());
+        log.warn("Authentication failed for user: {}", username);
+        return false;
     }
 
     @Override
     public boolean register(Register register) {
-        if (manager.userExists(register.getUsername())) {
+        log.info("Registration attempt for user: {}", register.getUsername());
+
+        if (usersRepository.existsByEmail(register.getUsername())) {
+            log.warn("Registration failed - user already exists: {}", register.getUsername());
             return false;
         }
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
-                        .username(register.getUsername())
-                        .roles(register.getRole().name())
-                        .build());
-        return true;
-    }
 
+        try {
+            Users user = userMapper.registerToUser(register);
+            user.setPassword(passwordEncoder.encode(register.getPassword()));
+            usersRepository.save(user);
+            log.info("User registered successfully: {}", register.getUsername());
+            return true;
+        } catch (Exception e) {
+            log.error("Registration error for user: {}", register.getUsername(), e);
+            return false;
+        }
+    }
 }

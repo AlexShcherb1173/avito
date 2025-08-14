@@ -1,62 +1,72 @@
 package ru.skypro.homework.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import ru.skypro.homework.dto.Role;
+
+import javax.sql.DataSource;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+@Slf4j
 @Configuration
+@EnableMethodSecurity
 public class WebSecurityConfig {
-
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
-            "/v3/api-docs",
+            "/v3/api-docs/**",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/ads/image/**",
+            "/users/image/**",
+            "/image/**",
+            "/images/**",
+            "/error"
     };
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user =
-                User.builder()
-                        .username("user@gmail.com")
-                        .password("password")
-                        .passwordEncoder(passwordEncoder::encode)
-                        .roles(Role.USER.name())
-                        .build();
-        return new InMemoryUserDetailsManager(user);
+    private final DataSource dataSource;
+
+    public WebSecurityConfig(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .authorizeHttpRequests(
-                        authorization ->
-                                authorization
-                                        .mvcMatchers(AUTH_WHITELIST)
-                                        .permitAll()
-                                        .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated())
-                .cors()
-                .and()
-                .httpBasic(withDefaults());
-        return http.build();
+        return http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers("/users/**").authenticated()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/ads/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+                .cors(withDefaults())
+                .httpBasic(withDefaults())
+                .build();
+    }
+
+    @Bean
+    public JdbcUserDetailsManager jdbcUserDetailsManager(PasswordEncoder passwordEncoder) {
+        JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
+        manager.setUsersByUsernameQuery(
+                "SELECT email as username, password, true as enabled FROM users WHERE email = ?");
+        manager.setAuthoritiesByUsernameQuery(
+                "SELECT email as username, 'ROLE_' || role as authority FROM users WHERE email = ?");
+        return manager;
+
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(12);
     }
-
 }
