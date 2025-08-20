@@ -20,6 +20,7 @@ import ru.skypro.homework.service.impl.CommentService;
 
 import java.awt.*;
 import java.io.IOException;
+
 @Slf4j
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
@@ -421,7 +422,6 @@ public class AdsController {
         adService.updateAdImage(id, image);
         return ResponseEntity.ok().build();
     }
-
 
 
 }
