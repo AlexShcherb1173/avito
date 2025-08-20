@@ -31,3 +31,13 @@ build/
 
 ### VS Code ###
 .vscode/
+
+.gradle/
+.mvn/
+gradle/
+build.gradle
+gradlew
+gradlew.bat
+settings.gradle
+
+.env

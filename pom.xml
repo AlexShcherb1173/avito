@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.7.15</version>
+    <version>3.5.4</version>
     <relativePath/> <!-- lookup parent from repository -->
   </parent>
 
@@ -19,7 +19,7 @@
   <description>Application for managing ads</description>
 
   <properties>
-    <java.version>11</java.version>
+    <java.version>21</java.version>
   </properties>
 
   <dependencies>
@@ -48,6 +48,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>me.paulschwarz</groupId>
+      <artifactId>spring-dotenv</artifactId>
+      <version>4.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <optional>true</optional>
@@ -61,6 +66,30 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
+      <version>4.33.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.validation</groupId>
+      <artifactId>jakarta.validation-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-ui</artifactId>
+      <version>1.8.0</version>
     </dependency>
   </dependencies>
 
@@ -76,6 +105,16 @@
               <artifactId>lombok</artifactId>
             </exclude>
           </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.liquibase.maven.plugins</groupId>
+        <artifactId>liquibase-maven-plugin</artifactId>
+        <version>4.33.0</version>
+        <configuration>
+          <changeLogFile>src/main/resources/db/db.changelog-master.xml</changeLogFile>
+          <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+          <contexts>development,production</contexts>
         </configuration>
       </plugin>
     </plugins>
