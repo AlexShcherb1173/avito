@@ -8,8 +8,10 @@ import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -35,6 +37,19 @@ public class UserEntity implements UserDetails {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "IMAGE_ID")
     private ImageEntity image;
+
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserEntity)) return false;
+        UserEntity userEntity = (UserEntity) o;
+        return Objects.equals(getUsername(), userEntity.getUsername())
+                && Objects.equals(getFirstName(), userEntity.getFirstName())
+                && Objects.equals(getLastName(), userEntity.getLastName())
+                && Objects.equals(getPhone(), userEntity.getPhone());
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

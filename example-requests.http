@@ -1,4 +1,10 @@
-GET http://localhost:8080/ads/1/comments
+###
+GET http://localhost:8080/get
+Content-Type: application/json
+Authorization: Basic user@gmail.com password
+
+###
+GET http://localhost:8080/ads/asddsfsdf/comment
 Content-Type: application/json
 Authorization: Basic user@gmail.com password
 
@@ -7,8 +13,11 @@ POST http://localhost:8080/login
 Content-Type: application/json
 
 {
-  "username": "user@gmail.com",
-  "password": "password"
+   "username": "user@gmail.com",
+   "password": "password",
+   "firstName":  " asdad",
+   "lastName": " asdad",
+   "phone":  " asdad"
 }
 
 ###
@@ -16,12 +25,8 @@ POST http://localhost:8080/register
 Content-Type: application/json
 
 {
-  "username": "user@gmail.com",
-  "password": "password",
-  "firstName": " asdad",
-  "lastName": " asdad",
-  "phone": " asdad",
-  "role": "USER"
+  "username": "user12",
+  "password": "password1"
 }
 
 ###
@@ -42,13 +47,21 @@ Authorization: Basic user@gmail.com password
 {
   "phone": "33333",
   "lastName": "Ivanov",
-  "firstName": "Ivan"
+  "firstName": "Ivan",
+  "email": "user",
+  "id": 1
 }
+
+###
+GET http://localhost:8080/users/1
+Content-Type: application/json
+Authorization: Basic user@gmail.com password
 
 ###
 GET http://localhost:8080/ads
 Content-Type: application/json
 Authorization: Basic user@gmail.com password
+
 
 ###
 POST http://localhost:8080/users/set_password
@@ -66,8 +79,17 @@ Content-Type: application/json
 Authorization: Basic user@gmail.com password
 
 {
+  "image": "123",
   "price": 123,
   "description": "123",
+  "pk": 1233,
   "title": "123"
 }
+
+###
+GET http://localhost:8080/ads
+Content-Type: application/json
+Authorization: Basic user@gmail.com password
+
+
 

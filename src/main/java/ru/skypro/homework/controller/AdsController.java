@@ -9,28 +9,32 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.service.impl.AdService;
-import ru.skypro.homework.service.impl.CommentService;
+import ru.skypro.homework.entity.ImageEntity;
+import ru.skypro.homework.service.impl.AdServiceImpl;
+import ru.skypro.homework.service.impl.CommentServiceImpl;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
 
 @Slf4j
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
 @RequestMapping("ads")
 public class AdsController {
-    private final AdService adService;
-    private final CommentService commentService;
+    private final AdServiceImpl adService;
+    private final CommentServiceImpl commentService;
 
-    public AdsController(AdService adService, CommentService commentService) {
+    public AdsController(AdServiceImpl adService, CommentServiceImpl commentService) {
         this.adService = adService;
         this.commentService = commentService;
     }
@@ -80,7 +84,6 @@ public class AdsController {
         return adService.addAd(properties, image);
     }
 
-
     @Operation(summary = "Получить комментарии объявления",
             tags = "Комментарии",
             parameters = {
@@ -112,8 +115,6 @@ public class AdsController {
     @GetMapping("{id}/comments")
     public CommentsDto getComments(@PathVariable Integer id) {
         return commentService.getComments(id);
-
-
     }
 
     @Operation(summary = "Добавить комментарий к объявлению",
@@ -221,6 +222,7 @@ public class AdsController {
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeAd(@PathVariable Integer id) {
+        adService.hasAdAccess(id);
         adService.removeAd(id);
     }
 
@@ -261,6 +263,7 @@ public class AdsController {
     @PatchMapping("{id}")
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public AdDto updateAds(@PathVariable Integer id, @RequestBody CreateOrUpdateAdDto createAdsDto) {
+        adService.hasAdAccess(id);
         return adService.updateDto(id, createAdsDto);
     }
 
@@ -300,8 +303,12 @@ public class AdsController {
             })
     @DeleteMapping("{adId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@PathVariable Integer adId, @PathVariable Integer commentId) {
-        commentService.deleteComment(commentId);
+    public boolean deleteComment(@PathVariable Integer adId, @PathVariable Integer commentId) {
+        if (commentService.hasCommentAccess(commentId)) {
+            commentService.deleteComment(commentId);
+            return true;
+        }
+        return false;
     }
 
     @Operation(summary = "Обновить комментарий",
@@ -351,7 +358,9 @@ public class AdsController {
     @PatchMapping("{adId}/comments/{commentId}")
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public CommentDto updateComment(@PathVariable Integer adId, @PathVariable Integer commentId, @RequestBody CommentDto commentDto) {
-        return commentService.updateComment(commentId, commentDto);
+        if (commentService.hasCommentAccess(commentId))
+            return commentService.updateComment(commentId, commentDto);
+        return commentDto;
     }
 
     @Operation(summary = "Получить объявления авторизованного пользователя",
@@ -373,6 +382,7 @@ public class AdsController {
     @GetMapping("me")
     public AdsDto getAdsMe() {
         return adService.getAdsMe();
+
     }
 
     @Operation(summary = "Обновить картинку объявления",
@@ -413,20 +423,27 @@ public class AdsController {
                             description = "Not found"
                     )
             })
-
-    @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "{id}/image", produces = {MediaType.IMAGE_PNG_VALUE,
+            MediaType.IMAGE_JPEG_VALUE,
+            MediaType.IMAGE_GIF_VALUE, "image/*"})
 
     public Map<Integer, ArrayList<byte[]>> updateImage(@PathVariable Integer id, @RequestParam MultipartFile image) throws IOException {
         adService.updateAdImage(id, image);
         return new HashMap<>();
     }
 
-    @GetMapping(value = "/image/{id}/from-db", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping(value = "/image/{id}/from-db", produces = {MediaType.IMAGE_PNG_VALUE,
+            MediaType.IMAGE_JPEG_VALUE,
+            MediaType.IMAGE_GIF_VALUE, "image/*"})
     public Map<Integer, ArrayList<byte[]>> getAdImage(@PathVariable Integer id) {
-        adService.getAdImage(id);
-        return new HashMap<>();
+
+        ImageEntity image = adService.getAdImage(id);
+        AtomicReference<HttpHeaders> headers = new AtomicReference<>(new HttpHeaders());
+        headers.get().setContentType(MediaType.parseMediaType(image.getMediaType()));
+        headers.get().setContentLength(image.getData().length);
+        return Map.of();
+
     }
-
-
 }
+
 

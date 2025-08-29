@@ -20,8 +20,10 @@ public class CommentEntity {
     private String text;
     @JoinColumn(name = "USER_ID")
     @ManyToOne(fetch = FetchType.EAGER)
+
     private UserEntity user;
     @JoinColumn(name = "AD_ID")
     @ManyToOne(fetch = FetchType.LAZY)
+
     private AdEntity ad;
 }

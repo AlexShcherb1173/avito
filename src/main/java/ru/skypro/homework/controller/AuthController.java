@@ -25,9 +25,7 @@ import static ru.skypro.homework.dto.Role.USER;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
-
 
     @Operation(summary = "Авторизация пользователя",
             tags = "Авторизация",

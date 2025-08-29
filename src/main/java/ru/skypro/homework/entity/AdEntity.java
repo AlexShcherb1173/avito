@@ -23,7 +23,9 @@ public class AdEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID")
     private UserEntity user;
+
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "IMAGE_ID")
+
     private ImageEntity image;
 }
