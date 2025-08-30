@@ -1,46 +1,52 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
+import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
+import ru.skypro.homework.dto.ExtendedAd;
 
 @RestController
 @RequestMapping("/ads")
+@Tag(name = "Объявления", description = "CRUD операции для объявлений")
 public class AdController {
 
     @GetMapping
-    public ResponseEntity<?> getAllAds() {
-        // TODO: return service.getAllAds()
-        return ResponseEntity.ok().build();
+    @Operation(summary = "Получение всех объявлений")
+    public ResponseEntity<Ads> getAllAds() {
+        return ResponseEntity.ok(new Ads());
     }
 
     @PostMapping
-    public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd adDto,
-                                    @RequestPart("image") MultipartFile image) {
-        // TODO: return service.addAd(adDto, image)
+    @Operation(summary = "Добавление объявления")
+    public ResponseEntity<Ad> addAd() {
         return ResponseEntity.status(201).body(new Ad());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getAd(@PathVariable Integer id) {
-        return ResponseEntity.ok(new Ad());
+    @Operation(summary = "Получение информации об объявлении")
+    public ResponseEntity<ExtendedAd> getAd(@PathVariable Integer id) {
+        return ResponseEntity.ok(new ExtendedAd());
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Удаление объявления")
     public ResponseEntity<Void> removeAd(@PathVariable Integer id) {
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Ad> updateAd(@PathVariable Integer id,
-                                       @RequestBody CreateOrUpdateAd adDto) {
+    @Operation(summary = "Обновление информации об объявлении")
+    public ResponseEntity<Ad> updateAd(@PathVariable Integer id, @RequestBody CreateOrUpdateAd ad) {
         return ResponseEntity.ok(new Ad());
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> getAdsMe() {
-        return ResponseEntity.ok().build();
+    @Operation(summary = "Получение объявлений авторизованного пользователя")
+    public ResponseEntity<Ads> getMyAds() {
+        return ResponseEntity.ok(new Ads());
     }
 }

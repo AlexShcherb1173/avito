@@ -1,37 +1,39 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 
 @RestController
 @RequestMapping("/users")
+@Tag(name = "Пользователи", description = "Управление пользователями")
 public class UserController {
 
     @PostMapping("/set_password")
+    @Operation(summary = "Обновление пароля")
     public ResponseEntity<Void> setPassword(@RequestBody NewPassword newPassword) {
-        // TODO: service.setPassword(newPassword)
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
+    @Operation(summary = "Получение информации об авторизованном пользователе")
     public ResponseEntity<User> getUser() {
-        // TODO: return service.getCurrentUser()
         return ResponseEntity.ok(new User());
     }
 
     @PatchMapping("/me")
+    @Operation(summary = "Обновление информации об авторизованном пользователе")
     public ResponseEntity<UpdateUser> updateUser(@RequestBody UpdateUser updateUser) {
-        // TODO: return service.updateUser(updateUser)
         return ResponseEntity.ok(updateUser);
     }
 
     @PatchMapping("/me/image")
-    public ResponseEntity<Void> updateUserImage(@RequestParam MultipartFile image) {
-        // TODO: service.updateUserImage(image)
+    @Operation(summary = "Обновление аватара авторизованного пользователя")
+    public ResponseEntity<Void> updateUserImage() {
         return ResponseEntity.ok().build();
     }
 }
