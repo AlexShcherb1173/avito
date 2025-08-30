@@ -1,0 +1,37 @@
+package ru.skypro.homework.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.NewPassword;
+import ru.skypro.homework.dto.UpdateUser;
+import ru.skypro.homework.dto.User;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    @PostMapping("/set_password")
+    public ResponseEntity<Void> setPassword(@RequestBody NewPassword newPassword) {
+        // TODO: service.setPassword(newPassword)
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<User> getUser() {
+        // TODO: return service.getCurrentUser()
+        return ResponseEntity.ok(new User());
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<UpdateUser> updateUser(@RequestBody UpdateUser updateUser) {
+        // TODO: return service.updateUser(updateUser)
+        return ResponseEntity.ok(updateUser);
+    }
+
+    @PatchMapping("/me/image")
+    public ResponseEntity<Void> updateUserImage(@RequestParam MultipartFile image) {
+        // TODO: service.updateUserImage(image)
+        return ResponseEntity.ok().build();
+    }
+}
