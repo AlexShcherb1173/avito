@@ -16,6 +16,8 @@ import ru.skypro.homework.responseDto.CommentDto;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,8 +30,29 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public AdDto createAd(User user, CreateOrUpdateAd dto, MultipartFile image) {
-        // TODO: реализовать
-        return null;
+        // Создаём новое объявление
+        Ad ad = new Ad();
+        ad.setTitle(dto.getTitle());
+        ad.setPrice(dto.getPrice());
+        ad.setDescription(dto.getDescription());
+        ad.setAuthor(user);
+        ad.setCreatedAt(LocalDateTime.now());
+
+        // Сохраняем изображение
+        if (image != null && !image.isEmpty()) {
+            try {
+                String filename = imageService.saveImage(image, "ads");
+                ad.setImage("/images/ads/" + filename);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to save image", e);
+            }
+        }
+
+        // Сохраняем в БД
+        Ad saved = adRepository.save(ad);
+
+        // Конвертируем в DTO
+        return convertToAdDto(saved);
     }
 
     @Override

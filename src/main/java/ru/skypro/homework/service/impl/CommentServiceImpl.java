@@ -1,15 +1,22 @@
 package ru.skypro.homework.service.impl;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
+import ru.skypro.homework.model.User;
+import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.CommentDto;
 import ru.skypro.homework.responseDto.CommentsResponse;
 import ru.skypro.homework.service.CommentService;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,17 +24,38 @@ import java.util.stream.Collectors;
 public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
-
+private final AdRepository adRepository;
+private final UserRepository userRepository;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, AdRepository adRepository, UserRepository userRepository) {
         this.commentRepository = commentRepository;
+        this.adRepository = adRepository;
+        this.userRepository = userRepository;
         }
 
     @Override
     public CommentDto addComment(Long adId, Long userId, CreateOrUpdateComment dto) {
-        // TODO: реализовать
-        return null;
+        // 1. Находим объявление
+        Ad ad = adRepository.findById(adId)
+                .orElseThrow(() -> new EntityNotFoundException("Ad not found"));
+
+        // 2. Находим автора комментария
+        User author = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        // 3. Создаём комментарий
+        Comment comment = new Comment();
+        comment.setAd(ad);
+        comment.setAuthor(author);
+        comment.setText(dto.getText());
+        comment.setCreatedAt(LocalDateTime.now());
+
+        // 4. Сохраняем в БД
+        Comment saved = commentRepository.save(comment);
+
+        // 5. Конвертируем в DTO и возвращаем
+        return convertToCommentDto(saved);
     }
 
     @Override
@@ -54,11 +82,10 @@ public class CommentServiceImpl implements CommentService {
         CommentDto dto = new CommentDto();
         dto.setPk(Math.toIntExact(comment.getId()));
         dto.setAuthor(Math.toIntExact(comment.getAuthor().getId()));
+        dto.setAuthorImage("/images/users/" + comment.getAuthor().getImage()); // если есть
         dto.setAuthorFirstName(comment.getAuthor().getFirstName());
-        dto.setAuthorImage(comment.getAuthor().getImage()); // например: "/images/users/1.jpg"
+        dto.setCreatedAt(comment.getCreatedAt().atZone(ZoneId.systemDefault()).toEpochSecond());
         dto.setText(comment.getText());
-        // createdAt — в миллисекундах с 1970 года
-        dto.setCreatedAt(comment.getCreatedAt().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli());
         return dto;
     }
 }

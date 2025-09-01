@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ import ru.skypro.homework.service.AuthService;
 
 @Slf4j
 @RestController
-
+@AllArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
@@ -32,14 +33,14 @@ public class AuthController {
     private final JwtTokenUtil jwtTokenUtil;
     private final UserDetailsService userDetailsService;
 
-    public AuthController(AuthService authService,
-                          AuthenticationManager authenticationManager,
-                          JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService) {
-        this.authService = authService;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.userDetailsService = userDetailsService;
-    }
+//    public AuthController(AuthService authService,
+//                          AuthenticationManager authenticationManager,
+//                          JwtTokenUtil jwtTokenUtil, UserDetailsService userDetailsService) {
+//        this.authService = authService;
+//        this.authenticationManager = authenticationManager;
+//        this.jwtTokenUtil = jwtTokenUtil;
+//        this.userDetailsService = userDetailsService;
+//    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Login login) {

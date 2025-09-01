@@ -6,16 +6,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.model.User;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 
@@ -25,6 +28,7 @@ import java.io.IOException;
 public class AdController {
 
     private final AdService adService;
+    private final UserRepository userRepository;
 
     // Получение всех объявлений
     @GetMapping
@@ -43,22 +47,28 @@ public class AdController {
     public ResponseEntity<?> addAd(
             @RequestPart("properties") @Valid CreateOrUpdateAd adDto,
             @RequestPart("image") MultipartFile image,
-            @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        // 🔍 Добавьте эти строки в начало метода
-        System.out.println("👤 User в контроллере: " + user);
-        if (user == null) {
+        // 🔍 Проверяем, что пользователь аутентифицирован
+        System.out.println("👤 UserDetails в контроллере: " + userDetails);
+        if (userDetails == null) {
             System.out.println("❌ Ошибка: пользователь не аутентифицирован. Проверьте токен в Authorization");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
             System.out.println("✅ Начало создания объявления");
-            System.out.println("👤 Автор: " + user.getUsername());
+            System.out.println("👤 Автор: " + userDetails.getUsername());
             System.out.println("📝 DTO получено: " + adDto);
-            System.out.println("🖼 Изображение: " + image.getOriginalFilename());
+            System.out.println("🖼 Изображение: " + image.getOriginalFilename() + " (" + image.getSize() + " bytes)");
 
-            AdDto ad = adService.createAd(user, adDto, image);
+            // ✅ Получаем сущность User из БД по username
+            String username = userDetails.getUsername();
+            User dbUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found in database"));
+
+            // ✅ Передаём dbUser в сервис
+            AdDto ad = adService.createAd(dbUser, adDto, image);
 
             System.out.println("✅ Объявление успешно создано, ID: " + ad.getPk());
             return new ResponseEntity<>(ad, HttpStatus.CREATED);

@@ -1,5 +1,6 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,11 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
     @Service
+    @AllArgsConstructor
     public class UserDetailsServiceImpl implements UserDetailsService {
 
-        @Autowired
+//        @Autowired
         private UserRepository userRepository;
-        @Autowired
+//        @Autowired
         private PasswordEncoder passwordEncoder;
 
         @Override
