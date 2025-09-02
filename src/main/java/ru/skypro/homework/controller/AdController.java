@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.Ad;
+import ru.skypro.homework.dto.AdDto;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
@@ -22,8 +22,8 @@ public class AdController {
 
     @PostMapping
     @Operation(summary = "Добавление объявления")
-    public ResponseEntity<Ad> addAd() {
-        return ResponseEntity.status(201).body(new Ad());
+    public ResponseEntity<AdDto> addAd() {
+        return ResponseEntity.status(201).body(new AdDto());
     }
 
     @GetMapping("/{id}")
@@ -40,8 +40,8 @@ public class AdController {
 
     @PatchMapping("/{id}")
     @Operation(summary = "Обновление информации об объявлении")
-    public ResponseEntity<Ad> updateAd(@PathVariable Integer id, @RequestBody CreateOrUpdateAd ad) {
-        return ResponseEntity.ok(new Ad());
+    public ResponseEntity<AdDto> updateAd(@PathVariable Integer id, @RequestBody CreateOrUpdateAd ad) {
+        return ResponseEntity.ok(new AdDto());
     }
 
     @GetMapping("/me")
