@@ -1,5 +1,7 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 
 import org.springframework.core.io.Resource;
@@ -10,9 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.service.impl.ImageService;
 
-// ImageController.java
-// ImageController.java
 @RestController
+@Tag(name = "Images", description = "API для отдачи изображений объявлений и пользователей")
 public class ImageController {
 
     private final ImageService imageService;
@@ -21,7 +22,10 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    // GET /images/ads/filename.jpg
+    @Operation(
+            summary = "Получение изображения объявления",
+            description = "Возвращает изображение по имени файла."
+    )
     @GetMapping("/images/ads/{filename:.+}")
     public ResponseEntity<Resource> getAdImage(@PathVariable String filename) {
         try {
@@ -34,7 +38,10 @@ public class ImageController {
         }
     }
 
-    // GET /images/users/{filename}
+    @Operation(
+            summary = "Получение аватара пользователя",
+            description = "Возвращает изображение профиля пользователя."
+    )
     @GetMapping("/images/users/{filename:.+}")
     public ResponseEntity<Resource> getUserImage(@PathVariable String filename) {
         try {
