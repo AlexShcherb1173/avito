@@ -14,6 +14,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByAdId(Long adId);
 
     // Дополнительно: найти комментарий по ID объявления и ID комментария
-    // (полезно для проверки принадлежности при удалении)
-     List<Comment> findByAdIdAndId(Long adId, Long commentId);
+    List<Comment> findByAdIdAndId(Long adId, Long commentId);
 }

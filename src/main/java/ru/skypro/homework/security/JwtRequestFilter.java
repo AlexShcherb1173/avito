@@ -22,63 +22,58 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-
     private final UserDetailsService userDetailsService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    // JwtRequestFilter.java
-    // JwtRequestFilter.java
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
         final String authorizationHeader = request.getHeader("Authorization");
 
-        // 🔥 Ключевая проверка: если нет Bearer — пропускаем дальше
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            logger.debug("❌ Отсутствует Authorization header или не начинается с Bearer");
-            logger.debug("📨 Заголовки запроса: " + Collections.list(request.getHeaderNames()));
+            logger.debug("Отсутствует Authorization header или не начинается с Bearer");
+            logger.debug("Заголовки запроса: " + Collections.list(request.getHeaderNames()));
             filterChain.doFilter(request, response);
             return;
         }
 
         String jwtToken = authorizationHeader.substring(7);
-        logger.debug("✅ Извлечен JWT токен: " + jwtToken);
+        logger.debug("Извлечен JWT токен: " + jwtToken);
 
         String username = jwtTokenUtil.getUsernameFromToken(jwtToken);
-        logger.debug("👤 Извлечен username из токена: " + username);
+        logger.debug("Извлечен username из токена: " + username);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            logger.debug("🔍 Загрузка UserDetails для пользователя: " + username);
+            logger.debug("Загрузка UserDetails для пользователя: " + username);
 
             try {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-                logger.debug("✅ UserDetails успешно загружен: " + userDetails.getUsername());
+                logger.debug(" UserDetails успешно загружен: " + userDetails.getUsername());
 
                 if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
-                    logger.debug("✅ Токен валиден, создаем аутентификацию");
+                    logger.debug("Токен валиден, создаем аутентификацию");
 
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(
                                     userDetails, null, userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    System.out.println("🔐 Устанавливаем аутентификацию в SecurityContext: " + authenticationToken);
+                    System.out.println("Устанавливаем аутентификацию в SecurityContext: " + authenticationToken);
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-                    logger.debug("✅ Аутентификация установлена в SecurityContext");
+                    logger.debug("Аутентификация установлена в SecurityContext");
                 } else {
-                    logger.debug("❌ Токен не прошел валидацию");
+                    logger.debug("Токен не прошел валидацию");
                 }
             } catch (UsernameNotFoundException e) {
-                logger.debug("❌ Пользователь не найден: " + username);
+                logger.debug("Пользователь не найден: " + username);
             }
         } else {
             if (username == null) {
-                logger.debug("❌ Не удалось извлечь username из токена");
+                logger.debug("Не удалось извлечь username из токена");
             } else {
-                logger.debug("ℹ️ Аутентификация уже установлена в контексте");
+                logger.debug(" Аутентификация уже установлена в контексте");
             }
         }
-
         filterChain.doFilter(request, response);
     }
 }

@@ -1,5 +1,10 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Encoding;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,88 +23,84 @@ import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
-import ru.skypro.homework.service.UserService;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/ads")
+@Tag(name = "Ads", description = "API для работы с объявлениями: создание, просмотр, редактирование, удаление")
 @RequiredArgsConstructor
+
 public class AdController {
 
     private final AdService adService;
     private final UserRepository userRepository;
 
-    // Получение всех объявлений
+
+    @Operation(
+            summary = "Получение всех объявлений",
+            description = "Возвращает список всех объявлений с пагинацией."
+    )
     @GetMapping
     public ResponseEntity<AdsResponse> getAllAds() {
         return ResponseEntity.ok(adService.getAllAds());
     }
 
-    // Получение своих объявлений
+    @Operation(
+            summary = "Получение своих объявлений",
+            description = "Возвращает все объявления текущего пользователя."
+    )
     @GetMapping("/me")
     public ResponseEntity<AdsResponse> getMyAds(@AuthenticationPrincipal User user) {
         return ResponseEntity.ok(adService.getMyAds(user));
     }
 
-    // Добавление нового объявления
+    @Operation(
+            summary = "Создание объявления",
+            description = "Создаёт новое объявление с заголовком, ценой, описанием и изображением.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
+                            schema = @Schema(type = "object"),
+                            encoding = {
+                                    @Encoding(name = "properties", contentType = "application/json"),
+                                    @Encoding(name = "image", contentType = "image/jpeg, image/png")
+                            }
+                    )
+            )
+    )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addAd(
+    public ResponseEntity<AdDto> addAd(
             @RequestPart("properties") @Valid CreateOrUpdateAd adDto,
             @RequestPart("image") MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        // 🔍 Проверяем, что пользователь аутентифицирован
-        System.out.println("👤 UserDetails в контроллере: " + userDetails);
-        if (userDetails == null) {
-            System.out.println("❌ Ошибка: пользователь не аутентифицирован. Проверьте токен в Authorization");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        try {
-            System.out.println("✅ Начало создания объявления");
-            System.out.println("👤 Автор: " + userDetails.getUsername());
-            System.out.println("📝 DTO получено: " + adDto);
-            System.out.println("🖼 Изображение: " + image.getOriginalFilename() + " (" + image.getSize() + " bytes)");
-
-            // ✅ Получаем сущность User из БД по username
-            String username = userDetails.getUsername();
-            User dbUser = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User not found in database"));
-
-            // ✅ Передаём dbUser в сервис
-            AdDto ad = adService.createAd(dbUser, adDto, image);
-
-            System.out.println("✅ Объявление успешно создано, ID: " + ad.getPk());
-            return new ResponseEntity<>(ad, HttpStatus.CREATED);
-
-        } catch (MaxUploadSizeExceededException e) {
-            System.out.println("❌ Ошибка: размер файла превышен");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("File size exceeds the allowed limit (10MB)");
-        } catch (Exception e) {
-            System.out.println("❌ Неизвестная ошибка: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to create ad");
-        }
+        AdDto ad = adService.createAdFromMultipart(userDetails, adDto, image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ad);
     }
 
-    // Получение полной информации об объявлении
+    @Operation(
+            summary = "Полная информация об объявлении",
+            description = "Возвращает расширенные данные объявления: автор, описание, изображение и т.д."
+    )
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAdDto> getAd(@PathVariable Long id) {
         ExtendedAdDto dto = adService.getExtendedAd(id);
         return ResponseEntity.ok(dto);
     }
 
-    // Удаление объявления
+    @Operation(
+            summary = "Удаление объявления",
+            description = "Удаляет объявление по ID. Только автор или администратор может удалить."
+    )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAd(@PathVariable Long id) {
         adService.deleteAd(id);
         return ResponseEntity.noContent().build();
     }
 
-    // Редактирование данных объявления
+    @Operation(
+            summary = "Редактирование объявления",
+            description = "Изменяет заголовок и цену объявления. Автор остаётся прежним."
+    )
     @PatchMapping("/{id}")
     public ResponseEntity<AdDto> updateAd(
             @PathVariable Long id,
@@ -108,7 +109,10 @@ public class AdController {
         return ResponseEntity.ok(updated);
     }
 
-    // Обновление изображения объявления
+    @Operation(
+            summary = "Обновление изображения объявления",
+            description = "Заменяет изображение у существующего объявления."
+    )
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updateAdImage(
             @PathVariable Long id,

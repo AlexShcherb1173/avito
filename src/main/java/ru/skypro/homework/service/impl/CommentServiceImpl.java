@@ -1,8 +1,12 @@
 package ru.skypro.homework.service.impl;
 
-
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.model.Ad;
@@ -17,32 +21,37 @@ import ru.skypro.homework.service.CommentService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
+    private final AdRepository adRepository;
+    private final UserRepository userRepository;
     private final CommentRepository commentRepository;
-private final AdRepository adRepository;
-private final UserRepository userRepository;
 
-    @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, AdRepository adRepository, UserRepository userRepository) {
-        this.commentRepository = commentRepository;
-        this.adRepository = adRepository;
-        this.userRepository = userRepository;
-        }
+    private static final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
 
     @Override
-    public CommentDto addComment(Long adId, Long userId, CreateOrUpdateComment dto) {
+    public CommentDto addComment(Long adId, String username, CreateOrUpdateComment dto) {
+        log.info("Добавление комментария к объявлению ID: {} от пользователя: {}", adId, username);
+
         // 1. Находим объявление
         Ad ad = adRepository.findById(adId)
-                .orElseThrow(() -> new EntityNotFoundException("Ad not found"));
+                .orElseThrow(() -> {
+                    log.warn("Объявление не найдено: ID={}", adId);
+                    return new EntityNotFoundException("Ad not found");
+                });
 
-        // 2. Находим автора комментария
-        User author = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        // 2. Находим автора
+        User author = userRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    log.warn("Пользователь не найден: {}", username);
+                    return new EntityNotFoundException("User not found");
+                });
 
         // 3. Создаём комментарий
         Comment comment = new Comment();
@@ -51,11 +60,20 @@ private final UserRepository userRepository;
         comment.setText(dto.getText());
         comment.setCreatedAt(LocalDateTime.now());
 
-        // 4. Сохраняем в БД
+        // 4. Сохраняем
         Comment saved = commentRepository.save(comment);
 
-        // 5. Конвертируем в DTO и возвращаем
-        return convertToCommentDto(saved);
+        // 5. Конвертируем в DTO (вручную, без MapStruct)
+        CommentDto result = new CommentDto();
+        result.setPk(saved.getId().intValue());
+        result.setAuthor(saved.getAuthor().getId().intValue());
+        result.setAuthorImage(saved.getAuthor().getImage());
+        result.setAuthorFirstName(saved.getAuthor().getFirstName());
+        result.setCreatedAt(saved.getCreatedAt().toEpochSecond(ZoneOffset.UTC));
+        result.setText(saved.getText());
+
+        log.info("Комментарий успешно добавлен, ID: {}", result.getPk());
+        return result;
     }
 
     @Override

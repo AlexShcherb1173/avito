@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
 @Component
 public class JwtTokenUtil {
 
@@ -22,6 +23,7 @@ public class JwtTokenUtil {
 
     @Value("${jwt.expiration}")
     private Long expiration;
+
     // Сгенерировать токен
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
@@ -65,7 +67,6 @@ public class JwtTokenUtil {
     public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
-
 
 
     // Создать токен с claims и subject
