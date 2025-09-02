@@ -1,5 +1,10 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -16,10 +21,18 @@ import ru.skypro.homework.dto.User;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Tag(name = " Пользователи ", description = " API для работы с пользователями ")
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
+    @Operation(summary = "обновление пароля", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+
+            @ApiResponse(responseCode = "401",description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden")
+    }
+    )
     @PostMapping("/set_password")
     public ResponseEntity<?>
     setPassword(@RequestBody NewPassword newPassword){
@@ -27,6 +40,11 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "получение информации об авторизованном пользователе", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "401",description = "Unauthorized")
+    }
+    )
     @GetMapping("/me")
     public ResponseEntity<User> getUser(){
         log.info(" Получить пользователя по имени");
@@ -34,15 +52,16 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    @Operation(summary = "обновление информации об авторизированном пользователе", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+
+            @ApiResponse(responseCode = "401",description = "Unauthorized")
+    }
+    )
     @PatchMapping("/me")
     public ResponseEntity<UpdateUser> updateUser(@RequestBody UpdateUser updateUser){
         log.info(" Обновить пользователя по имени ");
         return ResponseEntity.ok(updateUser);
     }
 
-    @PatchMapping("/me/image")
-    public ResponseEntity<?> updateUserImage(@RequestParam ("/image") MultipartFile image){
-        log.info(" Обновить изображение пользователя ");
-        return ResponseEntity.ok().build();
-    }
 }
