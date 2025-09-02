@@ -61,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Authentication failed", e);
         }
     }
+
     @Override
     public boolean login(String username, String password) {
         System.out.println("PasswordEncoder: " + passwordEncoder);

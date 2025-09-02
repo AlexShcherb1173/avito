@@ -33,7 +33,7 @@ public class WebSecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager(); // ✅ Обязательно!
+        return config.getAuthenticationManager(); // Обязательно!
     }
 
     @Bean

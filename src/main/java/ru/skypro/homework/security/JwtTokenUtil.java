@@ -38,7 +38,7 @@ public class JwtTokenUtil {
     public String getUsernameFromToken(String token) {
         System.out.println("🔍 Извлечение username из токена: " + token);
         String username = getClaimFromToken(token, Claims::getSubject);
-        System.out.println("✅ Извлечён username: " + username);
+        System.out.println(" Извлечён username: " + username);
         return username;
     }
 
