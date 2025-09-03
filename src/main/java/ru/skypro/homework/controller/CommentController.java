@@ -11,8 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
-import ru.skypro.homework.model.User;
-import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.CommentDto;
 import ru.skypro.homework.responseDto.CommentsResponse;
 import ru.skypro.homework.service.CommentService;
@@ -23,7 +21,6 @@ import ru.skypro.homework.service.CommentService;
 @AllArgsConstructor
 public class CommentController {
     private final CommentService commentService;
-    private final UserRepository userRepository;
 
     @Operation(
             summary = "Получение комментариев к объявлению",

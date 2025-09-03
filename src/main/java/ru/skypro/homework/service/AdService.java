@@ -17,8 +17,7 @@ public interface AdService {
 
     void deleteAd(Long id);
 
-    // Добавьте другие методы по необходимости
-    AdsResponse getMyAds(User user);
+    AdsResponse getMyAds(String username);
 
     AdsResponse getAllAds();
 

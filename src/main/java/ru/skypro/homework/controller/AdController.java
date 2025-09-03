@@ -18,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.model.User;
-import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
@@ -33,7 +31,6 @@ import ru.skypro.homework.service.AdService;
 public class AdController {
 
     private final AdService adService;
-    private final UserRepository userRepository;
 
     @Operation(
             summary = "Получение всех объявлений",
@@ -53,12 +50,7 @@ public class AdController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-
-        String username = userDetails.getUsername();
-        User dbUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        AdsResponse response = adService.getMyAds(dbUser);
+        AdsResponse response = adService.getMyAds(userDetails.getUsername());
         return ResponseEntity.ok(response);
     }
 
