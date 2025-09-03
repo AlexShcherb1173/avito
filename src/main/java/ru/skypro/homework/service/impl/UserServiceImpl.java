@@ -1,7 +1,5 @@
 package ru.skypro.homework.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,8 +13,6 @@ import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.UserDto;
 import ru.skypro.homework.service.UserService;
-
-//Бизнес-логика: обновление профиля, фото, пароля и т.д.
 
 @Service
 @RequiredArgsConstructor

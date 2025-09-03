@@ -10,11 +10,18 @@ import ru.skypro.homework.dto.CreateOrUpdateAd;
 
 public interface AdService {
     AdDto createAdFromMultipart(UserDetails userDetails, CreateOrUpdateAd dto, MultipartFile image);
+
     ExtendedAdDto getExtendedAd(Long id);
+
     AdDto updateAd(Long id, CreateOrUpdateAd dto);
+
     void deleteAd(Long id);
-    // Добавьте другие методы по необходимости
+
     AdsResponse getMyAds(User user);
+
     AdsResponse getAllAds();
+
     String updateAdImage(Long id, MultipartFile image);
+
+    boolean isOwner(Long adId, String username);
 }

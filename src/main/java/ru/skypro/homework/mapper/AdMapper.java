@@ -2,7 +2,6 @@ package ru.skypro.homework.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.model.Ad;
@@ -11,23 +10,13 @@ import ru.skypro.homework.responseDto.ExtendedAdDto;
 
 import java.util.List;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import ru.skypro.homework.model.Ad;
-import ru.skypro.homework.responseDto.AdDto;
-import ru.skypro.homework.responseDto.ExtendedAdDto;
-
-/**
- * Маппер для преобразования сущности Ad в DTO.
- */
 @Mapper
 public interface AdMapper {
-
-    // Экземпляр маппера для использования без внедрения через Spring
     AdMapper INSTANCE = Mappers.getMapper(AdMapper.class);
 
     /**
      * Преобразует сущность Ad в AdDto.
+     *
      * @param ad сущность объявления
      * @return AdDto
      */
@@ -38,6 +27,7 @@ public interface AdMapper {
     /**
      * Преобразует сущность Ad в ExtendedAdDto.
      * Маппит поля автора: имя, фамилия, email, телефон.
+     *
      * @param ad сущность объявления
      * @return ExtendedAdDto
      */
@@ -46,7 +36,7 @@ public interface AdMapper {
     @Mapping(source = "price", target = "price")
     @Mapping(source = "description", target = "description")
     @Mapping(source = "image", target = "image")
-    // Поля автора
+
     @Mapping(source = "author.firstName", target = "authorFirstName")
     @Mapping(source = "author.lastName", target = "authorLastName")
     @Mapping(source = "author.username", target = "email")
@@ -61,15 +51,17 @@ public interface AdMapper {
 
     /**
      * Преобразует список объявлений в список AdDto.
+     *
      * @param ads список сущностей
      * @return список DTO
      */
-    java.util.List<AdDto> toAdDtoList(java.util.List<Ad> ads);
+    List<AdDto> toAdDtoList(List<Ad> ads);
 
     /**
      * Преобразует список объявлений в список ExtendedAdDto.
+     *
      * @param ads список сущностей
      * @return список DTO
      */
-    java.util.List<ExtendedAdDto> toExtendedAdDtoList(java.util.List<Ad> ads);
+    List<ExtendedAdDto> toExtendedAdDtoList(List<Ad> ads);
 }

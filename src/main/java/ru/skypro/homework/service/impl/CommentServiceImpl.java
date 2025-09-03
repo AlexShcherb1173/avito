@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.mapper.CommentMapper;
@@ -21,10 +18,8 @@ import ru.skypro.homework.responseDto.CommentsResponse;
 import ru.skypro.homework.service.CommentService;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -94,4 +89,11 @@ public class CommentServiceImpl implements CommentService {
         List<CommentDto> dtos = CommentMapper.INSTANCE.toCommentDtoList(comments);
         return new CommentsResponse(dtos.size(), dtos);
     }
+
+    @Override
+    public boolean isCommentAuthor(Long commentId, String username) {
+        return commentRepository.findById(commentId)
+                .map(comment -> comment.getAuthor().getUsername().equals(username))
+                .orElse(false);
     }
+}

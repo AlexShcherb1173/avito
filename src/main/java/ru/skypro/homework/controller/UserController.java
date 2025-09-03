@@ -11,14 +11,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
-import ru.skypro.homework.model.User;
-import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.UserDto;
 import ru.skypro.homework.service.UserService;
 
@@ -34,6 +33,7 @@ public class UserController {
             description = "Возвращает данные текущего пользователя: имя, фамилия, телефон."
     )
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -47,6 +47,7 @@ public class UserController {
             description = "Изменяет имя, фамилию и телефон текущего пользователя."
     )
     @PatchMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserDto> updateUser(
             @RequestBody @Valid UpdateUser dto,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -78,7 +79,8 @@ public class UserController {
                     @ApiResponse(responseCode = "413", description = "Файл слишком большой")
             }
     )
-     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateUserImage(
             @RequestPart("image") MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -104,6 +106,7 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> setPassword(
             @RequestBody @Valid NewPassword dto,
             @AuthenticationPrincipal UserDetails userDetails) {

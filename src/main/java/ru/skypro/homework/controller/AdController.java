@@ -11,11 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.model.User;
@@ -49,6 +48,7 @@ public class AdController {
             description = "Возвращает все объявления текущего пользователя."
     )
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AdsResponse> getMyAds(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -77,6 +77,7 @@ public class AdController {
             )
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AdDto> addAd(
             @RequestPart("properties") @Valid CreateOrUpdateAd adDto,
             @RequestPart("image") MultipartFile image,
@@ -91,6 +92,7 @@ public class AdController {
             description = "Возвращает расширенные данные объявления: автор, описание, изображение и т.д."
     )
     @GetMapping("/{id}")
+    @PreAuthorize("@adServiceImpl.isOwner(#id, authentication.principal.username) or hasRole('ADMIN')")
     public ResponseEntity<ExtendedAdDto> getAd(@PathVariable Long id) {
         ExtendedAdDto dto = adService.getExtendedAd(id);
         return ResponseEntity.ok(dto);
@@ -101,6 +103,7 @@ public class AdController {
             description = "Удаляет объявление по ID. Только автор или администратор может удалить."
     )
     @DeleteMapping("/{id}")
+    @PreAuthorize("@adServiceImpl.isOwner(#id, authentication.principal.username) or hasRole('ADMIN')")
     public ResponseEntity<Void> removeAd(@PathVariable Long id) {
         adService.deleteAd(id);
         return ResponseEntity.noContent().build();
@@ -111,6 +114,7 @@ public class AdController {
             description = "Изменяет заголовок и цену объявления. Автор остаётся прежним."
     )
     @PatchMapping("/{id}")
+    @PreAuthorize("@adServiceImpl.isOwner(#id, authentication.principal.username) or hasRole('ADMIN')")
     public ResponseEntity<AdDto> updateAd(
             @PathVariable Long id,
             @RequestBody @Valid CreateOrUpdateAd dto) {
@@ -123,6 +127,7 @@ public class AdController {
             description = "Заменяет изображение у существующего объявления."
     )
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("@adServiceImpl.isOwner(#id, authentication.principal.username) or hasRole('ADMIN')")
     public ResponseEntity<String> updateAdImage(
             @PathVariable Long id,
             @RequestPart("image") MultipartFile image) {

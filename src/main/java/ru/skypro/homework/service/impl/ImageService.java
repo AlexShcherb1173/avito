@@ -3,16 +3,18 @@ package ru.skypro.homework.service.impl;
 import jakarta.annotation.PostConstruct;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.Resource;
+
 import java.nio.file.Files;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-// ImageService.java
 @Service
 public class ImageService {
 
@@ -27,7 +29,6 @@ public class ImageService {
         }
     }
 
-    // ✅ Возвращает имя файла
     public String saveImage(MultipartFile file, String folder) {
         try {
             String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();

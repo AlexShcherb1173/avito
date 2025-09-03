@@ -11,12 +11,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Login;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.dto.Register;
-import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.JwtResponse;
@@ -38,7 +36,6 @@ public class AuthServiceImpl implements AuthService {
         log.info("Попытка входа: {}", login.getUsername());
 
         try {
-            // Аутентифицируем пользователя
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword())
             );
@@ -62,6 +59,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Authentication failed", e);
         }
     }
+
     @Override
     public boolean login(String username, String password) {
         System.out.println("PasswordEncoder: " + passwordEncoder);
@@ -78,10 +76,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = UserMapper.INSTANCE.toUser(register);
 
-        // 2. Хэшируем пароль
         user.setPassword(passwordEncoder.encode(register.getPassword()));
 
-        // 3. Сохраняем в БД
         userRepository.save(user);
     }
 }

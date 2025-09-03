@@ -1,7 +1,6 @@
 package ru.skypro.homework.mapper;
 
 
-
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -12,13 +11,12 @@ import ru.skypro.homework.model.User;
 import ru.skypro.homework.responseDto.UserDto;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * Маппер для преобразования DTO в сущность User и обратно.
  * Использует @ObjectFactory для корректной инициализации User при использовании @Builder.
  */
-@Mapper (
+@Mapper(
         imports = {Role.class, LocalDateTime.class}
 )
 public interface UserMapper {
@@ -56,12 +54,10 @@ public interface UserMapper {
      */
     @AfterMapping
     default void afterToUser(Register register, @MappingTarget User user) {
-        // Валидация: username обязателен
         if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
             throw new IllegalArgumentException("Username must not be null or empty");
         }
 
-        // Дефолты, если поля null
         if (user.getFirstName() == null) {
             user.setFirstName("");
         }
@@ -74,11 +70,8 @@ public interface UserMapper {
             user.setPhone("");
         }
 
-        // Устанавливаем дефолтные значения
         user.setRole(Role.USER);
         user.setCreatedAt(LocalDateTime.now());
-
-        // Логирование (в реальном проекте используйте Logger)
         System.out.println("Пользователь создан: " + user.getUsername());
     }
 
@@ -88,7 +81,6 @@ public interface UserMapper {
      */
     @AfterMapping
     default void afterUpdateUser(UpdateUser dto, @MappingTarget User user) {
-        // Если в DTO переданы пустые строки — заменяем на пустую строку
         if (dto.getFirstName() != null && dto.getFirstName().isBlank()) {
             user.setFirstName("");
         }
@@ -101,7 +93,6 @@ public interface UserMapper {
             user.setPhone("");
         }
 
-        // Логирование
         System.out.println("Профиль обновлён: " + user.getUsername());
     }
 }

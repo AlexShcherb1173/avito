@@ -4,15 +4,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
-import ru.skypro.homework.model.User;
-import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.CommentDto;
 import ru.skypro.homework.responseDto.CommentsResponse;
 import ru.skypro.homework.service.CommentService;
@@ -23,7 +21,6 @@ import ru.skypro.homework.service.CommentService;
 @AllArgsConstructor
 public class CommentController {
     private final CommentService commentService;
-    private final UserRepository userRepository;
 
     @Operation(
             summary = "Получение комментариев к объявлению",
@@ -40,6 +37,7 @@ public class CommentController {
             description = "Оставляет комментарий под объявлением. Автор — текущий пользователь."
     )
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CommentDto> addComment(
             @PathVariable Long adId,
             @RequestBody @Valid CreateOrUpdateComment commentDto,
@@ -58,6 +56,7 @@ public class CommentController {
             description = "Удаляет комментарий. Только автор или администратор может удалить."
     )
     @DeleteMapping("/{commentId}")
+    @PreAuthorize("@commentServiceImpl.isCommentAuthor(#commentId, authentication.principal.username) or hasRole('ADMIN')")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long adId,
             @PathVariable Long commentId) {
@@ -70,6 +69,7 @@ public class CommentController {
             description = "Меняет текст комментария. Только автор может редактировать."
     )
     @PatchMapping("/{commentId}")
+    @PreAuthorize("@commentServiceImpl.isCommentAuthor(#commentId, authentication.principal.username)")
     public ResponseEntity<CommentDto> updateComment(
             @PathVariable Long adId,
             @PathVariable Long commentId,

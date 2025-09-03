@@ -6,6 +6,8 @@ import ru.skypro.homework.responseDto.JwtResponse;
 
 public interface AuthService {
     boolean login(String userName, String password);
+
     JwtResponse login(Login login);
+
     void register(Register register);
 }

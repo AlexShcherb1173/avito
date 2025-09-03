@@ -4,30 +4,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
-import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
-import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
-import ru.skypro.homework.responseDto.CommentDto;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -60,14 +54,11 @@ public class AdServiceImpl implements AdService {
                     return new EntityNotFoundException("User not found");
                 });
 
-        // ✅ 1. Создаём сущность Ad из DTO с помощью MapStruct
         Ad ad = AdMapper.INSTANCE.toAd(createOrUpdateAd);
 
-        // ✅ 2. Заполняем поля, которые не маппятся автоматически
         ad.setAuthor(dbUser);
         ad.setCreatedAt(LocalDateTime.now());
 
-        // ✅ 3. Сохраняем изображение
         try {
             String filename = imageService.saveImage(image, "ads");
             ad.setImage("/images/ads/" + filename);
@@ -75,11 +66,8 @@ public class AdServiceImpl implements AdService {
             log.error("Ошибка при сохранении изображения", e);
             throw new RuntimeException("Failed to save image", e);
         }
-
-        // ✅ 4. Сохраняем в БД
         Ad saved = adRepository.save(ad);
 
-        // ✅ 5. Конвертируем в DTO с помощью MapStruct
         AdDto result = AdMapper.INSTANCE.toAdDto(saved);
 
         log.info("Объявление успешно создано, ID: {}", result.getPk());
@@ -125,7 +113,14 @@ public class AdServiceImpl implements AdService {
     @Override
     public AdsResponse getAllAds() {
         List<Ad> ads = adRepository.findAll();
-        List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads); // ✅ Одна строка
+        List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads);
         return new AdsResponse(dtos.size(), dtos);
+    }
+
+    @Override
+    public boolean isOwner(Long adId, String username) {
+        return adRepository.findById(adId)
+                .map(ad -> ad.getAuthor().getUsername().equals(username))
+                .orElse(false);
     }
 }

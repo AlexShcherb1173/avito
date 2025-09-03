@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import java.util.HashMap;
 import java.util.Map;
 
-// GlobalExceptionHandler.java
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
