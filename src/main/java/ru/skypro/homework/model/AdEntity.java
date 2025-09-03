@@ -49,4 +49,8 @@ public class AdEntity {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 }

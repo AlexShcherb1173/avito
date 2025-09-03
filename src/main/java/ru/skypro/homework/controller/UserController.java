@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
+import ru.skypro.homework.service.UserService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -24,7 +25,13 @@ import ru.skypro.homework.dto.User;
 @Tag(name = " Пользователи ", description = " API для работы с пользователями ")
 public class UserController {
 
+    private final UserService userService;
+
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Operation(summary = "обновление пароля", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -48,7 +55,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<User> getUser(){
         log.info(" Получить пользователя по имени");
-        User user = new User();
+        User user = userService.getCurrentUser();
         return ResponseEntity.ok(user);
     }
 
@@ -61,6 +68,7 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<UpdateUser> updateUser(@RequestBody UpdateUser updateUser){
         log.info(" Обновить пользователя по имени ");
+        User updatedUser = userService.updateUser(updateUser);
         return ResponseEntity.ok(updateUser);
     }
 

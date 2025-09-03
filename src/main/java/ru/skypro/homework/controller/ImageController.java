@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.service.ImageService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -20,7 +21,13 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "Изображения", description = "API для работы с изображениями")
 public class ImageController {
 
+    private final ImageService imageService;
+
     private static final Logger log = LoggerFactory.getLogger(ImageController.class);
+
+    public ImageController(ImageService imageService) {
+        this.imageService = imageService;
+    }
 
     @Operation(summary = "Обновление аватара пользователя", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
@@ -30,6 +37,7 @@ public class ImageController {
     @PatchMapping("/users/me/image")
     public ResponseEntity<?> updateUserImage(@RequestParam("image") MultipartFile image) {
         log.info("Update user image called");
+        imageService.updateUserImage(image.getBytes());
         return ResponseEntity.ok().build();
     }
 
@@ -43,6 +51,7 @@ public class ImageController {
     @PatchMapping("/ads/{id}/image")
     public ResponseEntity<?> updateAdImage(@PathVariable Integer id, @RequestParam("image") MultipartFile image) {
         log.info("Update image called for ad: {}", id);
+        imageService.updateAdImage(id, image.getBytes());
         return ResponseEntity.ok().build();
     }
 }

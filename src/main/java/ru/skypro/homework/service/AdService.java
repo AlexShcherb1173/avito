@@ -18,5 +18,4 @@ public interface AdService {
 
     Ads getAdsMe();
 
-    void updateAdImage(Integer id, byte[] image);
 }

@@ -17,6 +17,7 @@ import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
+import ru.skypro.homework.service.AdService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -26,7 +27,13 @@ import ru.skypro.homework.dto.ExtendedAd;
 @Tag(name = " Объявления ", description = "API для работы с объявлениями")
 public class AdsController {
 
+    private final AdService adService;
+
     private static final Logger log = LoggerFactory.getLogger(AdsController.class);
+
+    public AdsController(AdService adService) {
+        this.adService = adService;
+    }
 
     @Operation(summary = "получение всех объявлений", responses = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -36,8 +43,7 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
         log.info(" Получить все объявления по названию ");
-        Ads ads = new Ads();
-        ads.setCount(0);
+        Ads ads = adService.getAllAds();
         return ResponseEntity.ok(ads);
     }
 
@@ -49,7 +55,7 @@ public class AdsController {
     @PostMapping
     public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties, @RequestPart("image") MultipartFile image) {
         log.info(" Добавить объявления ");
-        Ad ad = new Ad();
+        Ad ad = adService.addAd(properties, image.getBytes());
         return ResponseEntity.ok(ad);
     }
 
@@ -62,7 +68,7 @@ public class AdsController {
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAd> getAds(@PathVariable Integer id) {
         log.info(" Получить все объявления по id" + id);
-        ExtendedAd extendedAd = new ExtendedAd();
+        ExtendedAd extendedAd = adService.getAd(id);
         return ResponseEntity.ok(extendedAd);
     }
 
@@ -76,6 +82,7 @@ public class AdsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeAd(@PathVariable Integer id){
         log.info(" Удалить объявления " + id);
+        adService.removeAd(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -89,7 +96,7 @@ public class AdsController {
     @PatchMapping("/{id}")
     public ResponseEntity<Ad> updateAds(@PathVariable Integer id, @RequestBody CreateOrUpdateAd createOrUpdateAd){
         log.info(" Обновить объявления " + id);
-        Ad ad = new Ad();
+        Ad ad = adService.updateAd(id, createOrUpdateAd);
         return ResponseEntity.ok(ad);
     }
 
@@ -101,8 +108,7 @@ public class AdsController {
     @GetMapping("/me")
     public ResponseEntity<Ads> getAdsMe(){
         log.info("Получить мои объявления ");
-        Ads ads = new Ads();
-        ads.setCount(0);
+        Ads ads = adService.getAdsMe();
         return ResponseEntity.ok(ads);
     }
 
