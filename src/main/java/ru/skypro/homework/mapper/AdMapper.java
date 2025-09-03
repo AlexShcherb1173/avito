@@ -28,6 +28,7 @@ public interface AdMapper {
 
     /**
      * Преобразует сущность Ad в AdDto.
+     *
      * @param ad сущность объявления
      * @return AdDto
      */
@@ -38,6 +39,7 @@ public interface AdMapper {
     /**
      * Преобразует сущность Ad в ExtendedAdDto.
      * Маппит поля автора: имя, фамилия, email, телефон.
+     *
      * @param ad сущность объявления
      * @return ExtendedAdDto
      */
@@ -61,6 +63,7 @@ public interface AdMapper {
 
     /**
      * Преобразует список объявлений в список AdDto.
+     *
      * @param ads список сущностей
      * @return список DTO
      */
@@ -68,6 +71,7 @@ public interface AdMapper {
 
     /**
      * Преобразует список объявлений в список ExtendedAdDto.
+     *
      * @param ads список сущностей
      * @return список DTO
      */

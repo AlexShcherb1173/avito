@@ -3,9 +3,12 @@ package ru.skypro.homework.service.impl;
 import jakarta.annotation.PostConstruct;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.Resource;
+
 import java.nio.file.Files;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
@@ -27,14 +30,14 @@ public class ImageService {
         }
     }
 
-    // ✅ Возвращает имя файла
+    // Возвращает имя файла
     public String saveImage(MultipartFile file, String folder) {
         try {
             String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
             Path destination = rootLocation.resolve(folder).resolve(filename).normalize();
             Files.createDirectories(destination.getParent());
             Files.copy(file.getInputStream(), destination);
-            return filename; // ✅ возвращаем имя
+            return filename; // возвращаем имя
         } catch (IOException e) {
             throw new RuntimeException("Failed to save image", e);
         }

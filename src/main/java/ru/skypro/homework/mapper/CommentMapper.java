@@ -5,6 +5,7 @@ import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.responseDto.CommentDto;
+
 import java.time.ZoneOffset;
 
 import java.time.ZoneId;
@@ -39,7 +40,8 @@ public interface CommentMapper {
      * Преобразует список комментариев в список DTO.
      */
     java.util.List<CommentDto> toCommentDtoList(java.util.List<Comment> comments);
-      @AfterMapping
+
+    @AfterMapping
     default void mapCreatedAt(Comment comment, @MappingTarget CommentDto dto) {
         dto.setCreatedAt(comment.getCreatedAt().toEpochSecond(ZoneOffset.UTC));
     }
@@ -47,7 +49,7 @@ public interface CommentMapper {
     @Named("addImagePrefix")
     default String addImagePrefix(String image) {
         if (image == null || image.isBlank()) {
-            return "/images/users/default.jpg"; // ✅ или ""
+            return "/images/users/default.jpg";
         }
         return "/images/users/" + image;
     }

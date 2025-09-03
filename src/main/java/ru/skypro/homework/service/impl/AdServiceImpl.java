@@ -60,14 +60,14 @@ public class AdServiceImpl implements AdService {
                     return new EntityNotFoundException("User not found");
                 });
 
-        // ✅ 1. Создаём сущность Ad из DTO с помощью MapStruct
+        // 1. Создаём сущность Ad из DTO с помощью MapStruct
         Ad ad = AdMapper.INSTANCE.toAd(createOrUpdateAd);
 
-        // ✅ 2. Заполняем поля, которые не маппятся автоматически
+        // 2. Заполняем поля, которые не маппятся автоматически
         ad.setAuthor(dbUser);
         ad.setCreatedAt(LocalDateTime.now());
 
-        // ✅ 3. Сохраняем изображение
+        // 3. Сохраняем изображение
         try {
             String filename = imageService.saveImage(image, "ads");
             ad.setImage("/images/ads/" + filename);
@@ -76,10 +76,10 @@ public class AdServiceImpl implements AdService {
             throw new RuntimeException("Failed to save image", e);
         }
 
-        // ✅ 4. Сохраняем в БД
+        // 4. Сохраняем в БД
         Ad saved = adRepository.save(ad);
 
-        // ✅ 5. Конвертируем в DTO с помощью MapStruct
+        // 5. Конвертируем в DTO с помощью MapStruct
         AdDto result = AdMapper.INSTANCE.toAdDto(saved);
 
         log.info("Объявление успешно создано, ID: {}", result.getPk());
@@ -125,7 +125,7 @@ public class AdServiceImpl implements AdService {
     @Override
     public AdsResponse getAllAds() {
         List<Ad> ads = adRepository.findAll();
-        List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads); // ✅ Одна строка
+        List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads);
         return new AdsResponse(dtos.size(), dtos);
     }
 }

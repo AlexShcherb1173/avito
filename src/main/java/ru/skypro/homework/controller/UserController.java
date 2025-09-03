@@ -78,7 +78,7 @@ public class UserController {
                     @ApiResponse(responseCode = "413", description = "Файл слишком большой")
             }
     )
-     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateUserImage(
             @RequestPart("image") MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {

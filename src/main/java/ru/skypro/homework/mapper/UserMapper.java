@@ -1,7 +1,6 @@
 package ru.skypro.homework.mapper;
 
 
-
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -18,7 +17,7 @@ import java.util.Objects;
  * Маппер для преобразования DTO в сущность User и обратно.
  * Использует @ObjectFactory для корректной инициализации User при использовании @Builder.
  */
-@Mapper (
+@Mapper(
         imports = {Role.class, LocalDateTime.class}
 )
 public interface UserMapper {
