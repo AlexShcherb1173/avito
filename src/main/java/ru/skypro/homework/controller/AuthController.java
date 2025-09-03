@@ -36,9 +36,6 @@ import ru.skypro.homework.service.AuthService;
 public class AuthController {
 
     private final AuthService authService;
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenUtil jwtTokenUtil;
-    private final UserDetailsService userDetailsService;
 
     @Operation(
             summary = "Вход в систему",

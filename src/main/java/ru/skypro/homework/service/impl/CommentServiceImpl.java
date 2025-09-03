@@ -9,6 +9,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.User;
@@ -63,14 +64,8 @@ public class CommentServiceImpl implements CommentService {
         // 4. Сохраняем
         Comment saved = commentRepository.save(comment);
 
-        // 5. Конвертируем в DTO (вручную, без MapStruct)
-        CommentDto result = new CommentDto();
-        result.setPk(saved.getId().intValue());
-        result.setAuthor(saved.getAuthor().getId().intValue());
-        result.setAuthorImage(saved.getAuthor().getImage());
-        result.setAuthorFirstName(saved.getAuthor().getFirstName());
-        result.setCreatedAt(saved.getCreatedAt().toEpochSecond(ZoneOffset.UTC));
-        result.setText(saved.getText());
+        // 5. Используем MapStruct для маппинга
+        CommentDto result = CommentMapper.INSTANCE.toCommentDto(saved);
 
         log.info("Комментарий успешно добавлен, ID: {}", result.getPk());
         return result;
@@ -78,32 +73,25 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long adId, Long commentId) {
-        // TODO: реализовать
+        Comment comment = commentRepository.findByAdIdAndId(commentId, adId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+        commentRepository.delete(comment);
     }
 
     @Override
     public CommentDto updateComment(Long adId, Long commentId, CreateOrUpdateComment dto) {
-        // TODO: реализовать
-        return null;
+        Comment comment = commentRepository.findByAdIdAndId(adId, commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+
+        comment.setText(dto.getText());
+        Comment updated = commentRepository.save(comment);
+        return CommentMapper.INSTANCE.toCommentDto(updated);
     }
 
     @Override
     public CommentsResponse getComments(Long adId) {
         List<Comment> comments = commentRepository.findByAdId(adId);
-        List<CommentDto> dtos = comments.stream()
-                .map(this::convertToCommentDto)
-                .collect(Collectors.toList());
+        List<CommentDto> dtos = CommentMapper.INSTANCE.toCommentDtoList(comments);
         return new CommentsResponse(dtos.size(), dtos);
     }
-
-    private CommentDto convertToCommentDto(Comment comment) {
-        CommentDto dto = new CommentDto();
-        dto.setPk(Math.toIntExact(comment.getId()));
-        dto.setAuthor(Math.toIntExact(comment.getAuthor().getId()));
-        dto.setAuthorImage("/images/users/" + comment.getAuthor().getImage()); // если есть
-        dto.setAuthorFirstName(comment.getAuthor().getFirstName());
-        dto.setCreatedAt(comment.getCreatedAt().atZone(ZoneId.systemDefault()).toEpochSecond());
-        dto.setText(comment.getText());
-        return dto;
     }
-}

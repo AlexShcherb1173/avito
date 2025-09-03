@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,7 +35,6 @@ public class AdController {
     private final AdService adService;
     private final UserRepository userRepository;
 
-
     @Operation(
             summary = "Получение всех объявлений",
             description = "Возвращает список всех объявлений с пагинацией."
@@ -49,8 +49,17 @@ public class AdController {
             description = "Возвращает все объявления текущего пользователя."
     )
     @GetMapping("/me")
-    public ResponseEntity<AdsResponse> getMyAds(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(adService.getMyAds(user));
+    public ResponseEntity<AdsResponse> getMyAds(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = userDetails.getUsername();
+        User dbUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        AdsResponse response = adService.getMyAds(dbUser);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(

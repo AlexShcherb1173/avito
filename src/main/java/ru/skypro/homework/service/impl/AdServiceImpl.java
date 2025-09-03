@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.User;
@@ -38,14 +39,14 @@ public class AdServiceImpl implements AdService {
     private static final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
 
     @Override
-    public AdDto createAdFromMultipart(UserDetails userDetails, CreateOrUpdateAd dto, MultipartFile image) {
+    public AdDto createAdFromMultipart(UserDetails userDetails, CreateOrUpdateAd createOrUpdateAd, MultipartFile image) {
         if (userDetails == null) {
             log.warn("Попытка создания объявления без аутентификации");
             throw new AccessDeniedException("User not authenticated");
         }
 
         log.info("Начало создания объявления для пользователя: {}", userDetails.getUsername());
-        log.debug("DTO: {}", dto);
+        log.debug("DTO: {}", createOrUpdateAd);
         log.debug("Изображение: {} ({} bytes)", image.getOriginalFilename(), image.getSize());
 
         if (image.isEmpty()) {
@@ -59,23 +60,30 @@ public class AdServiceImpl implements AdService {
                     return new EntityNotFoundException("User not found");
                 });
 
-        Ad ad = new Ad();
-        ad.setTitle(dto.getTitle());
-        ad.setPrice(dto.getPrice());
-        ad.setDescription(dto.getDescription());
+        // ✅ 1. Создаём сущность Ad из DTO с помощью MapStruct
+        Ad ad = AdMapper.INSTANCE.toAd(createOrUpdateAd);
+
+        // ✅ 2. Заполняем поля, которые не маппятся автоматически
         ad.setAuthor(dbUser);
         ad.setCreatedAt(LocalDateTime.now());
 
-        // Сохраняем изображение
-        String filename = imageService.saveImage(image, "ads");
-        ad.setImage("/images/ads/" + filename);
+        // ✅ 3. Сохраняем изображение
+        try {
+            String filename = imageService.saveImage(image, "ads");
+            ad.setImage("/images/ads/" + filename);
+        } catch (Exception e) {
+            log.error("Ошибка при сохранении изображения", e);
+            throw new RuntimeException("Failed to save image", e);
+        }
 
+        // ✅ 4. Сохраняем в БД
         Ad saved = adRepository.save(ad);
-        AdDto result = convertToAdDto(saved);
+
+        // ✅ 5. Конвертируем в DTO с помощью MapStruct
+        AdDto result = AdMapper.INSTANCE.toAdDto(saved);
 
         log.info("Объявление успешно создано, ID: {}", result.getPk());
         return result;
-
     }
 
     @Override
@@ -110,28 +118,14 @@ public class AdServiceImpl implements AdService {
     @Override
     public AdsResponse getMyAds(User user) {
         List<Ad> ads = adRepository.findByAuthor(user);
-        List<AdDto> dtos = ads.stream()
-                .map(this::convertToAdDto)
-                .collect(Collectors.toList());
+        List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads);
         return new AdsResponse(dtos.size(), dtos);
-    }
-
-    private AdDto convertToAdDto(Ad ad) {
-        AdDto dto = new AdDto();
-        dto.setPk(Math.toIntExact(ad.getId()));
-        dto.setAuthor(Math.toIntExact(ad.getAuthor().getId()));
-        dto.setTitle(ad.getTitle());
-        dto.setPrice(ad.getPrice());
-        dto.setImage(ad.getImage()); // например: "/images/ads/1.jpg"
-        return dto;
     }
 
     @Override
     public AdsResponse getAllAds() {
         List<Ad> ads = adRepository.findAll();
-        List<AdDto> dtos = ads.stream()
-                .map(this::convertToAdDto)
-                .collect(Collectors.toList());
+        List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads); // ✅ Одна строка
         return new AdsResponse(dtos.size(), dtos);
     }
 }

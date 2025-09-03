@@ -14,9 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Login;
+import ru.skypro.homework.model.User;
 import ru.skypro.homework.dto.Register;
 import ru.skypro.homework.dto.Role;
-import ru.skypro.homework.model.User;
+import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.JwtResponse;
 import ru.skypro.homework.security.JwtTokenUtil;
@@ -26,11 +27,11 @@ import ru.skypro.homework.service.AuthService;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserRepository userRepository; // ← работаем напрямую с БД
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-    private static final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Override
     public JwtResponse login(Login login) {
@@ -70,20 +71,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(Register dto) {
-        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
+    public void register(Register register) {
+        if (userRepository.findByUsername(register.getUsername()).isPresent()) {
             throw new RuntimeException("User already exists");
         }
 
-        User user = User.builder()
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .phone(dto.getPhone())
-                .role(Role.USER)
-                .build();
+        User user = UserMapper.INSTANCE.toUser(register);
 
+        // 2. Хэшируем пароль
+        user.setPassword(passwordEncoder.encode(register.getPassword()));
+
+        // 3. Сохраняем в БД
         userRepository.save(user);
     }
 }
