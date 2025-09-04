@@ -104,7 +104,10 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
-    public AdsResponse getMyAds(User user) {
+    public AdsResponse getMyAds(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         List<Ad> ads = adRepository.findByAuthor(user);
         List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads);
         return new AdsResponse(dtos.size(), dtos);

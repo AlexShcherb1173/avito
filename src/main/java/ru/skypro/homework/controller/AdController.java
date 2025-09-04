@@ -54,11 +54,7 @@ public class AdController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        String username = userDetails.getUsername();
-        User dbUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
-
-        AdsResponse response = adService.getMyAds(dbUser);
+        AdsResponse response = adService.getMyAds(userDetails.getUsername());
         return ResponseEntity.ok(response);
     }
 
