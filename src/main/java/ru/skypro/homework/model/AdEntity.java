@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "ads")
@@ -50,7 +51,94 @@ public class AdEntity {
         createdAt = LocalDateTime.now();
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public Integer getPrice() {
+        return price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public List<CommentEntity> getComments() {
+        return comments;
+    }
+
+    public UserEntity getAuthor() {
+        return author;
+    }
+
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public void setAuthor(UserEntity author) {
+        this.author = author;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setPrice(Integer price) {
+        this.price = price;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setComments(List<CommentEntity> comments) {
+        this.comments = comments;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AdEntity adEntity = (AdEntity) o;
+        return Objects.equals(id, adEntity.id) && Objects.equals(title, adEntity.title) && Objects.equals(price, adEntity.price) && Objects.equals(description, adEntity.description) && Objects.equals(imageUrl, adEntity.imageUrl) && Objects.equals(createdAt, adEntity.createdAt) && Objects.equals(author, adEntity.author) && Objects.equals(comments, adEntity.comments);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, price, description, imageUrl, createdAt, author, comments);
+    }
+
+    @Override
+    public String toString() {
+        return "AdEntity{" +
+                "id=" + id +
+                ", title='" + title + '\'' +
+                ", price=" + price +
+                ", description='" + description + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", createdAt=" + createdAt +
+                ", author=" + author +
+                ", comments=" + comments +
+                '}';
     }
 }

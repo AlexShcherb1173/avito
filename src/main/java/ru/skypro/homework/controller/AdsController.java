@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +32,6 @@ public class AdsController {
 
     private static final Logger log = LoggerFactory.getLogger(AdsController.class);
 
-    public AdsController(AdService adService) {
-        this.adService = adService;
-    }
 
     @Operation(summary = "получение всех объявлений", responses = {
             @ApiResponse(responseCode = "200", description = "OK",
@@ -53,10 +51,16 @@ public class AdsController {
     }
     )
     @PostMapping
-    public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties, @RequestPart("image") MultipartFile image) {
-        log.info(" Добавить объявления ");
-        Ad ad = adService.addAd(properties, image.getBytes());
-        return ResponseEntity.ok(ad);
+    public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties, @RequestPart("image") MultipartFile image, Authentication authentication) {
+        log.info("Добавить объявления", authentication.name());
+        try {
+            Ad ad = adService.addAd(properties, image.getBytes(), authentication);
+            return ResponseEntity.ok(ad);
+        }  catch (Exception e){
+            log.error(" Ошибка добавления объявления ", e);
+            return ResponseEntity.badRequest().build();
+        }
+
     }
 
     @Operation(summary = "получение информации об объявлении", responses = {
@@ -106,10 +110,17 @@ public class AdsController {
     }
     )
     @GetMapping("/me")
-    public ResponseEntity<Ads> getAdsMe(){
-        log.info("Получить мои объявления ");
-        Ads ads = adService.getAdsMe();
-        return ResponseEntity.ok(ads);
+    public ResponseEntity<Ads> getAdsMe(Authentication authentication){
+        log.info("Получить мои объявления ", authentication.name());
+        try {
+            Ads ads = adService.getAdsMe(authentication);
+            return ResponseEntity.ok(ads);
+        } catch (Exception e) {
+            log.error(" Ошибка получения моих объявлений ");
+            return ResponseEntity.badRequest().build();
+        }
+
+
     }
 
 

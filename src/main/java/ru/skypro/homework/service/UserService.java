@@ -6,5 +6,12 @@ import ru.skypro.homework.dto.User;
 public interface UserService {
     User getCurrentUser();
 
-    User updateUser(UpdateUser updateUser);
+    User updateUser(UpdateUser updateUser,Integer userId);
+
+    User getUserById(Integer userId);
+
+
+    void deleteUser(Integer userId);
+
+    String getCurrentUsername();
 }

@@ -3,8 +3,9 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -16,7 +17,7 @@ import ru.skypro.homework.dto.Register;
 import ru.skypro.homework.service.AuthService;
 
 @Slf4j
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin(value = "http://localhost:3000", allowCredentials = "true")
 @RestController
 @Tag(name = " Авторизация", description = "API для аутентификации и регистрации")
 public class AuthController {
@@ -27,6 +28,8 @@ public class AuthController {
         this.authService = authService;
     }
 
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     @Operation(summary = "авторизация пользователя", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
 
@@ -35,6 +38,7 @@ public class AuthController {
     )
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Login login) {
+        log.info("Login attempt for user: {}", login.getUsername());
         if (authService.login(login.getUsername(), login.getPassword())) {
             return ResponseEntity.ok().build();
         } else {
@@ -50,6 +54,7 @@ public class AuthController {
     )
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
+        log.info("Registration attempt for user: {}", register.getUsername());
         if (authService.register(register)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {

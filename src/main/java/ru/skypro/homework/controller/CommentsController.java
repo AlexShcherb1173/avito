@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +29,6 @@ public class CommentsController {
 
     private static final Logger log = LoggerFactory.getLogger(CommentsController.class);
 
-    public CommentsController(CommentService commentService) {
-        this.commentService = commentService;
-    }
 
     @Operation(summary = "Получение комментариев объявления", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Comments.class))),
@@ -52,10 +50,15 @@ public class CommentsController {
     }
     )
     @PostMapping("/{id}/comments")
-    public ResponseEntity<Comment> addComment (@PathVariable Integer id, @RequestBody CreateOrUpdateComment createOrUpdateComment){
-        log.info("добавление комментария к объявлению:" + id);
-        Comment comment = commentService.addComment(id, createOrUpdateComment);
-        return ResponseEntity.ok(comment);
+    public ResponseEntity<Comment> addComment (@PathVariable Integer id, @RequestBody CreateOrUpdateComment createOrUpdateComment, Authentication authentication) {
+        log.info("добавление комментария к объявлению:" + id, authentication.name());
+        try {
+            Comment comment = commentService.addComment(id, createOrUpdateComment, authentication);
+            return ResponseEntity.ok(comment);
+        }catch (RuntimeException e){
+            log.error(" Ошибка добавления комментария к объявлению ", id, e);
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Operation(summary = "Удаление комментария", responses = {

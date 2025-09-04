@@ -1,5 +1,6 @@
 package ru.skypro.homework.service;
 
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
@@ -7,7 +8,7 @@ import ru.skypro.homework.dto.CreateOrUpdateComment;
 public interface CommentService {
     Comments getComments(Integer adId);
 
-    Comment addComment(Integer adId, CreateOrUpdateComment comment);
+    Comment addComment(Integer adId, CreateOrUpdateComment comment, Authentication authentication);
 
     void deleteComment(Integer adId, Integer commentId);
 

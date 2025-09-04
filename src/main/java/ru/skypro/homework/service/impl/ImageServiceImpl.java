@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,22 +29,14 @@ public class ImageServiceImpl implements ImageService {
 
     private static final String IMAGE_DIRECTORY = "images/";
 
-    public ImageServiceImpl(UserRepository userRepository, AdRepository adRepository) {
-        this.userRepository = userRepository;
-        this.adRepository = adRepository;
-    }
     private static final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
 
     @Override
     @Transactional
-    public void updateUserImage(byte[] image) {
+    public void updateUserImage(byte[] image, Authentication authentication) {
         try {
-            // TODO: Получить текущего пользователя из SecurityContext
-            Integer currentUserId = 1; // Заглушка
-            UserEntity user = userRepository.findById(currentUserId)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-
-            String imageUrl = saveImage(image, "user_" + currentUserId);
+            UserEntity user = userRepository.findById(Integer.valueOf(authentication.name())).orElseThrow(() -> new RuntimeException("User not found"));
+            String imageUrl = saveImage(image, "user_" + user.getId());
             user.setImageUrl(imageUrl);
             userRepository.save(user);
 
@@ -69,7 +62,6 @@ public class ImageServiceImpl implements ImageService {
             throw new RuntimeException("Failed to save ad image", e);
         }
     }
-
 
     private String saveImage(byte[] imageData, String prefix) throws IOException, IOException {
         Path directory = Paths.get(IMAGE_DIRECTORY);
