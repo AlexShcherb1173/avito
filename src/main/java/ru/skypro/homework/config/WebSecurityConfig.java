@@ -39,20 +39,17 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .authorizeHttpRequests(
-                        authorization ->
-                                authorization
-                                        .mvcMatchers(AUTH_WHITELIST)
-                                        .permitAll()
-                                        .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated())
-                .cors()
-                .and()
-                .httpBasic(withDefaults());
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers("/ads/**", "/users/**").authenticated()
+                )
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+                .httpBasic(org.springframework.security.config.Customizer.withDefaults());
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
