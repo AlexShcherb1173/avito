@@ -19,7 +19,7 @@ import ru.skypro.homework.service.UserService;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ImageService imageService; // ✅ Правильно
+    private final ImageService imageService;
 
     @Override
     public UserDto getUserDto(UserDetails userDetails) {

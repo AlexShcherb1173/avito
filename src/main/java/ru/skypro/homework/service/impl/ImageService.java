@@ -35,7 +35,7 @@ public class ImageService {
             Path destination = rootLocation.resolve(folder).resolve(filename).normalize();
             Files.createDirectories(destination.getParent());
             Files.copy(file.getInputStream(), destination);
-            return filename; // ✅ возвращаем имя
+            return filename; //  возвращаем имя
         } catch (IOException e) {
             throw new RuntimeException("Failed to save image", e);
         }
