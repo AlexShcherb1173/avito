@@ -1,14 +1,13 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Service
 @RequiredArgsConstructor

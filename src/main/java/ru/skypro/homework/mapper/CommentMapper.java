@@ -1,7 +1,6 @@
 package ru.skypro.homework.mapper;
 
 import org.mapstruct.*;
-import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.responseDto.CommentDto;

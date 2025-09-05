@@ -46,4 +46,16 @@ public class AuthController {
         authService.register(register);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> signIn() {
+        log.info("Успешный вход через /sign-in");
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login() {
+        log.info("Successful login");
+        return ResponseEntity.ok().build();
+    }
 }

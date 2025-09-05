@@ -1,9 +1,9 @@
 package ru.skypro.homework.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.mapper.CommentMapper;

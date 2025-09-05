@@ -3,28 +3,21 @@ package ru.skypro.homework.config;
 import jakarta.servlet.MultipartConfigElement;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
-
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import ru.skypro.homework.dto.Role;
 
 @Configuration
 @EnableWebSecurity
@@ -36,17 +29,6 @@ public class WebSecurityConfig {
         return config.getAuthenticationManager();
     }
 
-    @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user =
-                User.builder()
-                        .username("user@gmail.com")
-                        .password("password")
-                        .passwordEncoder(passwordEncoder::encode)
-                        .roles(Role.USER.name())
-                        .build();
-        return new InMemoryUserDetailsManager(user);
-    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -67,7 +49,7 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register", "/ads", "/ads/**", "/images/**").permitAll()
+                        .requestMatchers("/register", "/ads", "/ads/**", "/images/**", "/sign-in", "/login").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

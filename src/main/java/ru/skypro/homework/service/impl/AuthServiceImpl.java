@@ -1,14 +1,14 @@
 package ru.skypro.homework.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.exceptions.UsernameExistsException;
-import ru.skypro.homework.model.User;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.exceptions.UsernameExistsException;
 import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 

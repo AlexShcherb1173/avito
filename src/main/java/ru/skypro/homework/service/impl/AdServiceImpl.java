@@ -1,13 +1,14 @@
 package ru.skypro.homework.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.User;
@@ -17,7 +18,6 @@ import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
-import ru.skypro.homework.dto.CreateOrUpdateAd;
 
 import java.time.LocalDateTime;
 import java.util.List;
