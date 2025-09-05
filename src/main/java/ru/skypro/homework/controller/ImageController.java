@@ -14,18 +14,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.service.ImageService;
+import ru.skypro.homework.service.impl.ImageServiceImpl;
 
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequiredArgsConstructor
 @Tag(name = "Изображения", description = "API для работы с изображениями")
 public class ImageController {
 
-    private final ImageService imageService;
+    private final ImageServiceImpl imageService;
 
     private static final Logger log = LoggerFactory.getLogger(ImageController.class);
+
+    public ImageController(ImageServiceImpl imageService) {
+        this.imageService = imageService;
+    }
 
 
     @Operation(summary = "Обновление аватара пользователя", responses = {

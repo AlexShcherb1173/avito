@@ -1,6 +1,5 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
@@ -8,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.model.AdEntity;
-import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.model.Users;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.ImageService;
@@ -21,7 +20,6 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
 
     private final UserRepository userRepository;
@@ -31,11 +29,16 @@ public class ImageServiceImpl implements ImageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
 
+    public ImageServiceImpl(UserRepository userRepository, AdRepository adRepository) {
+        this.userRepository = userRepository;
+        this.adRepository = adRepository;
+    }
+
     @Override
     @Transactional
     public void updateUserImage(byte[] image, Authentication authentication) {
         try {
-            UserEntity user = userRepository.findById(Integer.valueOf(authentication.name())).orElseThrow(() -> new RuntimeException("User not found"));
+            Users user = userRepository.findById(Integer.valueOf(authentication.name())).orElseThrow(() -> new RuntimeException("User not found"));
             String imageUrl = saveImage(image, "user_" + user.getId());
             user.setImageUrl(imageUrl);
             userRepository.save(user);

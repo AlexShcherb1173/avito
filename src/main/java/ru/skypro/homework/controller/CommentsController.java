@@ -16,18 +16,22 @@ import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.service.impl.CommentServiceImpl;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
-@RequiredArgsConstructor
 @Tag(name = "Комментарии", description = "API для работы с комментариями")
 public class CommentsController {
 
-    private final CommentService commentService;
+    private final CommentServiceImpl commentService;
 
     private static final Logger log = LoggerFactory.getLogger(CommentsController.class);
+
+    public CommentsController(CommentServiceImpl commentService) {
+        this.commentService = commentService;
+    }
 
 
     @Operation(summary = "Получение комментариев объявления", responses = {

@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 
-import javax.persistence.*;
+
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -30,7 +30,7 @@ public class CommentEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    private UserEntity author;
+    private Users author;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ad_id", nullable = false)
@@ -46,7 +46,7 @@ public class CommentEntity {
         this.text = text;
     }
 
-    public UserEntity getAuthor() {
+    public Users getAuthor() {
         return author;
     }
 
@@ -74,7 +74,7 @@ public class CommentEntity {
         this.id = id;
     }
 
-    public void setAuthor(UserEntity author) {
+    public void setAuthor(Users author) {
         this.author = author;
     }
 

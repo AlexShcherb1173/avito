@@ -19,18 +19,22 @@ import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.service.impl.AdServiceImpl;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
-@RequiredArgsConstructor
 @Tag(name = " Объявления ", description = "API для работы с объявлениями")
 public class AdsController {
 
-    private final AdService adService;
+    private final AdServiceImpl adService;
 
     private static final Logger log = LoggerFactory.getLogger(AdsController.class);
+
+    public AdsController(AdServiceImpl adService) {
+        this.adService = adService;
+    }
 
 
     @Operation(summary = "получение всех объявлений", responses = {

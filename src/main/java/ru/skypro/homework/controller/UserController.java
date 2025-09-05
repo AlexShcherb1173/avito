@@ -19,19 +19,25 @@ import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.service.PasswordService;
 import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.service.impl.PasswordServiceImpl;
+import ru.skypro.homework.service.impl.UserServiceImpl;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
 @Tag(name = " Пользователи ", description = " API для работы с пользователями ")
 public class UserController {
 
-    private final UserService userService;
-    private final PasswordService passwordService;
+    private final UserServiceImpl userService;
+    private final PasswordServiceImpl passwordService;
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
+
+    public UserController(UserServiceImpl userService, PasswordServiceImpl passwordService) {
+        this.userService = userService;
+        this.passwordService = passwordService;
+    }
 
     @Operation(
             summary = "Обновление пароля",

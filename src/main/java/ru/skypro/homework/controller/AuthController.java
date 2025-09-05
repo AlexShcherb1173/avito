@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.dto.Login;
 import ru.skypro.homework.dto.Register;
 import ru.skypro.homework.service.AuthService;
+import ru.skypro.homework.service.impl.AuthServiceImpl;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000", allowCredentials = "true")
@@ -22,9 +23,9 @@ import ru.skypro.homework.service.AuthService;
 @Tag(name = " Авторизация", description = "API для аутентификации и регистрации")
 public class AuthController {
 
-    private final AuthService authService;
+    private final AuthServiceImpl authService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthServiceImpl authService) {
         this.authService = authService;
     }
 
@@ -52,13 +53,32 @@ public class AuthController {
             @ApiResponse(responseCode = "400", description = "Bad Request")
     }
     )
+//    @PostMapping("/register")
+//    public ResponseEntity<?> register(@RequestBody Register register) {
+//        log.info("Registration attempt for user: {}", register.getUsername());
+//        if (authService.register(register)) {
+//            return ResponseEntity.status(HttpStatus.CREATED).build();
+//        } else {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+//        }
+//    }
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
         log.info("Registration attempt for user: {}", register.getUsername());
-        if (authService.register(register)) {
-            return ResponseEntity.status(HttpStatus.CREATED).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
+        try {
+            if (authService.register(register)) {
+                log.info("User {} registered successfully", register.getUsername());
+                return ResponseEntity.status(HttpStatus.CREATED).build();
+            } else {
+                log.warn("Registration failed - user {} already exists", register.getUsername());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("User already exists");
+            }
+        } catch (Exception e) {
+            log.error("Registration error for user {}: {}", register.getUsername(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Registration failed");
         }
     }
 }

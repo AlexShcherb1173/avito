@@ -1,39 +1,36 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.mapper.UserMapper;
-import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.model.Users;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+
     }
 
 
     @Override
     public User getCurrentUser() {
         String username = getCurrentUsername();
-        UserEntity userEntity = userRepository.findByEmail(username)
+        Users userEntity = userRepository.findByEmail(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return userMapper.toDto(userEntity);
+        return UserMapper.INSTANCE.toDto(userEntity);
     }
 
     @Override
@@ -42,21 +39,21 @@ public class UserServiceImpl implements UserService {
     public User updateUser(UpdateUser updateUser, Integer userId) {
         String targetUsername = (userId != null) ? getUserEmail(userId) : getCurrentUsername();
 
-        UserEntity userEntity = userRepository.findByEmail(targetUsername)
+        Users userEntity = userRepository.findByEmail(targetUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        userMapper.updateEntityFromDto(updateUser, userEntity);
-        UserEntity savedEntity = userRepository.save(userEntity);
+        UserMapper.INSTANCE.updateEntityFromDto(updateUser, userEntity);
+        Users savedEntity = userRepository.save(userEntity);
 
-        return userMapper.toDto(savedEntity);
+        return UserMapper.INSTANCE.toDto(savedEntity);
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN') or authentication.name == @userServiceImpl.getUserEmail(#userId)")
     public User getUserById(Integer userId) {
-        UserEntity userEntity = userRepository.findById(userId)
+        Users userEntity = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        return userMapper.toDto(userEntity);
+        return UserMapper.INSTANCE.toDto(userEntity);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public String getUserEmail(Integer userId) {
-        return userRepository.findById(userId).map(UserEntity::getEmail).orElseThrow(() -> new RuntimeException("User not found"));
+        return userRepository.findById(userId).map(Users::getEmail).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
 

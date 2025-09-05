@@ -1,6 +1,5 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -10,13 +9,13 @@ import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.AdEntity;
 import ru.skypro.homework.model.CommentEntity;
-import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.model.Users;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.CommentService;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,13 +26,13 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final AdRepository adRepository;
-    private final CommentMapper commentMapper;
 
-    public CommentServiceImpl(CommentRepository commentRepository, UserRepository userRepository, AdRepository adRepository, CommentMapper commentMapper) {
+
+    public CommentServiceImpl(CommentRepository commentRepository, UserRepository userRepository, AdRepository adRepository) {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.adRepository = adRepository;
-        this.commentMapper = commentMapper;
+
     }
 
     @Override
@@ -41,7 +40,7 @@ public class CommentServiceImpl implements CommentService {
         List<CommentEntity> entities = commentRepository.findByAdId(adId);
         Comments comments = new Comments();
         comments.setCount(entities.size());
-        comments.setResults(entities.stream().map(commentMapper::toDto).collect(Collectors.toList()));
+        comments.setResults(entities.stream().map(CommentMapper.INSTANCE::toDto).collect(Collectors.toList()));
         return comments;
     }
 
@@ -49,17 +48,17 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public Comment addComment(Integer adId, CreateOrUpdateComment comment, Authentication authentication) {
-        UserEntity author = userRepository.findByEmail(authentication.name()).orElseThrow(() -> new RuntimeException("User not found"));
+        Users author = userRepository.findByEmail(authentication.name()).orElseThrow(() -> new RuntimeException("User not found"));
 
         AdEntity ad = adRepository.findById(adId).orElseThrow(() -> new RuntimeException("Ad not found"));
 
-        CommentEntity entity = commentMapper.toEntity(comment);
+        CommentEntity entity = CommentMapper.INSTANCE.toEntity(comment);
         entity.setAuthor(author);
         entity.setAd(ad);
         entity.setCreatedAt(LocalDateTime.now());
 
         CommentEntity savedEntity = commentRepository.save(entity);
-        return commentMapper.toDto(savedEntity);
+        return CommentMapper.INSTANCE.toDto(savedEntity);
     }
 
     @Override
@@ -78,7 +77,7 @@ public class CommentServiceImpl implements CommentService {
 
         entity.setText(comment.getText());
         CommentEntity savedEntity = commentRepository.save(entity);
-        return commentMapper.toDto(savedEntity);
+        return CommentMapper.INSTANCE.toDto(savedEntity);
     }
 
 }
