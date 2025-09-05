@@ -1,8 +1,8 @@
 package mapper;
 
 
-import enity.Ad;
-import enity.User;
+import ru.skypro.homework.enity.Ad;
+import ru.skypro.homework.enity.User;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 

@@ -9,5 +9,5 @@ public class ExtendedAd {
     private String description;
     private Integer price;
     private String image;
-    private User author;
+    private UserDto author;
 }

@@ -2,8 +2,8 @@ package mapper;
 
 
 
-import enity.Comment;
-import enity.User;
+import ru.skypro.homework.enity.Comment;
+import ru.skypro.homework.enity.User;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 

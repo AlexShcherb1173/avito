@@ -1,6 +1,6 @@
 package repository;
 
-import enity.Ad;
+import ru.skypro.homework.enity.Ad;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

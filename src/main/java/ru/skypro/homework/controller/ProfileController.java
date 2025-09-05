@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.UpdateUser;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.UserDto;
 
 
 @RestController
@@ -16,8 +16,8 @@ public class ProfileController {
 
     @GetMapping
     @Operation(summary = "Получение данных профиля")
-    public ResponseEntity<User> getProfile() {
-        return ResponseEntity.ok(new User());
+    public ResponseEntity<UserDto> getProfile() {
+        return ResponseEntity.ok(new UserDto());
     }
 
     @PatchMapping

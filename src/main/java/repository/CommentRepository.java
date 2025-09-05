@@ -1,6 +1,6 @@
 package repository;
 
-import enity.Comment;
+import ru.skypro.homework.enity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

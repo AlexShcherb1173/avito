@@ -1,7 +1,7 @@
 package mapper;
 
-import enity.Ad;
-import enity.Comment;
+import ru.skypro.homework.enity.Ad;
+import ru.skypro.homework.enity.Comment;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import javax.persistence.*;
