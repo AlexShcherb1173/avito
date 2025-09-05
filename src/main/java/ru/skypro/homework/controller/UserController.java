@@ -10,12 +10,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.responseDto.UserDto;
@@ -30,32 +30,41 @@ public class UserController {
 
     @Operation(
             summary = "Получение своего профиля",
-            description = "Возвращает данные текущего пользователя: имя, фамилия, телефон."
+            description = "Возвращает данные текущего пользователя: имя, фамилия, телефон.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Данные пользователя получены успешно",
+                            content = @Content(schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован")
+            }
     )
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserDto> getUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public UserDto getUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         }
-        UserDto userDto = userService.getUserDto(userDetails);
-        return ResponseEntity.ok(userDto);
+        return userService.getUserDto(userDetails);
     }
 
     @Operation(
             summary = "Обновление профиля",
-            description = "Изменяет имя, фамилию и телефон текущего пользователя."
+            description = "Изменяет имя, фамилию и телефон текущего пользователя.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Профиль успешно обновлен",
+                            content = @Content(schema = @Schema(implementation = UserDto.class))),
+                    @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+                    @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован")
+            }
     )
     @PatchMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UserDto> updateUser(
+    public UserDto updateUser(
             @RequestBody @Valid UpdateUser dto,
             @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         }
-        UserDto updated = userService.updateUser(dto, userDetails);
-        return ResponseEntity.ok(updated);
+        return userService.updateUser(dto, userDetails);
     }
 
     @Operation(
@@ -73,7 +82,8 @@ public class UserController {
                     )
             ),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Аватар успешно обновлён"),
+                    @ApiResponse(responseCode = "200", description = "Аватар успешно обновлён",
+                            content = @Content(schema = @Schema(type = "string"))),
                     @ApiResponse(responseCode = "400", description = "Файл пустой или не изображение"),
                     @ApiResponse(responseCode = "401", description = "Не авторизован"),
                     @ApiResponse(responseCode = "413", description = "Файл слишком большой")
@@ -81,14 +91,20 @@ public class UserController {
     )
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateUserImage(
+    public String updateUserImage(
             @RequestPart("image") MultipartFile image,
             @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         }
-        String imagePath = userService.updateUserImage(image, userDetails);
-        return ResponseEntity.ok().build();
+
+        try {
+            return userService.updateUserImage(image, userDetails);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update user image");
+        }
     }
 
     @Operation(
@@ -107,13 +123,22 @@ public class UserController {
     )
     @PostMapping("/set_password")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> setPassword(
+    @ResponseStatus(HttpStatus.OK)
+    public void setPassword(
             @RequestBody @Valid NewPassword dto,
             @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         }
-        userService.setPassword(dto, userDetails);
-        return ResponseEntity.ok().build();
+
+        try {
+            userService.setPassword(dto, userDetails);
+        } catch (org.springframework.security.authentication.BadCredentialsException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to set password");
+        }
     }
 }

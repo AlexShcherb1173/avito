@@ -1,14 +1,13 @@
 package ru.skypro.homework.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.User;
@@ -18,10 +17,10 @@ import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.dto.CreateOrUpdateAd;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 
 @Service
 @RequiredArgsConstructor
@@ -76,19 +75,59 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public ExtendedAdDto getExtendedAd(Long id) {
-        // TODO: реализовать
-        return null;
+        log.info("Получение расширенной информации об объявлении ID: {}", id);
+
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Объявление не найдено: ID={}", id);
+                    return new EntityNotFoundException("Ad not found with id: " + id);
+                });
+
+        log.debug("Найдено объявление: {}", ad.getTitle());
+        return AdMapper.INSTANCE.toExtendedAdDto(ad);
     }
 
     @Override
     public AdDto updateAd(Long id, CreateOrUpdateAd dto) {
-        // TODO: реализовать
-        return null;
+        log.info("Обновление объявления ID: {}", id);
+        log.debug("Данные для обновления: {}", dto);
+
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Объявление не найдено для обновления: ID={}", id);
+                    return new EntityNotFoundException("Ad not found with id: " + id);
+                });
+
+        // Обновляем только те поля, которые пришли в DTO
+        if (dto.getTitle() != null) {
+            ad.setTitle(dto.getTitle());
+        }
+        if (dto.getPrice() != null) {
+            ad.setPrice(dto.getPrice());
+        }
+        if (dto.getDescription() != null) {
+            ad.setDescription(dto.getDescription());
+        }
+
+        Ad updatedAd = adRepository.save(ad);
+        log.info("Объявление успешно обновлено: ID={}", id);
+
+        return AdMapper.INSTANCE.toAdDto(updatedAd);
     }
 
     @Override
     public void deleteAd(Long id) {
-        // TODO: реализовать
+        log.info("Удаление объявления ID: {}", id);
+
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Объявление не найдено для удаления: ID={}", id);
+                    return new EntityNotFoundException("Ad not found with id: " + id);
+                });
+
+        // TODO: При необходимости добавить удаление связанных изображений
+        adRepository.delete(ad);
+        log.info("Объявление успешно удалено: ID={}", id);
     }
 
     @Override

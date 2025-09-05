@@ -5,11 +5,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.responseDto.CommentDto;
 import ru.skypro.homework.responseDto.CommentsResponse;
@@ -22,59 +22,43 @@ import ru.skypro.homework.service.CommentService;
 public class CommentController {
     private final CommentService commentService;
 
-    @Operation(
-            summary = "Получение комментариев к объявлению",
-            description = "Возвращает все комментарии к объявлению с пагинацией."
-    )
+    @Operation(summary = "Получение комментариев к объявлению", description = "Возвращает все комментарии к объявлению с пагинацией.")
     @GetMapping
-    public ResponseEntity<CommentsResponse> getComments(@PathVariable Long adId) {
-        CommentsResponse response = commentService.getComments(adId);
-        return ResponseEntity.ok(response);
+    public CommentsResponse getComments(@PathVariable Long adId) {
+        return commentService.getComments(adId);
     }
 
-    @Operation(
-            summary = "Добавление комментария",
-            description = "Оставляет комментарий под объявлением. Автор — текущий пользователь."
-    )
+    @Operation(summary = "Добавление комментария", description = "Оставляет комментарий под объявлением. Автор — текущий пользователь.")
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentDto> addComment(
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto addComment(
             @PathVariable Long adId,
             @RequestBody @Valid CreateOrUpdateComment commentDto,
             @AuthenticationPrincipal UserDetails userDetails) {
 
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         }
 
-        CommentDto dto = commentService.addComment(adId, userDetails.getUsername(), commentDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        return commentService.addComment(adId, userDetails.getUsername(), commentDto);
     }
 
-    @Operation(
-            summary = "Удаление комментария",
-            description = "Удаляет комментарий. Только автор или администратор может удалить."
-    )
+    @Operation(summary = "Удаление комментария", description = "Удаляет комментарий. Только автор или администратор может удалить.")
     @DeleteMapping("/{commentId}")
     @PreAuthorize("@commentServiceImpl.isCommentAuthor(#commentId, authentication.principal.username) or hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteComment(
-            @PathVariable Long adId,
-            @PathVariable Long commentId) {
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteComment(@PathVariable Long adId, @PathVariable Long commentId) {
         commentService.deleteComment(adId, commentId);
-        return ResponseEntity.ok().build();
     }
 
-    @Operation(
-            summary = "Редактирование комментария",
-            description = "Меняет текст комментария. Только автор может редактировать."
-    )
+    @Operation(summary = "Редактирование комментария", description = "Меняет текст комментария. Только автор может редактировать.")
     @PatchMapping("/{commentId}")
     @PreAuthorize("@commentServiceImpl.isCommentAuthor(#commentId, authentication.principal.username)")
-    public ResponseEntity<CommentDto> updateComment(
+    public CommentDto updateComment(
             @PathVariable Long adId,
             @PathVariable Long commentId,
             @RequestBody @Valid CreateOrUpdateComment dto) {
-        CommentDto updated = commentService.updateComment(adId, commentId, dto);
-        return ResponseEntity.ok(updated);
+        return commentService.updateComment(adId, commentId, dto);
     }
 }

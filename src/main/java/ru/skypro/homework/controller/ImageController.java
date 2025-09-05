@@ -20,10 +20,7 @@ public class ImageController {
         this.imageService = imageService;
     }
 
-    @Operation(
-            summary = "Получение изображения объявления",
-            description = "Возвращает изображение по имени файла."
-    )
+    @Operation(summary = "Получение изображения объявления", description = "Возвращает изображение по имени файла.")
     @GetMapping("/images/ads/{filename:.+}")
     public ResponseEntity<Resource> getAdImage(@PathVariable String filename) {
         try {
@@ -36,10 +33,7 @@ public class ImageController {
         }
     }
 
-    @Operation(
-            summary = "Получение аватара пользователя",
-            description = "Возвращает изображение профиля пользователя."
-    )
+    @Operation(summary = "Получение аватара пользователя", description = "Возвращает изображение профиля пользователя.")
     @GetMapping("/images/users/{filename:.+}")
     public ResponseEntity<Resource> getUserImage(@PathVariable String filename) {
         try {
