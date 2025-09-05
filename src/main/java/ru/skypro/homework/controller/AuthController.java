@@ -10,40 +10,22 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skypro.homework.dto.Login;
 import ru.skypro.homework.dto.Register;
-import ru.skypro.homework.responseDto.JwtResponse;
 import ru.skypro.homework.service.AuthService;
 
 @Slf4j
 @RestController
+@Transactional
 @AllArgsConstructor
 @Tag(name = "Authentication", description = "API для регистрации и входа пользователей")
 public class AuthController {
 
-    private final AuthService authService;
 
-    @Operation(
-            summary = "Вход в систему",
-            description = "Аутентифицирует пользователя и возвращает JWT токен.",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Логин и пароль",
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = Login.class))
-            ),
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Успешный вход", content = @Content(schema = @Schema(implementation = JwtResponse.class))),
-                    @ApiResponse(responseCode = "401", description = "Неверные учётные данные")
-            }
-    )
-    @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody @Valid Login login) {
-        JwtResponse response = authService.login(login);
-        return ResponseEntity.ok(response);
-    }
+    private final AuthService authService;
 
     @Operation(
             summary = "Регистрация нового пользователя",
