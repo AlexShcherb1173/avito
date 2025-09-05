@@ -37,6 +37,10 @@ databaseChangeLog:
               - column: {name: text, type: text}
               - column: {name: created_at, type: timestamp}
 
+  - changeSet:
+      id: 2
+      author: your_name
+      changes:
         - addForeignKeyConstraint:
             baseTableName: ad
             baseColumnNames: author_id
