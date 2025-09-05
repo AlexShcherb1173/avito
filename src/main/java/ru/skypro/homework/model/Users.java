@@ -41,6 +41,7 @@ public class Users implements UserDetails {
     @Column(length = 20)
     private String phone;
 
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
