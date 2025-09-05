@@ -11,21 +11,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.exceptions.UsernameExistsException;
 import ru.skypro.homework.service.AuthService;
 
 @Slf4j
 @RestController
 @Transactional
-@AllArgsConstructor
 @Tag(name = "Authentication", description = "API для регистрации и входа пользователей")
 public class AuthController {
 
-
     private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @Operation(
             summary = "Регистрация нового пользователя",
@@ -43,7 +47,18 @@ public class AuthController {
     )
     @PostMapping("/register")
     public ResponseEntity<Void> register(@RequestBody @Valid Register register) {
-        authService.register(register);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        try {
+            authService.register(register);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (UsernameExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+    }
+
+    // Обработчик исключения для UsernameExistsException
+
+    @ExceptionHandler(UsernameExistsException.class)
+    public ResponseEntity<String> handleUsernameExistsException(UsernameExistsException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 }
