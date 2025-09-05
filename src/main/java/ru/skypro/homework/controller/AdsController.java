@@ -6,19 +6,18 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
-import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.service.impl.AdServiceImpl;
 
 @Slf4j
@@ -56,7 +55,7 @@ public class AdsController {
     )
     @PostMapping
     public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties, @RequestPart("image") MultipartFile image, Authentication authentication) {
-        log.info("Добавить объявления", authentication.name());
+        log.info("Добавить объявления", authentication.getName());
         try {
             Ad ad = adService.addAd(properties, image.getBytes(), authentication);
             return ResponseEntity.ok(ad);
@@ -115,7 +114,7 @@ public class AdsController {
     )
     @GetMapping("/me")
     public ResponseEntity<Ads> getAdsMe(Authentication authentication){
-        log.info("Получить мои объявления ", authentication.name());
+        log.info("Получить мои объявления ", authentication.getName());
         try {
             Ads ads = adService.getAdsMe(authentication);
             return ResponseEntity.ok(ads);

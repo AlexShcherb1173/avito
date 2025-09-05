@@ -1,8 +1,9 @@
 package ru.skypro.homework.service.impl;
 
 import jakarta.transaction.Transactional;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mapper.AdMapper;
@@ -41,7 +42,7 @@ public class AdServiceImpl implements AdService {
     @Override
     @Transactional
     public Ad addAd(CreateOrUpdateAd properties, byte[] image, Authentication authentication) {
-        Users author = userRepository.findByEmail(authentication.name())
+        Users author = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException(" Пользователь не найден "));
         AdEntity entity = AdMapper.INSTANCE.toEntity(properties);
         entity.setAuthor(author);
@@ -77,7 +78,7 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public Ads getAdsMe(Authentication authentication) {
-        Users user = userRepository.findByEmail(authentication.name()).orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("User not found"));
 
         List<AdEntity> entities = adRepository.findByAuthorId(user.getId());
         Ads ads = new Ads();

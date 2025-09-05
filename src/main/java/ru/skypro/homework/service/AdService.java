@@ -1,7 +1,7 @@
 package ru.skypro.homework.service;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.springframework.security.access.prepost.PreAuthorize;
+
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;

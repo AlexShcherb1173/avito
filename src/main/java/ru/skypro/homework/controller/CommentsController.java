@@ -5,17 +5,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
-import ru.skypro.homework.service.CommentService;
+
 import ru.skypro.homework.service.impl.CommentServiceImpl;
 
 @Slf4j
@@ -55,7 +55,7 @@ public class CommentsController {
     )
     @PostMapping("/{id}/comments")
     public ResponseEntity<Comment> addComment (@PathVariable Integer id, @RequestBody CreateOrUpdateComment createOrUpdateComment, Authentication authentication) {
-        log.info("добавление комментария к объявлению:" + id, authentication.name());
+        log.info("добавление комментария к объявлению:" + id, authentication.getName());
         try {
             Comment comment = commentService.addComment(id, createOrUpdateComment, authentication);
             return ResponseEntity.ok(comment);

@@ -1,9 +1,10 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.model.AdEntity;
@@ -38,7 +39,7 @@ public class ImageServiceImpl implements ImageService {
     @Transactional
     public void updateUserImage(byte[] image, Authentication authentication) {
         try {
-            Users user = userRepository.findById(Integer.valueOf(authentication.name())).orElseThrow(() -> new RuntimeException("User not found"));
+            Users user = userRepository.findById(Integer.valueOf(authentication.getName())).orElseThrow(() -> new RuntimeException("User not found"));
             String imageUrl = saveImage(image, "user_" + user.getId());
             user.setImageUrl(imageUrl);
             userRepository.save(user);

@@ -1,7 +1,8 @@
 package ru.skypro.homework.service.impl;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
@@ -48,7 +49,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public Comment addComment(Integer adId, CreateOrUpdateComment comment, Authentication authentication) {
-        Users author = userRepository.findByEmail(authentication.name()).orElseThrow(() -> new RuntimeException("User not found"));
+        Users author = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("User not found"));
 
         AdEntity ad = adRepository.findById(adId).orElseThrow(() -> new RuntimeException("Ad not found"));
 

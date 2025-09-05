@@ -1,6 +1,7 @@
 package ru.skypro.homework.service;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;

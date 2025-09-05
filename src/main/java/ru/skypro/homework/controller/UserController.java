@@ -5,20 +5,18 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
-import ru.skypro.homework.service.PasswordService;
-import ru.skypro.homework.service.UserService;
 import ru.skypro.homework.service.impl.PasswordServiceImpl;
 import ru.skypro.homework.service.impl.UserServiceImpl;
 
@@ -49,7 +47,7 @@ public class UserController {
     )
     @PostMapping("/set_password")
     public ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword, Authentication authentication) {
-        log.info("Set password called by user: {}", authentication.name());
+        log.info("Set password called by user: {}", authentication.getName());
         try {
             boolean success = passwordService.setPassword(newPassword, authentication);
             if (success) {

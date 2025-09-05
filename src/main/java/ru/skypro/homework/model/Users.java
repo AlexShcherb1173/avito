@@ -27,7 +27,7 @@ public class Users implements UserDetails {
     private String email;
 
     @Column(unique = true, nullable = false, length = 32)
-    private String Username;
+    private String username;
 
     @Column(nullable = false)
     private String password;
@@ -71,18 +71,14 @@ public class Users implements UserDetails {
         return List.of(new SimpleGrantedAuthority("Role_" + role.name()));
     }
 
-//    @Override
-//    public String getUsername(){
-//        return email;
-//    }
 
     @Override
     public String getUsername() {
-        return Username;
+        return username;
     }
 
     public void setUsername(String username) {
-        Username = username;
+        this.username = username;
     }
 
     @Override
@@ -203,12 +199,12 @@ public class Users implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Users users = (Users) o;
-        return enabled == users.enabled && Objects.equals(id, users.id) && Objects.equals(email, users.email) && Objects.equals(Username, users.Username) && Objects.equals(password, users.password) && Objects.equals(firstName, users.firstName) && Objects.equals(lastName, users.lastName) && Objects.equals(phone, users.phone) && role == users.role && Objects.equals(imageUrl, users.imageUrl) && Objects.equals(createdAt, users.createdAt) && Objects.equals(ads, users.ads) && Objects.equals(comments, users.comments);
+        return enabled == users.enabled && Objects.equals(id, users.id) && Objects.equals(email, users.email) && Objects.equals(username, users.username) && Objects.equals(password, users.password) && Objects.equals(firstName, users.firstName) && Objects.equals(lastName, users.lastName) && Objects.equals(phone, users.phone) && role == users.role && Objects.equals(imageUrl, users.imageUrl) && Objects.equals(createdAt, users.createdAt) && Objects.equals(ads, users.ads) && Objects.equals(comments, users.comments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, email, Username, password, firstName, lastName, phone, role, imageUrl, createdAt, enabled, ads, comments);
+        return Objects.hash(id, email, username, password, firstName, lastName, phone, role, imageUrl, createdAt, enabled, ads, comments);
     }
 
     @Override
@@ -216,7 +212,7 @@ public class Users implements UserDetails {
         return "Users{" +
                 "id=" + id +
                 ", email='" + email + '\'' +
-                ", Username='" + Username + '\'' +
+                ", Username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +

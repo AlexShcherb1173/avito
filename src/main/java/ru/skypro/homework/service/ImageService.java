@@ -1,6 +1,7 @@
 package ru.skypro.homework.service;
 
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
+import org.springframework.security.core.Authentication;
 
 public interface ImageService {
     void updateUserImage(byte[] image, Authentication authentication);

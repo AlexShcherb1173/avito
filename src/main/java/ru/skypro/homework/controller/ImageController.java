@@ -5,15 +5,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.service.ImageService;
+
 import ru.skypro.homework.service.impl.ImageServiceImpl;
 
 
@@ -39,7 +39,7 @@ public class ImageController {
     )
     @PatchMapping("/users/me/image")
     public ResponseEntity<?> updateUserImage(@RequestParam("image") MultipartFile image, Authentication authentication) {
-        log.info(" Обновить изображение пользователя ", authentication.name());
+        log.info(" Обновить изображение пользователя ", authentication.getName());
         try {
         imageService.updateUserImage(image.getBytes(), authentication);
         return ResponseEntity.ok().build();
@@ -58,7 +58,7 @@ public class ImageController {
     )
     @PatchMapping("/ads/{id}/image")
     public ResponseEntity<?> updateAdImage(@PathVariable Integer id, @RequestParam("image") MultipartFile image,Authentication authentication) {
-        log.info("Обновить изображение объявления пользователя: {}", id, authentication.name());
+        log.info("Обновить изображение объявления пользователя: {}", id, authentication.getName());
         try {
             imageService.updateAdImage(id, image.getBytes());
             return ResponseEntity.ok().build();
