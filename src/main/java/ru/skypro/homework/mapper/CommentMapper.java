@@ -8,7 +8,7 @@ import ru.skypro.homework.responseDto.CommentDto;
 import java.time.ZoneOffset;
 import java.util.List;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CommentMapper {
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
