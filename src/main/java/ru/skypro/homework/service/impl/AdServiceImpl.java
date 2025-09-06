@@ -1,5 +1,7 @@
 package ru.skypro.homework.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import jakarta.persistence.EntityNotFoundException;
@@ -8,6 +10,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.User;
@@ -23,8 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 // Реализация сервиса для работы с объявлениями.
-// Обеспечивает создание, получение, обновление и удаление объявлений.
-
+// Обеспечивает создание, получение, обновление
 @Service
 @RequiredArgsConstructor
 public class AdServiceImpl implements AdService {
@@ -32,14 +34,13 @@ public class AdServiceImpl implements AdService {
     private final AdRepository adRepository;
     private final ImageService imageService;
     private final UserRepository userRepository;
+    private final AdMapper adMapper;
     private static final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
-
     // Создание объявления из multipart данных.
     // @param userDetails данные аутентификации пользователя
     // @param createOrUpdateAd DTO с данными объявления
     // @param image файл изображения
     // @return AdDto созданного объявления
-
     @Override
     public AdDto createAdFromMultipart(UserDetails userDetails, CreateOrUpdateAd createOrUpdateAd, MultipartFile image) {
         if (userDetails == null) {
@@ -61,18 +62,20 @@ public class AdServiceImpl implements AdService {
                 });
 
         Ad ad = AdMapper.INSTANCE.toAd(createOrUpdateAd);
+
         ad.setAuthor(dbUser);
         ad.setCreatedAt(LocalDateTime.now());
 
         try {
             String filename = imageService.saveImage(image, "ads");
-            ad.setImage(filename); // Сохраняем только имя файла
+            ad.setImage("/images/ads/" + filename);
         } catch (Exception e) {
             log.error("Ошибка при сохранении изображения", e);
             throw new RuntimeException("Failed to save image", e);
         }
 
         Ad saved = adRepository.save(ad);
+
         AdDto result = AdMapper.INSTANCE.toAdDto(saved);
 
         log.info("Объявление успешно создано, ID: {}", result.getPk());
@@ -85,15 +88,10 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public ExtendedAdDto getExtendedAd(Long id) {
-        log.info("Получение расширенной информации об объявлении ID: {}", id);
-
         Ad ad = adRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.warn("Объявление не найдено: ID={}", id);
-                    return new EntityNotFoundException("Ad not found with id: " + id);
-                });
+                .orElseThrow(() -> new EntityNotFoundException("Объявление не найдено"));
 
-        return AdMapper.INSTANCE.toExtendedAdDto(ad);
+        return adMapper.toExtendedAdDto(ad); // ✅ Преобразуем Ad → ExtendedAdDto
     }
 
     // Обновление объявления.
@@ -156,10 +154,11 @@ public class AdServiceImpl implements AdService {
                 .orElseThrow(() -> new EntityNotFoundException("Ad not found"));
 
         String filename = imageService.saveImage(image, "ads");
-        ad.setImage(filename); // Сохраняем только имя файла
+        String imageUrl = "/images/ads/" + filename;
+        ad.setImage(imageUrl);
         adRepository.save(ad);
 
-        return "/images/ads/" + filename; // Возвращаем полный URL
+        return imageUrl;
     }
 
     // Получение объявлений текущего пользователя.
@@ -182,7 +181,7 @@ public class AdServiceImpl implements AdService {
     @Override
     public AdsResponse getAllAds() {
         List<Ad> ads = adRepository.findAll();
-        List<AdDto> dtos = AdMapper.INSTANCE.toAdDtoList(ads);
+        List<AdDto> dtos = adMapper.toAdDtoList(ads); // ✅ Преобразуем список Ad → AdDto
         return new AdsResponse(dtos.size(), dtos);
     }
 

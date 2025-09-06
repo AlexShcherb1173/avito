@@ -11,20 +11,25 @@ import java.util.List;
 // Маппер для преобразования между сущностью Comment и CommentDto.
 // Обеспечивает корректное отображение полей комментариев.
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CommentMapper {
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
-    // Преобразует сущность Comment в CommentDto.
-    // Маппит ID комментария в pk, данные автора и обрабатывает URL изображения автора.
-    // @param comment сущность комментария
-    // @return CommentDto
-
+    /**
+     * Преобразует сущность Comment в CommentDto.
+     * Обратите внимание:
+     * - id → pk
+     * - author.id → author
+     * - author.firstName → authorFirstName
+     * - author.image → authorImage (с префиксом)
+     * - createdAt → toEpochSecond в UTC
+     */
     @Mapping(source = "id", target = "pk")
     @Mapping(source = "author.id", target = "author")
     @Mapping(source = "author.firstName", target = "authorFirstName")
     @Mapping(source = "author.image", target = "authorImage", qualifiedByName = "addImagePrefix")
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(source = "text", target = "text")
     CommentDto toCommentDto(Comment comment);
 
     // Преобразует список комментариев в список CommentDto.
