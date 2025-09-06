@@ -1,40 +1,75 @@
 package ru.skypro.homework.controller;
 
-import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skypro.homework.dto.Login;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.exceptions.UsernameExistsException;
 import ru.skypro.homework.service.AuthService;
 
 @Slf4j
-@CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequiredArgsConstructor
+@Transactional
+@Tag(name = "Authentication", description = "API для регистрации и входа пользователей")
 public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Login login) {
-        if (authService.login(login.getUsername(), login.getPassword())) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
+    @Operation(
+            summary = "Регистрация нового пользователя",
+            description = "Создаёт нового пользователя. Логин должен быть уникальным.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Данные для регистрации",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Register.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Пользователь успешно зарегистрирован"),
+                    @ApiResponse(responseCode = "400", description = "Некорректные данные"),
+                    @ApiResponse(responseCode = "409", description = "Пользователь с таким логином уже существует")
+            }
+    )
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Register register) {
-        if (authService.register(register)) {
+    public ResponseEntity<Void> register(@RequestBody @Valid Register register) {
+        try {
+            authService.register(register);
             return ResponseEntity.status(HttpStatus.CREATED).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        } catch (UsernameExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
+    @PostMapping("/sign-in")
+    public ResponseEntity<?> signIn() {
+        log.info("Успешный вход через /sign-in");
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Void> login() {
+        log.info("Successful login");
+        return ResponseEntity.ok().build();
+    }
+    // Обработчик исключения для UsernameExistsException
+
+    @ExceptionHandler(UsernameExistsException.class)
+    public ResponseEntity<String> handleUsernameExistsException(UsernameExistsException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
+    
 }

@@ -1,0 +1,26 @@
+package ru.skypro.homework.service;
+
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.CreateOrUpdateAd;
+import ru.skypro.homework.responseDto.AdDto;
+import ru.skypro.homework.responseDto.AdsResponse;
+import ru.skypro.homework.responseDto.ExtendedAdDto;
+
+public interface AdService {
+    AdDto createAdFromMultipart(UserDetails userDetails, CreateOrUpdateAd dto, MultipartFile image);
+
+    ExtendedAdDto getExtendedAd(Long id);
+
+    AdDto updateAd(Long id, CreateOrUpdateAd dto);
+
+    void deleteAd(Long id);
+
+    AdsResponse getMyAds(String username);
+
+    AdsResponse getAllAds();
+
+    String updateAdImage(Long id, MultipartFile image);
+
+    boolean isOwner(Long adId, String username);
+}
