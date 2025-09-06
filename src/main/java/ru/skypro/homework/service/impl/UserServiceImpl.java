@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
             user.setImage(filename);
             userRepository.save(user);
 
-            // ВАЖНО: Возвращаем полный URL для доступа к изображению
+            // Возвращаем полный URL для доступа к изображению
             return "/images/users/" + filename;
         } catch (Exception e) {
             throw new RuntimeException("Failed to save image", e);
@@ -88,8 +88,8 @@ public class UserServiceImpl implements UserService {
     // @param dto DTO с текущим и новым паролем
     // @param userDetails данные аутентификации пользователя
     // @throws BadCredentialsException если текущий пароль неверный
-    // @throws IllegalArgumentException если новый пароль слишком короткий
-    // @throws RuntimeException если пользователь не найден
+    //  @throws IllegalArgumentException если новый пароль слишком короткий
+    //  @throws RuntimeException если пользователь не найден
 
     @Override
     public void setPassword(NewPassword dto, UserDetails userDetails) {
@@ -100,6 +100,11 @@ public class UserServiceImpl implements UserService {
         // Проверяем текущий пароль
         if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
             throw new BadCredentialsException("Current password is incorrect");
+        }
+
+        // Проверяем, что новый пароль не совпадает со старым
+        if (passwordEncoder.matches(dto.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("New password must be different from current password");
         }
 
         // Проверяем длину нового пароля
