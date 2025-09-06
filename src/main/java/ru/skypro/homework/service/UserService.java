@@ -1,0 +1,16 @@
+package ru.skypro.homework.service;
+
+import ru.skypro.homework.dto.UpdateUser;
+import ru.skypro.homework.dto.User;
+
+public interface UserService {
+
+    User updateUser(UpdateUser updateUser,Integer userId);
+
+    User getUserById(Integer userId);
+
+
+    void deleteUser(Integer userId);
+
+    String getCurrentUsername();
+}
