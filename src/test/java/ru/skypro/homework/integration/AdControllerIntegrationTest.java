@@ -14,12 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.repository.AdRepository;
 
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -36,26 +36,32 @@ class AdControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private AdRepository adRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
+        // Сначала чистим объявления, потом пользователей (иначе FK-конфликт)
+        adRepository.deleteAll();
         userRepository.deleteAll();
 
+        // Создаем пользователя с УНИКАЛЬНЫМ username для каждого теста
         User user = new User();
-        user.setUsername("user@mail.com");
+        user.setUsername("testuser@mail.com"); // Изменили на уникальный
         user.setPassword(passwordEncoder.encode("password"));
         user.setFirstName("Test");
         user.setLastName("User");
         user.setPhone("+7 (999) 888-77-66");
-        user.setEmail("user@mail.com");
+        user.setEmail("testuser@mail.com"); // Также изменил email
         user.setRole(ru.skypro.homework.dto.Role.USER);
         user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
     @Test
-    @WithMockUser(username = "user@mail.com", roles = "USER")
+    @WithMockUser(username = "testuser@mail.com", roles = "USER") // Используем новый username
     void createAd_AuthenticatedUser_ShouldCreateAd() throws Exception {
         MockMultipartFile image = new MockMultipartFile(
                 "image", "test.jpg", MediaType.IMAGE_JPEG_VALUE, "test".getBytes()
@@ -87,7 +93,6 @@ class AdControllerIntegrationTest {
                 "properties", "", MediaType.APPLICATION_JSON_VALUE, json.getBytes()
         );
 
-        // Ожидаем 401, но если получаем 500 - то тоже вполне
         mockMvc.perform(multipart("/ads")
                         .file(image)
                         .file(properties)
@@ -108,8 +113,11 @@ class AdControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "user@mail.com", roles = "USER")
+    @WithMockUser(username = "testuser@mail.com", roles = "USER") // Используем новый username
     void getMyAds_AuthenticatedUser_ShouldReturnEmptyList() throws Exception {
+        // Убеждаемся, что у пользователя нет объявлений
+        adRepository.deleteAll();
+
         mockMvc.perform(get("/ads/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").value(0));
@@ -117,7 +125,6 @@ class AdControllerIntegrationTest {
 
     @Test
     void getAd_NonExistentAd_ShouldReturnNotFound() throws Exception {
-        // Для неаутентифицированного доступа к несуществующему объявлению
         mockMvc.perform(get("/ads/9999"))
                 .andExpect(result -> {
                     int status = result.getResponse().getStatus();
@@ -128,13 +135,12 @@ class AdControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "user@mail.com", roles = "USER")
+    @WithMockUser(username = "testuser@mail.com", roles = "USER") // Используем новый username
     void updateAdImage_NonExistentAd_ShouldReturnNotFound() throws Exception {
         MockMultipartFile image = new MockMultipartFile(
                 "image", "test.jpg", MediaType.IMAGE_JPEG_VALUE, "test".getBytes()
         );
 
-        // Используем PATCH запрос напрямую
         mockMvc.perform(multipart("/ads/9999/image")
                         .file(image)
                         .with(request -> {

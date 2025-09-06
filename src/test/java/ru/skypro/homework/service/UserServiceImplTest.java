@@ -9,10 +9,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.skypro.homework.dto.NewPassword;
-import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.responseDto.UserDto;
 import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import java.util.Optional;
@@ -44,21 +42,21 @@ class UserServiceImplTest {
 
         NewPassword newPassword = new NewPassword();
         newPassword.setCurrentPassword("oldPass");
-        newPassword.setNewPassword("newPass");
+        newPassword.setNewPassword("newPassword123"); //  длиннее 8 символов
 
         User user = new User();
         user.setPassword("encodedOldPass");
 
         when(userRepository.findByUsername("test@mail.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("oldPass", "encodedOldPass")).thenReturn(true);
-        when(passwordEncoder.encode("newPass")).thenReturn("encodedNewPass");
+        when(passwordEncoder.encode("newPassword123")).thenReturn("encodedNewPass");
 
         // Act
         userService.setPassword(newPassword, userDetails);
 
         // Assert
         verify(passwordEncoder, times(1)).matches("oldPass", "encodedOldPass");
-        verify(passwordEncoder, times(1)).encode("newPass");
+        verify(passwordEncoder, times(1)).encode("newPassword123");
         assertEquals("encodedNewPass", user.getPassword());
     }
 
@@ -70,7 +68,7 @@ class UserServiceImplTest {
 
         NewPassword newPassword = new NewPassword();
         newPassword.setCurrentPassword("wrongPass");
-        newPassword.setNewPassword("newPass");
+        newPassword.setNewPassword("newPassword123"); //  длиннее 8 символов
 
         User user = new User();
         user.setPassword("encodedOldPass");

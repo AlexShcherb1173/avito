@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.User;
@@ -21,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
 // Проверяют бизнес-логику работы с комментариями:
 // (Добавление комментария, Удаление комментария, Проверку прав доступа)
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +35,9 @@ class CommentServiceImplTest {
 
     @Mock
     private CommentRepository commentRepository;
+
+    @Mock
+    private CommentMapper commentMapper;
 
     @InjectMocks
     private CommentServiceImpl commentService;
@@ -55,13 +58,20 @@ class CommentServiceImplTest {
         author.setId(1L);
         author.setUsername(username);
 
+        Comment savedComment = new Comment();
+        savedComment.setId(100L);
+        savedComment.setText("Great ad!");
+        savedComment.setAuthor(author);
+        savedComment.setAd(ad);
+
+        CommentDto expectedDto = new CommentDto();
+        expectedDto.setPk(100);
+        expectedDto.setText("Great ad!");
+
         when(adRepository.findById(adId)).thenReturn(Optional.of(ad));
         when(userRepository.findByUsername(username)).thenReturn(Optional.of(author));
-        when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> {
-            Comment comment = invocation.getArgument(0);
-            comment.setId(100L);
-            return comment;
-        });
+        when(commentRepository.save(any(Comment.class))).thenReturn(savedComment);
+        when(commentMapper.toCommentDto(savedComment)).thenReturn(expectedDto);
 
         // Вызов метода, который тестирует
         CommentDto result = commentService.addComment(adId, username, dto);
@@ -71,5 +81,6 @@ class CommentServiceImplTest {
         assertEquals(100, result.getPk());
         assertEquals("Great ad!", result.getText());
         verify(commentRepository, times(1)).save(any(Comment.class));
+        verify(commentMapper, times(1)).toCommentDto(savedComment);
     }
 }
