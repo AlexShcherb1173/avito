@@ -54,6 +54,8 @@ public class WebSecurityConfig {
                         // Публичные эндпоинты
                         .requestMatchers(
                                 "/register",
+                                "/login",
+                                "/sign-in",
                                 "/ads",
                                 "/ads/**",
                                 "/images/**",
