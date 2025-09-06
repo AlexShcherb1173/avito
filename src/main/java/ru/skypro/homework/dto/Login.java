@@ -1,6 +1,8 @@
 package ru.skypro.homework.dto;
 
 // используется для передачи данных от фронтенда к бэкенду при попытке входа пользователя в систему
+// Проверяет что поля не пустые и соответствуют ограничениям длины
+
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

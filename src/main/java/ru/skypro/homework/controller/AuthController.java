@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import ru.skypro.homework.dto.Login;
 import ru.skypro.homework.dto.Register;
 import ru.skypro.homework.service.AuthService;
 
@@ -49,5 +50,47 @@ public class AuthController {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @Operation(
+            summary = "Аутентификация пользователя",
+            description = "Выполняет вход пользователя в систему. Возвращает успешный статус при валидных учетных данных.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Данные для входа",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Login.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Успешная аутентификация"),
+                    @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
+            }
+    )
+    @PostMapping("/sign-in")
+    @ResponseStatus(HttpStatus.OK)
+    public void signIn(@RequestBody @Valid Login login) {
+        log.info("Попытка входа пользователя: {}", login.getUsername());
+        // Spring Security автоматически обработает аутентификацию через Basic Auth
+        // Этот метод просто логирует попытку входа
+    }
+
+    @Operation(
+            summary = "Альтернативный эндпоинт для аутентификации",
+            description = "Альтернативный endpoint для входа пользователя. Функционально идентичен /sign-in.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Данные для входа",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Login.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Успешная аутентификация"),
+                    @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
+            }
+    )
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    public void login(@RequestBody @Valid Login login) {
+        log.info("Попытка входа через /login для пользователя: {}", login.getUsername());
+        // Spring Security автоматически обработает аутентификацию через Basic Auth
+        // Этот метод просто логирует попытку входа
     }
 }
