@@ -24,15 +24,6 @@ public class UserServiceImpl implements UserService {
 
     }
 
-
-    @Override
-    public User getCurrentUser() {
-        String username = getCurrentUsername();
-        Users userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return UserMapper.INSTANCE.toDto(userEntity);
-    }
-
     @Override
     @PreAuthorize("hasRole('ADMIN') or #userId == null or authentication.name == @userServiceImpl.getUserEmail(#userId)")
     @Transactional
