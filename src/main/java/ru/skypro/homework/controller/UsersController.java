@@ -2,7 +2,8 @@ package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
@@ -11,31 +12,37 @@ import ru.skypro.homework.dto.User;
 import ru.skypro.homework.service.UserService;
 
 @RestController
-@RequestMapping
+@RequestMapping("/users")
+@RequiredArgsConstructor
 @Tag(name = "Пользователи")
 public class UsersController {
-    private final UserService service;
-    public UsersController(UserService service) { this.service = service; }
+
+    private final UserService userService;
 
     @Operation(summary = "Обновление пароля")
-    @PostMapping("/users/set_password")
-    public void setPassword(@RequestBody @Valid NewPassword dto) {
-        service.setPassword(dto);
+    @PostMapping("/set_password")
+    public void setPassword(@RequestBody NewPassword passwordDto,
+                            Authentication authentication) {
+        userService.updatePassword(authentication.getName(), passwordDto);
     }
 
     @Operation(summary = "Получение информации об авторизованном пользователе")
-    @GetMapping("/users/me")
-    public User getMe() { return service.getMe(); }
+    @GetMapping("/me")
+    public User getUserInfo(Authentication authentication) {
+        return userService.getUserInfo(authentication.getName());
+    }
 
     @Operation(summary = "Обновление информации об авторизованном пользователе")
-    @PatchMapping("/users/me")
-    public UpdateUser updateMe(@RequestBody @Valid UpdateUser dto) {
-        return service.updateMe(dto);
+    @PatchMapping("/me")
+    public UpdateUser updateUser(@RequestBody UpdateUser updateUser,
+                                 Authentication authentication) {
+        return userService.updateUser(authentication.getName(), updateUser);
     }
 
     @Operation(summary = "Обновление аватара авторизованного пользователя")
-    @PatchMapping(value = "/users/me/image", consumes = "multipart/form-data")
-    public void updateUserImage(@RequestPart("image") MultipartFile image) {
-        service.updateUserImage(image);
+    @PatchMapping("/me/image")
+    public void updateUserImage(@RequestParam MultipartFile image,
+                                Authentication authentication) {
+        userService.updateUserImage(authentication.getName(), image);
     }
 }
