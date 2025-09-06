@@ -4,7 +4,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
-import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.responseDto.AdDto;
@@ -52,7 +51,7 @@ public interface AdMapper {
     @Mapping(target = "image", ignore = true)
     Ad toAd(CreateOrUpdateAd dto);
 
-    // реобразует список объявлений в список AdDto.
+    // преобразует список объявлений в список AdDto.
     // @param ads список сущностей
     // @return список DTO
 

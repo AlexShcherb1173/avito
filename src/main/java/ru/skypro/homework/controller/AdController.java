@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Encoding;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
@@ -82,8 +80,7 @@ public class AdController {
 
     @Operation(summary = "Полная информация об объявлении", description = "Возвращает расширенные данные объявления: автор, описание, изображение и т.д.")
     @GetMapping("/{id}")
-    @PreAuthorize("@adServiceImpl.isOwner(#id, authentication.principal.username) or hasRole('ADMIN')")
-    public ExtendedAdDto getAd(@PathVariable Long id) {
+   public ExtendedAdDto getAd(@PathVariable Long id) {
         ExtendedAdDto dto = adService.getExtendedAd(id);
         if (dto == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found");

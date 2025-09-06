@@ -4,8 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.persistence.EntityNotFoundException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -20,7 +18,6 @@ import ru.skypro.homework.responseDto.AdDto;
 import ru.skypro.homework.responseDto.AdsResponse;
 import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
-import ru.skypro.homework.dto.CreateOrUpdateAd;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +33,7 @@ public class AdServiceImpl implements AdService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
     private static final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
+
     // Создание объявления из multipart данных.
     // @param userDetails данные аутентификации пользователя
     // @param createOrUpdateAd DTO с данными объявления

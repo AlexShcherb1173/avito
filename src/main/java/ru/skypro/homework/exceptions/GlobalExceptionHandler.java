@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
     }
 
 // Обработка ошибок валидации DTO объектов.
-// Возвращает HTTP 400 Bad Request с детальной информацией о ошибках валидации.
+// Возвращает HTTP 400 Bad Request с детальной информацией об ошибках валидации.
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(

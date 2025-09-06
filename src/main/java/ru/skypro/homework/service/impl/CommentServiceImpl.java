@@ -1,9 +1,9 @@
 package ru.skypro.homework.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 import ru.skypro.homework.mapper.CommentMapper;
@@ -55,7 +55,7 @@ public class CommentServiceImpl implements CommentService {
 
         Comment saved = commentRepository.save(comment);
 
-        // ✅ Используем внедрённый маппер
+        // Используем внедрённый маппер
         CommentDto result = commentMapper.toCommentDto(saved);
 
         log.info("Комментарий успешно добавлен, ID: {}", result.getPk());

@@ -26,7 +26,6 @@ public interface UserMapper {
      */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "role", ignore = true)
     @Mapping(target = "image", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     User toUser(Register register);
@@ -69,7 +68,10 @@ public interface UserMapper {
         }
 
         // Устанавливаем дефолты
-        user.setRole(Role.USER);
+        //роль ТОЛЬКО если она не задана в DTO
+        if (user.getRole() == null) {
+            user.setRole(Role.USER);
+        }
         user.setCreatedAt(LocalDateTime.now());
     }
 
@@ -100,7 +102,6 @@ public interface UserMapper {
             user.setPhone("");
         }
 
-        // Пример логирования (в реальном проекте используйте Logger)
-        System.out.println("✅ Профиль обновлён: " + user.getUsername());
+        System.out.println(" Профиль обновлён: " + user.getUsername());
     }
 }
