@@ -12,7 +12,7 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;                    // <-- ОБЯЗАТЕЛЬНО
+    private Long id;
 
     @Column(nullable = false, length = 2000)
     private String text;
