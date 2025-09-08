@@ -1,0 +1,809 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:8080
+  description: Generated server url
+paths:
+  /users/set_password:
+    post:
+      tags:
+      - Пользователи
+      summary: Обновление пароля
+      operationId: setPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPasswordDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+  /register:
+    post:
+      tags:
+      - Регистрация
+      summary: Регистрация пользователя
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            '*/*':
+              schema:
+                type: object
+        "400":
+          description: Bad Request
+          content:
+            '*/*':
+              schema:
+                type: object
+  /login:
+    post:
+      tags:
+      - Авторизация
+      summary: Авторизация пользователя
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+  /ads:
+    get:
+      tags:
+      - Объявления
+      summary: Получение всех объявлений
+      operationId: getAllAds
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdDto'
+    post:
+      tags:
+      - Объявления
+      summary: Добавить объявление
+      operationId: addAd
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateAdDto'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdsDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdDto'
+  /ads/{id}/comments:
+    get:
+      tags:
+      - Комментарии
+      summary: Получить комментарии объявления
+      operationId: getComments
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentsDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentsDto'
+        "404":
+          description: Not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentsDto'
+    post:
+      tags:
+      - Комментарии
+      summary: Добавить комментарий к объявлению
+      operationId: addComment
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateCommentDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        "404":
+          description: Not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+  /users/me:
+    get:
+      tags:
+      - Пользователи
+      summary: Получить информацию об авторизованном пользователе
+      operationId: getUser
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserDto'
+    patch:
+      tags:
+      - Пользователи
+      summary: Обновление информации об авторизованном пользователе
+      operationId: updateUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserDto'
+  /users/me/image:
+    patch:
+      tags:
+      - Пользователи
+      summary: Обновить аватар авторизованного пользователя
+      operationId: updateUserImage
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - image
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+  /ads/{id}:
+    get:
+      tags:
+      - Объявления
+      summary: Получить информацию об объявлении
+      operationId: getAds
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExtendedAdDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExtendedAdDto'
+        "404":
+          description: Not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ExtendedAdDto'
+    delete:
+      tags:
+      - Объявления
+      summary: Удалить объявление
+      operationId: removeAd
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "204":
+          description: No Content
+          content:
+            '*/*':
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+        "404":
+          description: Not found
+          content:
+            '*/*':
+              schema:
+                type: object
+    patch:
+      tags:
+      - Объявления
+      summary: Обновить информацию об объявлении
+      operationId: updateAds
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateAdDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdsDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdDto'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdDto'
+  /ads/{id}/image:
+    patch:
+      tags:
+      - Объявления
+      summary: Обновить картинку объявления
+      operationId: updateImage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+              - image
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/octet-stream: {}
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
+        "404":
+          description: Not found
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
+  /ads/{adId}/comments/{commentId}:
+    delete:
+      tags:
+      - Комментарии
+      summary: Удалить комментарий
+      operationId: deleteComment
+      parameters:
+      - name: adId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
+        "404":
+          description: Not found
+          content:
+            '*/*':
+              schema:
+                type: object
+    patch:
+      tags:
+      - Комментарии
+      summary: Обновить комментарий
+      operationId: updateComment
+      parameters:
+      - name: adId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      - name: commentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrUpdateCommentDto'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        "403":
+          description: Forbidden
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        "404":
+          description: Not found
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+  /users/image/{id}/from-db:
+    get:
+      tags:
+      - user-controller
+      operationId: getUserImage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
+  /ads/me:
+    get:
+      tags:
+      - Объявления
+      summary: Получить объявления авторизованного пользователя
+      operationId: getAdsMe
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdDto'
+        "401":
+          description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AdsDto'
+  /ads/image/{id}/from-db:
+    get:
+      tags:
+      - ads-controller
+      operationId: getAdImage
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  type: string
+                  format: byte
+components:
+  schemas:
+    NewPasswordDto:
+      type: object
+      properties:
+        currentPassword:
+          maxLength: 16
+          minLength: 8
+          type: string
+        newPassword:
+          maxLength: 16
+          minLength: 8
+          type: string
+    RegisterDto:
+      type: object
+      properties:
+        username:
+          maxLength: 32
+          minLength: 4
+          type: string
+          description: логин
+        password:
+          maxLength: 16
+          minLength: 8
+          type: string
+          description: пароль
+        firstName:
+          maxLength: 16
+          minLength: 2
+          type: string
+          description: имя пользователя
+        lastName:
+          maxLength: 16
+          minLength: 2
+          type: string
+          description: фамилия пользователя
+        phone:
+          pattern: "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}"
+          type: string
+          description: телефон пользователя
+        role:
+          type: string
+          description: роль пользователя
+          enum:
+          - USER
+          - ADMIN
+    LoginDto:
+      type: object
+      properties:
+        username:
+          maxLength: 32
+          minLength: 4
+          type: string
+        password:
+          maxLength: 16
+          minLength: 8
+          type: string
+    CreateOrUpdateAdDto:
+      type: object
+      properties:
+        title:
+          maxLength: 32
+          minLength: 4
+          type: string
+          description: заголовок объявления
+        price:
+          type: integer
+          description: цена объявления
+          format: int32
+        description:
+          maxLength: 64
+          minLength: 8
+          type: string
+          description: описание объявления
+    AdDto:
+      type: object
+      properties:
+        author:
+          type: integer
+          description: id автора объявления
+          format: int32
+        image:
+          type: string
+          description: ссылка на картинку объявления
+        pk:
+          type: integer
+          description: id объявления
+          format: int32
+        price:
+          type: integer
+          description: цена объявления
+          format: int32
+        title:
+          type: string
+          description: заголовок объявления
+    AdsDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: общее количество объявлений
+          format: int32
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdDto'
+    CreateOrUpdateCommentDto:
+      type: object
+      properties:
+        text:
+          type: string
+          description: общее количество комментариев
+    CommentDto:
+      type: object
+      properties:
+        author:
+          type: integer
+          description: id автора комментария
+          format: int32
+        authorImage:
+          type: string
+          description: ссылка на аватар автора комментария
+        authorFirstName:
+          type: string
+          description: имя создателя комментария
+        createdAt:
+          type: integer
+          description: дата и время создания комментария в миллисекундах с 00:00:00
+            01.01.1970
+          format: int64
+        pk:
+          type: integer
+          description: id комментария
+          format: int32
+        text:
+          type: string
+          description: текст комментария
+    UpdateUserDto:
+      type: object
+      properties:
+        firstName:
+          maxLength: 10
+          minLength: 3
+          type: string
+          description: имя пользователя
+        lastName:
+          maxLength: 10
+          minLength: 3
+          type: string
+          description: фамилия пользователя
+        phone:
+          pattern: "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}"
+          type: string
+          description: телефон пользователя
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: id пользователя
+          format: int32
+          readOnly: true
+        email:
+          type: string
+          description: логин пользователя
+        firstName:
+          type: string
+          description: имя пользователя
+        lastName:
+          type: string
+          description: фамилия пользователя
+        phone:
+          type: string
+          description: телефон пользователя
+        image:
+          type: string
+          description: ссылка на аватар пользователя
+    ExtendedAdDto:
+      type: object
+      properties:
+        pk:
+          type: integer
+          description: id объявления
+          format: int32
+        authorFirstName:
+          type: string
+          description: имя автора объявления
+        authorLastName:
+          type: string
+          description: фамилия автора объявления
+        description:
+          type: string
+          description: описание объявления
+        email:
+          type: string
+          description: логин автора объявления
+        image:
+          type: string
+          description: ссылка на картинку объявления
+        phone:
+          type: string
+          description: телефон автора объявления
+        price:
+          type: integer
+          description: цена объявления
+          format: int32
+        title:
+          type: string
+          description: заголовок объявления
+    CommentsDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: общее количество комментариев
+          format: int32
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentDto'
