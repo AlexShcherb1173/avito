@@ -16,6 +16,10 @@ import ru.skypro.homework.service.AdsService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с объявлениями.
+ * Обеспечивает полный CRUD функционал, а также работу с изображениями и доступом по ролям.
+ */
 @Service
 @Transactional
 public class AdsServiceImpl implements AdsService {
@@ -32,6 +36,11 @@ public class AdsServiceImpl implements AdsService {
         this.sec = sec;
     }
 
+    /**
+     * Получает список всех объявлений.
+     *
+     * @return DTO, содержащий общее количество и список объявлений
+     */
     @Override
     @Transactional(readOnly = true)
     public Ads getAllAds() {
@@ -42,6 +51,13 @@ public class AdsServiceImpl implements AdsService {
         return res;
     }
 
+    /**
+     * Создаёт новое объявление.
+     *
+     * @param props DTO с текстом объявления
+     * @param image изображение (не обрабатывается на этом этапе)
+     * @return созданное объявление
+     */
     @Override
     public Ad addAd(CreateOrUpdateAd props, MultipartFile image) {
         UserEntity me = sec.currentUser();
@@ -51,6 +67,11 @@ public class AdsServiceImpl implements AdsService {
         return mapper.toAdDto(saved);
     }
 
+    /**
+     * Получает объявления, созданные текущим пользователем.
+     *
+     * @return DTO со списком своих объявлений
+     */
     @Override
     @Transactional(readOnly = true)
     public Ads getMyAds() {
@@ -62,6 +83,13 @@ public class AdsServiceImpl implements AdsService {
         return res;
     }
 
+    /**
+     * Получает подробную информацию об объявлении по ID.
+     *
+     * @param id идентификатор объявления
+     * @return DTO с полной информацией об объявлении
+     * @throws IllegalArgumentException если объявление не найдено
+     */
     @Override
     @Transactional(readOnly = true)
     public ExtendedAd getAd(int id) {
@@ -69,6 +97,12 @@ public class AdsServiceImpl implements AdsService {
         return mapper.toExtendedDto(e);
     }
 
+    /**
+     * Удаляет объявление по ID, если пользователь — владелец или админ.
+     *
+     * @param id идентификатор объявления
+     * @throws AccessDeniedException если доступ запрещён
+     */
     @Override
     public void removeAd(int id) {
         AdEntity e = ads.findById(id).orElseThrow(() -> new IllegalArgumentException("ad not found"));
@@ -79,6 +113,15 @@ public class AdsServiceImpl implements AdsService {
         ads.delete(e);
     }
 
+    /**
+     * Обновляет объявление по ID.
+     * Разрешено владельцу или админу.
+     *
+     * @param id  идентификатор объявления
+     * @param dto DTO с новыми данными
+     * @return обновлённое объявление
+     * @throws AccessDeniedException если доступ запрещён
+     */
     @Override
     public Ad updateAd(int id, CreateOrUpdateAd dto) {
         AdEntity e = ads.findById(id).orElseThrow(() -> new IllegalArgumentException("ad not found"));
@@ -90,6 +133,15 @@ public class AdsServiceImpl implements AdsService {
         return mapper.toAdDto(e);
     }
 
+    /**
+     * Обновляет изображение объявления по ID.
+     * Метод пока возвращает пустой массив (заглушка).
+     *
+     * @param id    идентификатор объявления
+     * @param image изображение
+     * @return пустой массив байтов
+     * @throws AccessDeniedException если доступ запрещён
+     */
     @Override
     public byte[] updateImage(int id, MultipartFile image) {
         AdEntity e = ads.findById(id).orElseThrow(() -> new IllegalArgumentException("ad not found"));
@@ -100,3 +152,4 @@ public class AdsServiceImpl implements AdsService {
         return new byte[0];
     }
 }
+

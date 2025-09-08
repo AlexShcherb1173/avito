@@ -17,6 +17,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для управления комментариями к объявлениям.
+ * Отвечает за получение, создание, редактирование и удаление комментариев.
+ * Проверяет права доступа на уровне пользователя.
+ */
 @Service
 @Transactional
 public class CommentServiceImpl implements CommentService {
@@ -33,6 +38,12 @@ public class CommentServiceImpl implements CommentService {
         this.sec = sec;
     }
 
+    /**
+     * Получает все комментарии, относящиеся к объявлению по его ID.
+     *
+     * @param adId ID объявления
+     * @return DTO-объект {@link Comments} с количеством и списком комментариев
+     */
     @Override
     @Transactional(readOnly = true)
     public Comments getComments(int adId) {
@@ -43,6 +54,14 @@ public class CommentServiceImpl implements CommentService {
         return res;
     }
 
+    /**
+     * Добавляет новый комментарий к объявлению.
+     *
+     * @param adId ID объявления
+     * @param dto  DTO с текстом нового комментария
+     * @return DTO добавленного комментария
+     * @throws IllegalArgumentException если объявление не найдено
+     */
     @Override
     public Comment addComment(int adId, CreateOrUpdateComment dto) {
         AdEntity ad = ads.findById(adId).orElseThrow(() -> new IllegalArgumentException("ad not found"));
@@ -54,6 +73,14 @@ public class CommentServiceImpl implements CommentService {
         return mapper.toDto(comments.save(c));
     }
 
+    /**
+     * Удаляет комментарий по ID. Доступно автору комментария или администратору.
+     *
+     * @param adId       ID объявления
+     * @param commentId  ID комментария
+     * @throws AccessDeniedException если пользователь не имеет прав на удаление
+     * @throws IllegalArgumentException если комментарий не найден
+     */
     @Override
     public void deleteComment(int adId, int commentId) {
         CommentEntity c = comments.findById(commentId).orElseThrow(() -> new IllegalArgumentException("comment not found"));
@@ -64,6 +91,16 @@ public class CommentServiceImpl implements CommentService {
         comments.delete(c);
     }
 
+    /**
+     * Обновляет текст комментария. Доступно только автору или администратору.
+     *
+     * @param adId       ID объявления
+     * @param commentId  ID комментария
+     * @param dto        DTO с новым текстом комментария
+     * @return DTO обновлённого комментария
+     * @throws AccessDeniedException если пользователь не имеет прав на обновление
+     * @throws IllegalArgumentException если комментарий не найден
+     */
     @Override
     public Comment updateComment(int adId, int commentId, CreateOrUpdateComment dto) {
         CommentEntity c = comments.findById(commentId).orElseThrow(() -> new IllegalArgumentException("comment not found"));
@@ -75,3 +112,4 @@ public class CommentServiceImpl implements CommentService {
         return mapper.toDto(c);
     }
 }
+
