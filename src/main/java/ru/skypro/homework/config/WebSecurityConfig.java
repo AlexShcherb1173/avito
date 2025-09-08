@@ -2,18 +2,14 @@ package ru.skypro.homework.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import ru.skypro.homework.dto.Role;
-
-import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
     private static final String[] AUTH_WHITELIST = {
@@ -26,37 +22,21 @@ public class WebSecurityConfig {
     };
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user =
-                User.builder()
-                        .username("user@gmail.com")
-                        .password("password")
-                        .passwordEncoder(passwordEncoder::encode)
-                        .roles(Role.USER.name())
-                        .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .authorizeHttpRequests(
-                        authorization ->
-                                authorization
-                                        .mvcMatchers(AUTH_WHITELIST)
-                                        .permitAll()
-                                        .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated())
-                .cors()
-                .and()
-                .httpBasic(withDefaults());
+        http
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(AUTH_WHITELIST).permitAll()
+                        .requestMatchers("/ads/**", "/users/**").authenticated()
+                )
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+                .httpBasic(org.springframework.security.config.Customizer.withDefaults());
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
