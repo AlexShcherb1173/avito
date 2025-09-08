@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.service.CommentService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -18,6 +20,7 @@ import ru.skypro.homework.dto.CreateOrUpdateComment;
 @RequiredArgsConstructor
 @RequestMapping("/ads")
 public class CommentController {
+    private final CommentService commentService;
 
     @Operation(
             summary = "Получение комментариев объявления",
@@ -35,8 +38,8 @@ public class CommentController {
             }
     )
     @GetMapping("/{id}/comments")
-    public ResponseEntity<Comments> getComments(@PathVariable("id") int id) {
-        return ResponseEntity.ok(new Comments());
+    public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(commentService.getComments(id));
     }
 
     @Operation(
@@ -55,9 +58,10 @@ public class CommentController {
             }
     )
     @PostMapping("/{id}/comments")
-    public ResponseEntity<Comment> addComment(@PathVariable("id") int id,
-                                              @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        return ResponseEntity.ok(new Comment());
+    public ResponseEntity<Comment> addComment(@PathVariable("id") Integer id,
+                                              @RequestBody CreateOrUpdateComment createOrUpdateComment,
+                                              Authentication authentication) {
+        return ResponseEntity.ok(commentService.addComment(id, createOrUpdateComment, authentication));
     }
 
     @Operation(
@@ -70,8 +74,10 @@ public class CommentController {
             }
     )
     @DeleteMapping("/{adId}/comments/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable("adId") int adId,
-                                           @PathVariable("commentId") int commentId) {
+    public ResponseEntity<?> deleteComment(@PathVariable("adId") Integer adId,
+                                           @PathVariable("commentId") Integer commentId,
+                                           Authentication authentication) {
+        commentService.deleteComment(adId, commentId, authentication);
         return ResponseEntity.ok().build();
     }
 
@@ -92,9 +98,10 @@ public class CommentController {
             }
     )
     @PatchMapping("/{adId}/comments/{commentId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable("adId") int adId,
-                                                 @PathVariable("commentId") int commentId,
-                                                 @RequestBody CreateOrUpdateComment updateComment) {
-        return ResponseEntity.ok(new Comment());
+    public ResponseEntity<Comment> updateComment(@PathVariable("adId") Integer adId,
+                                                 @PathVariable("commentId") Integer commentId,
+                                                 @RequestBody CreateOrUpdateComment updateComment,
+                                                 Authentication authentication) {
+        return ResponseEntity.ok(commentService.updateComment(adId, commentId, updateComment, authentication));
     }
 }

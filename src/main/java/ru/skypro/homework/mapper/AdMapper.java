@@ -6,6 +6,7 @@ import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.entity.AdEntity;
+import ru.skypro.homework.entity.UserEntity;
 
 @Mapper(componentModel = "spring", uses = {UserMapper.class})
 public interface AdMapper {
@@ -32,6 +33,12 @@ public interface AdMapper {
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "comments", ignore = true)
     void updateEntityFromDto(CreateOrUpdateAd createOrUpdateAd, @org.mapstruct.MappingTarget AdEntity adEntity);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "imagePath", ignore = true)
+    @Mapping(target = "author", ignore = true)
+    @Mapping(target = "comments", ignore = true)
+    AdEntity toEntity(CreateOrUpdateAd createOrUpdateAd, UserEntity author);
 
     @org.mapstruct.Named("imagePathToImage")
     default String imagePathToImage(String imagePath) {

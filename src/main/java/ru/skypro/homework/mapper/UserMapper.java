@@ -32,4 +32,10 @@ public interface UserMapper {
     default String imagePathToImage(String imagePath) {
         return imagePath != null ? "/images/" + imagePath : null;
     }
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "imagePath", ignore = true)
+    @Mapping(target = "ads", ignore = true)
+    @Mapping(target = "comments", ignore = true)
+    UserEntity toEntity(Register register, String encodedPassword);
 }

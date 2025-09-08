@@ -9,12 +9,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
+import ru.skypro.homework.service.AdService;
+
+import java.io.IOException;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -22,6 +26,7 @@ import ru.skypro.homework.dto.ExtendedAd;
 @RequiredArgsConstructor
 @RequestMapping("/ads")
 public class AdController {
+    private final AdService adService;
 
     @Operation(
             summary = "Получение всех объявлений",
@@ -38,7 +43,7 @@ public class AdController {
     )
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
-        return ResponseEntity.ok(new Ads());
+        return ResponseEntity.ok(adService.getAllAds());
     }
 
     @Operation(
@@ -57,8 +62,9 @@ public class AdController {
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
-                                    @RequestPart("image") MultipartFile image) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(new Ad());
+                                    @RequestPart("image") MultipartFile image,
+                                    Authentication authentication) throws IOException {
+        return ResponseEntity.status(HttpStatus.CREATED).body(adService.addAd(properties, image, authentication));
     }
 
     @Operation(
@@ -77,8 +83,8 @@ public class AdController {
             }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<ExtendedAd> getAd(@PathVariable("id") int id) {
-        return ResponseEntity.ok(new ExtendedAd());
+    public ResponseEntity<ExtendedAd> getAd(@PathVariable("id") Integer id) {
+        return ResponseEntity.ok(adService.getAd(id));
     }
 
     @Operation(
@@ -91,7 +97,8 @@ public class AdController {
             }
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeAd(@PathVariable("id") int id) {
+    public ResponseEntity<?> removeAd(@PathVariable("id") Integer id, Authentication authentication) {
+        adService.removeAd(id, authentication);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -112,9 +119,10 @@ public class AdController {
             }
     )
     @PatchMapping("/{id}")
-    public ResponseEntity<Ad> updateAd(@PathVariable("id") int id,
-                                       @RequestBody CreateOrUpdateAd updateAd) {
-        return ResponseEntity.ok(new Ad());
+    public ResponseEntity<Ad> updateAd(@PathVariable("id") Integer id,
+                                       @RequestBody CreateOrUpdateAd updateAd,
+                                       Authentication authentication) {
+        return ResponseEntity.ok(adService.updateAd(id, updateAd, authentication));
     }
 
     @Operation(
@@ -132,8 +140,8 @@ public class AdController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<Ads> getAdsMe() {
-        return ResponseEntity.ok(new Ads());
+    public ResponseEntity<Ads> getAdsMe(Authentication authentication) {
+        return ResponseEntity.ok(adService.getAdsMe(authentication));
     }
 
     @Operation(
@@ -142,7 +150,7 @@ public class AdController {
                     @ApiResponse(
                             responseCode = "200",
                             description = "OK",
-                            content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                            content = @Content(mediaType = MediaType.IMAGE_JPEG_VALUE)
                     ),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -150,8 +158,14 @@ public class AdController {
             }
     )
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<byte[]> updateAdImage(@PathVariable("id") int id,
-                                                @RequestPart("image") MultipartFile image) {
-        return ResponseEntity.ok(new byte[0]);
+    public ResponseEntity<byte[]> updateAdImage(@PathVariable("id") Integer id,
+                                                @RequestPart("image") MultipartFile image,
+                                                Authentication authentication) throws IOException {
+        return ResponseEntity.ok(adService.updateAdImage(id, image, authentication));
+    }
+
+    @GetMapping(value = "/image/{filename}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getAdImage(@PathVariable String filename) throws IOException {
+        return ResponseEntity.ok(adService.getAdImage(filename));
     }
 }
