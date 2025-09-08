@@ -1,4 +1,4 @@
-package repository;
+package ru.skypro.homework.repository;
 
 import org.springframework.stereotype.Repository;
 import ru.skypro.homework.enity.Comment;

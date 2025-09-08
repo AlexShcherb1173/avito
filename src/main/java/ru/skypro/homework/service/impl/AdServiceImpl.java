@@ -6,13 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import repository.AdRepository;
-import repository.UserRepository;
+import ru.skypro.homework.repository.AdRepository;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.enity.Ad;
 import ru.skypro.homework.enity.User;
 import ru.skypro.homework.service.AdService;
-import security.SecurityUtils;
+import ru.skypro.homework.security.SecurityUtils;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;

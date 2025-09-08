@@ -2,14 +2,14 @@ package ru.skypro.homework.service.impl;
 
 import ru.skypro.homework.enity.User;
 import ru.skypro.homework.service.CommentService;
-import security.SecurityUtils;
+import ru.skypro.homework.security.SecurityUtils;
 import ru.skypro.homework.enity.Ad;
 import ru.skypro.homework.enity.Comment;
 import ru.skypro.homework.enity.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import repository.AdRepository;
-import repository.CommentRepository;
+import ru.skypro.homework.repository.AdRepository;
+import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;

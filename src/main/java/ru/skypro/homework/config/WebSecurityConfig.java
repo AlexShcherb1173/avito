@@ -1,6 +1,7 @@
 package ru.skypro.homework.config;
 
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,7 +27,7 @@ public class WebSecurityConfig {
             "/register"
     };
 
-    @Bean
+    //@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests(auth -> auth
@@ -39,7 +40,7 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    @Bean
+    //@Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
