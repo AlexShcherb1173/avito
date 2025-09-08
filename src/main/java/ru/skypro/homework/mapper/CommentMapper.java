@@ -7,12 +7,14 @@ import ru.skypro.homework.dto.CommentDto;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDto;
 import ru.skypro.homework.entity.CommentEntity;
 
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CommentMapper {
+
     CommentEntity toComment(CreateOrUpdateCommentDto createCommentDto);
 
     @Mapping(target = "pk", source = "id")

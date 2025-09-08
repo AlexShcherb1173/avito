@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
-import lombok.extern.slf4j.Slf4j;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -20,17 +20,12 @@ import ru.skypro.homework.service.impl.AdServiceImpl;
 import ru.skypro.homework.service.impl.CommentServiceImpl;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-
-@Slf4j
+@Log4j2
 @RestController
 @CrossOrigin(value = "http://localhost:3000")
 @RequestMapping("ads")
 public class AdsController {
+
     private final AdServiceImpl adService;
     private final CommentServiceImpl commentService;
 
@@ -47,14 +42,16 @@ public class AdsController {
                             description = "OK",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AdsDto.class)
+                                    schema = @Schema(implementation = AdDto.class)
                             )
                     )
             })
     @GetMapping()
-    public AdsDto getAllAds() {
-        return adService.getAllAds();
+    public ResponseEntity<AdsDto> getAllAds() {
+        log.info("Запрос всех обьявлений");
+        return ResponseEntity.ok(adService.getAllAds());
     }
+
 
     @Operation(summary = "Добавить объявление",
             tags = "Объявления",
@@ -70,7 +67,7 @@ public class AdsController {
                             description = "Created",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AdDto.class)
+                                    schema = @Schema(implementation = AdsDto.class)
                             )
                     ),
                     @ApiResponse(
@@ -79,9 +76,10 @@ public class AdsController {
                     )
             })
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public AdDto addAd(@RequestPart("properties") CreateOrUpdateAdDto properties,
-                       @RequestPart("image") MultipartFile image) throws IOException {
-        return adService.addAd(properties, image);
+    public ResponseEntity<AdDto> addAd(@RequestPart("properties") CreateOrUpdateAdDto properties,
+                                       @RequestPart("image") MultipartFile image) throws IOException {
+        log.info("Нажали добавить обьявление");
+        return ResponseEntity.ok(adService.addAd(properties, image));
     }
 
     @Operation(summary = "Получить комментарии объявления",
@@ -91,7 +89,7 @@ public class AdsController {
                             name = "id",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema
+                            schema = @Schema      //TODO
                     )
             },
             responses = {
@@ -113,8 +111,8 @@ public class AdsController {
                     )
             })
     @GetMapping("{id}/comments")
-    public CommentsDto getComments(@PathVariable Integer id) {
-        return commentService.getComments(id);
+    public ResponseEntity<CommentsDto> getComments(@PathVariable Integer id) {
+        return ResponseEntity.ok(commentService.getComments(id));
     }
 
     @Operation(summary = "Добавить комментарий к объявлению",
@@ -130,7 +128,7 @@ public class AdsController {
                             name = "id",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema
+                            schema = @Schema      //TODO
                     )
             },
             responses = {
@@ -152,10 +150,8 @@ public class AdsController {
                     )
             })
     @PostMapping("{id}/comments")
-    @ResponseStatus(HttpStatus.CREATED)
-    public CommentDto addComment(@PathVariable Integer id, @RequestBody CreateOrUpdateCommentDto createCommentDto) {
-
-        return commentService.addComment(id, createCommentDto);
+    public ResponseEntity<CommentDto> addComment(@PathVariable Integer id, @RequestBody CreateOrUpdateCommentDto createCommentDto) {
+        return ResponseEntity.ok(commentService.addComment(id, createCommentDto));
     }
 
     @Operation(summary = "Получить информацию об объявлении",
@@ -165,7 +161,7 @@ public class AdsController {
                             name = "id",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema()
+                            schema = @Schema()      //TODO
                     )
             },
             responses = {
@@ -187,8 +183,9 @@ public class AdsController {
                     )
             })
     @GetMapping("{id}")
-    public ExtendedAdDto getAds(@PathVariable Integer id) {
-        return adService.getAds(id);
+    public ResponseEntity<ExtendedAdDto> getAds(@PathVariable Integer id) {
+        log.info("Нажали на обьявление ");
+        return ResponseEntity.ok(adService.getAds(id));
     }
 
     @Operation(summary = "Удалить объявление",
@@ -198,7 +195,7 @@ public class AdsController {
                             name = "id",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema()
+                            schema = @Schema()      //TODO
                     )
             },
             responses = {
@@ -220,10 +217,12 @@ public class AdsController {
                     )
             })
     @DeleteMapping("{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeAd(@PathVariable Integer id) {
-        adService.hasAdAccess(id);
-        adService.removeAd(id);
+    public ResponseEntity<?> removeAd(@PathVariable Integer id) {
+        if (adService.hasAdAccess(id)) {
+            adService.removeAd(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @Operation(summary = "Обновить информацию об объявлении",
@@ -239,7 +238,7 @@ public class AdsController {
                             name = "id",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema
+                            schema = @Schema      //TODO
                     )
             },
             responses = {
@@ -248,7 +247,7 @@ public class AdsController {
                             description = "OK",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                    schema = @Schema(implementation = AdDto.class)
+                                    schema = @Schema(implementation = AdsDto.class)
                             )
                     ),
                     @ApiResponse(
@@ -261,10 +260,11 @@ public class AdsController {
                     )
             })
     @PatchMapping("{id}")
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public AdDto updateAds(@PathVariable Integer id, @RequestBody CreateOrUpdateAdDto createAdsDto) {
-        adService.hasAdAccess(id);
-        return adService.updateDto(id, createAdsDto);
+    public ResponseEntity<AdDto> updateAds(@PathVariable Integer id, @RequestBody CreateOrUpdateAdDto createAdsDto) {
+        if (adService.hasAdAccess(id)) {
+            return ResponseEntity.ok(adService.updateDto(id, createAdsDto));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @Operation(summary = "Удалить комментарий",
@@ -274,13 +274,13 @@ public class AdsController {
                             name = "adId",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema()
+                            schema = @Schema()      //TODO
                     ),
                     @Parameter(
                             name = "commentId",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema()
+                            schema = @Schema()      //TODO
                     )
             },
             responses = {
@@ -302,13 +302,12 @@ public class AdsController {
                     )
             })
     @DeleteMapping("{adId}/comments/{commentId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public boolean deleteComment(@PathVariable Integer adId, @PathVariable Integer commentId) {
+    public ResponseEntity<?> deleteComment(@PathVariable Integer adId, @PathVariable Integer commentId) {
         if (commentService.hasCommentAccess(commentId)) {
             commentService.deleteComment(commentId);
-            return true;
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
-        return false;
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @Operation(summary = "Обновить комментарий",
@@ -324,13 +323,13 @@ public class AdsController {
                             name = "adId",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema()
+                            schema = @Schema()      //TODO
                     ),
                     @Parameter(
                             name = "commentId",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema()
+                            schema = @Schema()      //TODO
                     )
             },
             responses = {
@@ -356,11 +355,11 @@ public class AdsController {
                     )
             })
     @PatchMapping("{adId}/comments/{commentId}")
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    public CommentDto updateComment(@PathVariable Integer adId, @PathVariable Integer commentId, @RequestBody CommentDto commentDto) {
-        if (commentService.hasCommentAccess(commentId))
-            return commentService.updateComment(commentId, commentDto);
-        return commentDto;
+    public ResponseEntity<CommentDto> updateComment(@PathVariable Integer adId, @PathVariable Integer commentId, @RequestBody CommentDto commentDto) {
+        if (commentService.hasCommentAccess(commentId)) {
+            return ResponseEntity.ok(commentService.updateComment(commentId, commentDto));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @Operation(summary = "Получить объявления авторизованного пользователя",
@@ -380,9 +379,9 @@ public class AdsController {
                     )
             })
     @GetMapping("me")
-    public AdsDto getAdsMe() {
-        return adService.getAdsMe();
-
+    public ResponseEntity<AdsDto> getAdsMe() {
+        log.info("метод получения всех объявлений авторизованного пользователя");
+        return ResponseEntity.ok(adService.getAdsMe());
     }
 
     @Operation(summary = "Обновить картинку объявления",
@@ -390,7 +389,7 @@ public class AdsController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(
                             mediaType = MediaType.MULTIPART_FORM_DATA_VALUE,
-                            schema = @Schema()
+                            schema = @Schema()     //TODO
                     )
             ),
             parameters = {
@@ -398,7 +397,7 @@ public class AdsController {
                             name = "id",
                             in = ParameterIn.PATH,
                             required = true,
-                            schema = @Schema
+                            schema = @Schema      //TODO
                     )
             },
             responses = {
@@ -407,7 +406,7 @@ public class AdsController {
                             description = "OK",
                             content = @Content(
                                     mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                                    schema = @Schema()
+                                    schema = @Schema()      //TODO
                             )
                     ),
                     @ApiResponse(
@@ -423,27 +422,24 @@ public class AdsController {
                             description = "Not found"
                     )
             })
-    @PatchMapping(value = "{id}/image", produces = {MediaType.IMAGE_PNG_VALUE,
-            MediaType.IMAGE_JPEG_VALUE,
-            MediaType.IMAGE_GIF_VALUE, "image/*"})
-
-    public Map<Integer, ArrayList<byte[]>> updateImage(@PathVariable Integer id, @RequestParam MultipartFile image) throws IOException {
+    @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<byte[]> updateImage(@PathVariable Integer id, @RequestParam MultipartFile image) throws IOException {
         adService.updateAdImage(id, image);
-        return new HashMap<>();
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/image/{id}/from-db", produces = {MediaType.IMAGE_PNG_VALUE,
-            MediaType.IMAGE_JPEG_VALUE,
-            MediaType.IMAGE_GIF_VALUE, "image/*"})
-    public Map<Integer, ArrayList<byte[]>> getAdImage(@PathVariable Integer id) {
+
+    @GetMapping("/image/{id}/from-db")
+    public ResponseEntity<byte[]> getAdImage(@PathVariable Integer id) {
 
         ImageEntity image = adService.getAdImage(id);
-        AtomicReference<HttpHeaders> headers = new AtomicReference<>(new HttpHeaders());
-        headers.get().setContentType(MediaType.parseMediaType(image.getMediaType()));
-        headers.get().setContentLength(image.getData().length);
-        return Map.of();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(image.getMediaType()));
+        headers.setContentLength(image.getData().length);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(headers).body(image.getData());
 
     }
 }
-
 

@@ -19,4 +19,6 @@ public class CreateOrUpdateAdDto {
     @Schema(description = "описание объявления")
     @Size(min = 8, max = 64)
     private String description;
+
+
 }

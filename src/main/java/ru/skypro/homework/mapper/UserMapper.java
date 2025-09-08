@@ -10,6 +10,7 @@ import ru.skypro.homework.entity.UserEntity;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface UserMapper {
+
     UserEntity toUser(RegisterDto registerReqDto);
 
     @Mapping(source = "username", target = "email")
@@ -27,4 +28,6 @@ public interface UserMapper {
     @Mapping(ignore = true, target = "user.image")
     @Mapping(ignore = true, target = "user.username")
     void toUser(@MappingTarget UserEntity user, UserDto userDto);
+
+
 }

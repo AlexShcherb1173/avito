@@ -12,11 +12,12 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface AdMapper {
+
     AdEntity toAd(CreateOrUpdateAdDto createAdsDto);
 
     @Mapping(target = "pk", source = "id")
     @Mapping(target = "author", source = "user.id")
-    @Mapping(target = "image", expression = "java(getImage(ad))")
+    @Mapping(target = "image", expression="java(getImage(ad))")
     AdDto toAdsDto(AdEntity ad);
 
     @Mapping(target = "pk", source = "id")
@@ -24,7 +25,7 @@ public interface AdMapper {
     @Mapping(target = "authorLastName", source = "user.lastName")
     @Mapping(target = "email", source = "user.username")
     @Mapping(target = "phone", source = "user.phone")
-    @Mapping(target = "image", expression = "java(getImage(ad))")
+    @Mapping(target = "image", expression="java(getImage(ad))")
     ExtendedAdDto toFullAdsDto(AdEntity ad);
 
     default String getImage(AdEntity ad) {
@@ -35,4 +36,6 @@ public interface AdMapper {
     }
 
     List<AdDto> adListToAdsDtoList(List<AdEntity> adList);
+
+
 }

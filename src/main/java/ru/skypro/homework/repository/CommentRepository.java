@@ -7,7 +7,8 @@ import ru.skypro.homework.entity.CommentEntity;
 import java.util.List;
 
 @Repository
-public interface CommentRepository extends JpaRepository<CommentEntity, Integer> {
+public interface CommentRepository extends JpaRepository<CommentEntity, Integer>{
+
     List<CommentEntity> findAllByAdId(Integer adId);
     void deleteCommentsByAdId(Integer adId);
 }

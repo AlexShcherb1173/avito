@@ -28,6 +28,7 @@ public class RegisterDto {
     @Pattern(regexp = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}")
     private String phone;
 
+
     @Schema(description = "роль пользователя")
     private Role role;
 

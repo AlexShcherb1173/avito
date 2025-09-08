@@ -21,10 +21,22 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
         "401":
           description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
         "403":
           description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
   /register:
     post:
       tags:
@@ -87,7 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdsDto'
+                $ref: '#/components/schemas/AdDto'
     post:
       tags:
       - Объявления
@@ -104,7 +116,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdDto'
+                $ref: '#/components/schemas/AdsDto'
         "401":
           description: Unauthorized
           content:
@@ -180,12 +192,6 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/CommentDto'
-        "201":
-          description: Created
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/CommentDto'
   /users/me:
     get:
       tags:
@@ -249,8 +255,16 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
         "401":
           description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
   /ads/{id}:
     get:
       tags:
@@ -300,12 +314,28 @@ paths:
       responses:
         "204":
           description: No Content
+          content:
+            '*/*':
+              schema:
+                type: object
         "401":
           description: Unauthorized
+          content:
+            '*/*':
+              schema:
+                type: object
         "403":
           description: Forbidden
+          content:
+            '*/*':
+              schema:
+                type: object
         "404":
           description: Not found
+          content:
+            '*/*':
+              schema:
+                type: object
     patch:
       tags:
       - Объявления
@@ -330,7 +360,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AdDto'
+                $ref: '#/components/schemas/AdsDto'
         "401":
           description: Unauthorized
           content:
@@ -358,8 +388,7 @@ paths:
           format: int32
       requestBody:
         content:
-          multipart/form-data: {}
-          application/json:
+          multipart/form-data:
             schema:
               required:
               - image
@@ -376,132 +405,30 @@ paths:
         "401":
           description: Unauthorized
           content:
-            image/png:
+            '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/jpeg:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/gif:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/*:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
+                type: array
+                items:
+                  type: string
+                  format: byte
         "403":
           description: Forbidden
           content:
-            image/png:
+            '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/jpeg:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/gif:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/*:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
+                type: array
+                items:
+                  type: string
+                  format: byte
         "404":
           description: Not found
           content:
-            image/png:
+            '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/jpeg:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/gif:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/*:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
+                type: array
+                items:
+                  type: string
+                  format: byte
   /ads/{adId}/comments/{commentId}:
     delete:
       tags:
@@ -527,31 +454,25 @@ paths:
           content:
             '*/*':
               schema:
-                type: boolean
+                type: object
         "401":
           description: Unauthorized
           content:
             '*/*':
               schema:
-                type: boolean
+                type: object
         "403":
           description: Forbidden
           content:
             '*/*':
               schema:
-                type: boolean
+                type: object
         "404":
           description: Not found
           content:
             '*/*':
               schema:
-                type: boolean
-        "204":
-          description: No Content
-          content:
-            '*/*':
-              schema:
-                type: boolean
+                type: object
     patch:
       tags:
       - Комментарии
@@ -601,7 +522,7 @@ paths:
             '*/*':
               schema:
                 $ref: '#/components/schemas/CommentDto'
-  /users:
+  /users/image/{id}/from-db:
     get:
       tags:
       - user-controller
@@ -613,44 +534,16 @@ paths:
         schema:
           type: integer
           format: int32
-      - name: "/image/{id}/from-db"
-        in: header
-        schema:
-          type: string
       responses:
         "200":
           description: OK
           content:
-            image/jpeg:
+            '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/gif:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/*:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
+                type: array
+                items:
+                  type: string
+                  format: byte
   /ads/me:
     get:
       tags:
@@ -688,46 +581,12 @@ paths:
         "200":
           description: OK
           content:
-            image/png:
+            '*/*':
               schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/jpeg:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/gif:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
-            image/*:
-              schema:
-                type: object
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                      type: string
-                      format: byte
+                type: array
+                items:
+                  type: string
+                  format: byte
 components:
   schemas:
     NewPasswordDto:
@@ -737,12 +596,10 @@ components:
           maxLength: 16
           minLength: 8
           type: string
-          description: текущий пароль
         newPassword:
           maxLength: 16
           minLength: 8
           type: string
-          description: новый пароль
     RegisterDto:
       type: object
       properties:
@@ -783,12 +640,10 @@ components:
           maxLength: 32
           minLength: 4
           type: string
-          description: логин
         password:
           maxLength: 16
           minLength: 8
           type: string
-          description: пароль
     CreateOrUpdateAdDto:
       type: object
       properties:
@@ -827,14 +682,23 @@ components:
         title:
           type: string
           description: заголовок объявления
+    AdsDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: общее количество объявлений
+          format: int32
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdDto'
     CreateOrUpdateCommentDto:
       type: object
       properties:
         text:
-          maxLength: 64
-          minLength: 8
           type: string
-          description: текст комментария
+          description: общее количество комментариев
     CommentDto:
       type: object
       properties:
@@ -900,23 +764,6 @@ components:
         image:
           type: string
           description: ссылка на аватар пользователя
-        role:
-          type: string
-          description: роль пользователя
-          enum:
-          - USER
-          - ADMIN
-    AdsDto:
-      type: object
-      properties:
-        count:
-          type: integer
-          description: общее количество объявлений
-          format: int32
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/AdDto'
     ExtendedAdDto:
       type: object
       properties:

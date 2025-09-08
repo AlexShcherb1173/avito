@@ -1,5 +1,6 @@
 package ru.skypro.homework.entity;
 
+
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,11 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
-
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
 
 @Entity
 @Data
@@ -19,62 +17,48 @@ import java.util.Objects;
 public class UserEntity implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID", nullable = false)
     private Integer id;
-    @Column(name = "FIRST_NAME")
+
     private String firstName;
-    @Column(name = "LAST_NAME")
+
     private String lastName;
-    @Column(name = "PHONE")
+
     private String phone;
-    @Column(name = "PASSWORD")
+
     private String password;
-    @Column(name = "USERNAME")
+
     private String username;
-    @Column(name = "ROLE")
+
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "IMAGE_ID")
+
+    @OneToOne
     private ImageEntity image;
 
-
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UserEntity)) return false;
-        UserEntity userEntity = (UserEntity) o;
-        return Objects.equals(getUsername(), userEntity.getUsername())
-                && Objects.equals(getFirstName(), userEntity.getFirstName())
-                && Objects.equals(getLastName(), userEntity.getLastName())
-                && Objects.equals(getPhone(), userEntity.getPhone());
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public Collection<? extends GrantedAuthority> getAuthorities() { //получить полномочия
         Collection<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority(this.role.toString()));
         return authorities;
     }
 
     @Override
-    public boolean isAccountNonExpired() {
+    public boolean isAccountNonExpired() { //не истек ли срок действия аккаунта
         return true;
     }
 
     @Override
-    public boolean isAccountNonLocked() {
+    public boolean isAccountNonLocked() { //аккаунт не заблокирован
         return true;
     }
 
     @Override
-    public boolean isCredentialsNonExpired() {
+    public boolean isCredentialsNonExpired() { //Срок действия учетных данных не истек
         return true;
     }
 
     @Override
-    public boolean isEnabled() {
+    public boolean isEnabled() { //включено
         return true;
     }
 }

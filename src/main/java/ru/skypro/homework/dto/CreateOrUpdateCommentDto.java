@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 
 @Data
 public class CreateOrUpdateCommentDto {
-    @Schema(description = "текст комментария")
-    @Size(min = 8, max = 64)
+    @Schema(description = "общее количество комментариев")
+    //@Size(min = 8, max = 64)
     private String text;
 }

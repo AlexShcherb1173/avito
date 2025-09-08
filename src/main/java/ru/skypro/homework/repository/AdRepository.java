@@ -8,5 +8,6 @@ import java.util.List;
 
 @Repository
 public interface AdRepository extends JpaRepository<AdEntity, Integer> {
+
     List<AdEntity> findAllByUserId(Integer userId);
 }

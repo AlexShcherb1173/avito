@@ -31,4 +31,6 @@ public class ExtendedAdDto {
 
     @Schema(description = "заголовок объявления")
     private String title;
+
+
 }

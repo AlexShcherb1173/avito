@@ -15,4 +15,5 @@ public class AdDto {
     private Integer price;
     @Schema(description = "заголовок объявления")
     private String title;
+
 }
