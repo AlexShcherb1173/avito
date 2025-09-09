@@ -1,0 +1,9 @@
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    text VARCHAR(64) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    author_id INTEGER NOT NULL,
+    ad_id INTEGER NOT NULL,
+    CONSTRAINT fk_comments_author FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_comments_ad FOREIGN KEY (ad_id) REFERENCES ads(id) ON DELETE CASCADE
+);
