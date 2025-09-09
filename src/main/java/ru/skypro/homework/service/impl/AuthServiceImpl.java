@@ -32,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenUtil jwtTokenUtil;
-    private static final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil) {
         this.userRepository = userRepository;
@@ -87,19 +87,18 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("User already exists");
         }
 
-        User user = User.builder()
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .phone(dto.getPhone())
-                .role(Role.USER)
-                .build();
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setPhone(dto.getPhone());
+        user.setRole(Role.USER);
+        user.setImage(null); // или установите дефолтное изображение
 
         userRepository.save(user);
     }
 }
-
 
 
 
