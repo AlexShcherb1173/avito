@@ -1,102 +1,82 @@
 package ru.skypro.homework.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
+/**
+ * отвечает за получение и валидацию данных при регистрации нового пользователя
+ */
 
-import java.util.Objects;
+
+import lombok.Data;
+import jakarta.validation.constraints.*;
+
 
 @Data
-@Schema(description = "Регистариция пользователя")
 public class Register {
-
-    @Schema(description = "логин", minLength = 4, maxLength = 30)
+    @NotBlank
+    @Size(min = 4, max = 32)
     private String username;
 
-    @Schema(description = "пароль", minLength = 8, maxLength = 16)
+    @NotBlank
+    @Size(min = 8, max = 16)
     private String password;
 
-    @Schema(description = "имя пользователя", minLength = 2, maxLength = 16)
+    @NotBlank
+    @Size(min = 2, max = 16)
     private String firstName;
 
-    @Schema(description = "фамилия пользователя", minLength = 2, maxLength = 16)
+    @NotBlank
+    @Size(min = 2, max = 16)
     private String lastName;
 
-    @Schema(description = "телефон пользователя", pattern = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}")
+    @Pattern(regexp = "\\+7\\s?\\(\\d{3}\\)\\s?\\d{3}-\\d{2}-\\d{2}")
     private String phone;
 
-    @Schema(description = "роль пользователя", allowableValues = {"USER", "ADMIN"})
-    private Role role;
+    private Role role = Role.USER; // по умолчанию USER
 
-    public String getUsername() {
+    public @NotBlank @Size(min = 4, max = 32) String getUsername() {
         return username;
     }
 
-    public String getPassword() {
+    public void setUsername(@NotBlank @Size(min = 4, max = 32) String username) {
+        this.username = username;
+    }
+
+    public @NotBlank @Size(min = 8, max = 16) String getPassword() {
         return password;
     }
 
-    public String getFirstName() {
+    public void setPassword(@NotBlank @Size(min = 8, max = 16) String password) {
+        this.password = password;
+    }
+
+    public @NotBlank @Size(min = 2, max = 16) String getFirstName() {
         return firstName;
     }
 
-    public String getLastName() {
+    public void setFirstName(@NotBlank @Size(min = 2, max = 16) String firstName) {
+        this.firstName = firstName;
+    }
+
+    public @Pattern(regexp = "\\+7\\s?\\(\\d{3}\\)\\s?\\d{3}-\\d{2}-\\d{2}") String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(@Pattern(regexp = "\\+7\\s?\\(\\d{3}\\)\\s?\\d{3}-\\d{2}-\\d{2}") String phone) {
+        this.phone = phone;
+    }
+
+    public @NotBlank @Size(min = 2, max = 16) String getLastName() {
         return lastName;
     }
 
-    public String getPhone() {
-        return phone;
+    public void setLastName(@NotBlank @Size(min = 2, max = 16) String lastName) {
+        this.lastName = lastName;
     }
 
     public Role getRole() {
         return role;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Register register = (Register) o;
-        return Objects.equals(username, register.username) && Objects.equals(password, register.password) && Objects.equals(firstName, register.firstName) && Objects.equals(lastName, register.lastName) && Objects.equals(phone, register.phone) && role == register.role;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(username, password, firstName, lastName, phone, role);
-    }
-
-    @Override
-    public String toString() {
-        return "Register{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", phone='" + phone + '\'' +
-                ", role=" + role +
-                '}';
     }
 }

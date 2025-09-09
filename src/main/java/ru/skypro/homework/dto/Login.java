@@ -1,31 +1,36 @@
 package ru.skypro.homework.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+/**
+ *  используется для передачи данных от фронтенда к бэкенду при попытке входа пользователя в систему
+ */
+
+
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-@Schema(description = "Авторизация пользователя")
 public class Login {
-
-    @Schema(description = "логин", minLength = 4, maxLength = 30)
+    @NotBlank
+    @Size(min = 4, max = 32)
     private String username;
 
-    @Schema(description = "пароль", minLength = 8, maxLength = 16)
+    @NotBlank
+    @Size(min = 8, max = 16)
     private String password;
 
-    public String getUsername() {
+    public @NotBlank @Size(min = 4, max = 32) String getUsername() {
         return username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setUsername(String username) {
+    public void setUsername(@NotBlank @Size(min = 4, max = 32) String username) {
         this.username = username;
     }
 
-    public void setPassword(String password) {
+    public @NotBlank @Size(min = 8, max = 16) String getPassword() {
+        return password;
+    }
+
+    public void setPassword(@NotBlank @Size(min = 8, max = 16) String password) {
         this.password = password;
     }
 }

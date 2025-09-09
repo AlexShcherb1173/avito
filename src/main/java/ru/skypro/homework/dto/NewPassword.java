@@ -1,54 +1,36 @@
 package ru.skypro.homework.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+/**
+ * отвечает за передачу данных при смене пароля пользователя в приложении.
+ */
+
+
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.util.Objects;
-
 @Data
-@Schema(description = "Обновление пароля")
 public class NewPassword {
-
-    @Schema(description = "текущий пароль", minLength = 8, maxLength = 16)
+    @NotBlank
+    @Size(min = 8, max = 16)
     private String currentPassword;
 
-    @Schema(description = "новый пароль", minLength = 8, maxLength = 16)
+    @NotBlank
+    @Size(min = 8, max = 16)
     private String newPassword;
 
-    public String getCurrentPassword() {
+    public @NotBlank @Size(min = 8, max = 16) String getCurrentPassword() {
         return currentPassword;
     }
 
-    public String getNewPassword() {
-        return newPassword;
-    }
-
-    public void setCurrentPassword(String currentPassword) {
+    public void setCurrentPassword(@NotBlank @Size(min = 8, max = 16) String currentPassword) {
         this.currentPassword = currentPassword;
     }
 
-    public void setNewPassword(String newPassword) {
+    public @NotBlank @Size(min = 8, max = 16) String getNewPassword() {
+        return newPassword;
+    }
+
+    public void setNewPassword(@NotBlank @Size(min = 8, max = 16) String newPassword) {
         this.newPassword = newPassword;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        NewPassword that = (NewPassword) o;
-        return Objects.equals(currentPassword, that.currentPassword) && Objects.equals(newPassword, that.newPassword);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(currentPassword, newPassword);
-    }
-
-    @Override
-    public String toString() {
-        return "NewPassword{" +
-                "currentPassword='" + currentPassword + '\'' +
-                ", newPassword='" + newPassword + '\'' +
-                '}';
     }
 }

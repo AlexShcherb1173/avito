@@ -1,19 +1,23 @@
 package ru.skypro.homework.service.impl;
 
-import jakarta.transaction.Transactional;
-
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.*;
-import ru.skypro.homework.mapper.AdMapper;
-import ru.skypro.homework.model.AdEntity;
-import ru.skypro.homework.model.Users;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.model.Ad;
+import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.responseDto.AdDto;
+import ru.skypro.homework.responseDto.AdsResponse;
+import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.dto.CreateOrUpdateAd;
 
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,89 +25,114 @@ import java.util.stream.Collectors;
 public class AdServiceImpl implements AdService {
 
     private final AdRepository adRepository;
+    private final ImageServiceImpl imageService;
     private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
 
-
-    public AdServiceImpl(AdRepository adRepository, UserRepository userRepository) {
+    public AdServiceImpl(AdRepository adRepository, ImageServiceImpl imageService, UserRepository userRepository) {
         this.adRepository = adRepository;
+        this.imageService = imageService;
         this.userRepository = userRepository;
+    }
+
+    @Override
+    public AdDto createAdFromMultipart(UserDetails userDetails, CreateOrUpdateAd dto, MultipartFile image) {
+        if (userDetails == null) {
+            log.warn("Попытка создания объявления без аутентификации");
+            throw new AccessDeniedException("User not authenticated");
+        }
+
+        log.info("Начало создания объявления для пользователя: {}", userDetails.getUsername());
+        log.debug("DTO: {}", dto);
+        log.debug("Изображение: {} ({} bytes)", image.getOriginalFilename(), image.getSize());
+
+        if (image.isEmpty()) {
+            log.warn("Получен пустой файл изображения");
+            throw new IllegalArgumentException("Image file is empty");
+        }
+
+        User dbUser = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> {
+                    log.error("Пользователь не найден в БД: {}", userDetails.getUsername());
+                    return new EntityNotFoundException("User not found");
+                });
+
+        Ad ad = new Ad();
+        ad.setTitle(dto.getTitle());
+        ad.setPrice(dto.getPrice());
+        ad.setDescription(dto.getDescription());
+        ad.setAuthor(dbUser);
+        ad.setCreatedAt(LocalDateTime.now());
+
+        /**
+         * Сохраняем изображение
+          */
+
+        String filename = imageService.saveImage(image, "ads");
+        ad.setImage(filename);
+
+        Ad saved = adRepository.save(ad);
+        AdDto result = convertToAdDto(saved);
+
+        log.info("Объявление успешно создано, ID: {}", result.getPk());
+        return result;
 
     }
 
     @Override
-    public Ads getAllAds() {
-        List<AdEntity> entities = adRepository.findAll();
-        Ads ads = new Ads();
-        ads.setCount(entities.size());
-        ads.setResults(entities.stream().map(AdMapper.INSTANCE::toDto).collect(Collectors.toList()));
-        return ads;
+    public ExtendedAdDto getExtendedAd(Long id) {
+        // TODO: реализовать
+        return null;
     }
 
     @Override
-    @Transactional
-    public Ad addAd(CreateOrUpdateAd properties, byte[] image, Authentication authentication) {
-        Users author = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException(" Пользователь не найден "));
-        AdEntity entity = AdMapper.INSTANCE.toEntity(properties);
-        entity.setAuthor(author);
-        AdEntity savedEntity = adRepository.save(entity);
-        return AdMapper.INSTANCE.toDto(savedEntity);
+    public AdDto updateAd(Long id, CreateOrUpdateAd dto) {
+        // TODO: реализовать
+        return null;
     }
 
     @Override
-    public ExtendedAd getAd(Integer id) {
-        AdEntity entity = adRepository.findById(id).orElseThrow(() -> new RuntimeException(" Объявление не найдено "));
-        return AdMapper.INSTANCE.toExtendedDto(entity);
+    public void deleteAd(Long id) {
+        // TODO: реализовать
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN') or @adServiceImpl.isAdOwner(#id, authentication.name)")
-    @Transactional
-    public void removeAd(Integer id) {
-        adRepository.deleteById(id);
+    public String updateAdImage(Long id, MultipartFile image) {
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ad not found"));
+        String filename = imageService.saveImage(image, "ads");
+        String imageUrl = "/images/ads/" + filename;
+        ad.setImage(imageUrl);
+        adRepository.save(ad);
+
+        return imageUrl;
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN') or @adServiceImpl.isAdOwner(#id, authentication.name)")
-    @Transactional
-    public Ad updateAd(Integer id, CreateOrUpdateAd updateAd) {
-        AdEntity entity = adRepository.findById(id).orElseThrow(() -> new RuntimeException(" Объявление не найдено "));
-        if (updateAd.getTitle() != null) entity.setTitle(updateAd.getTitle());
-        if (updateAd.getPrice() != null) entity.setPrice(updateAd.getPrice());
-        if (updateAd.getDescription() != null) entity.setDescription(updateAd.getDescription());
+    public AdsResponse getMyAds(User user) {
+        List<Ad> ads = adRepository.findByAuthor(user);
+        List<AdDto> dtos = ads.stream()
+                .map(this::convertToAdDto)
+                .collect(Collectors.toList());
+        return new AdsResponse(dtos.size(), dtos);
+    }
 
-        AdEntity savedEntity = adRepository.save(entity);
-        return AdMapper.INSTANCE.toDto(savedEntity);
+    private AdDto convertToAdDto(Ad ad) {
+        AdDto dto = new AdDto();
+        dto.setPk(Math.toIntExact(ad.getId()));
+        dto.setAuthor(Math.toIntExact(ad.getAuthor().getId()));
+        dto.setTitle(ad.getTitle());
+        dto.setPrice(ad.getPrice());
+        dto.setImage(ad.getImage()); // например: "/images/ads/1.jpg"
+        return dto;
     }
 
     @Override
-    public Ads getAdsMe(Authentication authentication) {
-        Users user = userRepository.findByEmail(authentication.getName()).orElseThrow(() -> new RuntimeException("User not found"));
-
-        List<AdEntity> entities = adRepository.findByAuthorId(user.getId());
-        Ads ads = new Ads();
-        ads.setCount(entities.size());
-        ads.setResults(entities.stream().map(AdMapper.INSTANCE::toDto).collect(Collectors.toList()));
-        return ads;
+    public AdsResponse getAllAds() {
+        List<Ad> ads = adRepository.findAll();
+        List<AdDto> dtos = ads.stream()
+                .map(this::convertToAdDto)
+                .collect(Collectors.toList());
+        return new AdsResponse(dtos.size(), dtos);
     }
-
-
-    @PreAuthorize("hasRole('ADMIN') or @adServiceImpl.isAdOwner(#adId, authentication.name)")
-    public Ads getAdsByUser(Integer userId) {
-        List<AdEntity> entities = adRepository.findByAuthorId(userId);
-        Ads ads = new Ads();
-        ads.setCount(entities.size());
-        ads.setResults(entities.stream()
-                .map(AdMapper.INSTANCE::toDto)
-                .collect(Collectors.toList()));
-        return ads;
-    }
-
-    public String getAdAuthorEmail(Integer adId) {
-        return adRepository.findById(adId)
-                .map(ad -> ad.getAuthor().getEmail())
-                .orElseThrow(() -> new RuntimeException("Ad not found"));
-    }
-
 }
-

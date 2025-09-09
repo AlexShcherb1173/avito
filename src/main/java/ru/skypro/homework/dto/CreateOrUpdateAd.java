@@ -1,66 +1,48 @@
 package ru.skypro.homework.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+/**
+ * используется для передачи информации при создании или обновлении объявления в приложении
+ */
+
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.util.Objects;
-
 @Data
-@Schema(description = "создание или обновление объявления")
 public class CreateOrUpdateAd {
 
-    @Schema(description = "заголовок объявления", minLength = 4, maxLength = 32)
+    @NotBlank(message = "Title is required")
+    @Size(min = 4, max = 32, message = "Title must be between 4 and 32 characters")
     private String title;
 
-    @Schema(description = "цена объявления", minimum = "0", maximum = "1000000")
+    @NotNull(message = "Price is required")
+    @Min(value = 0, message = "Price must be at least 0")
+    @Max(value = 10_000_000, message = "Price must be less than 10 million")
     private Integer price;
 
-    @Schema(description = "описание объявления", minLength = 8, maxLength = 64)
+    @Size(min = 8, max = 64, message = "Description must be between 8 and 64 characters")
     private String description;
 
-    public String getTitle() {
+    public @NotBlank(message = "Title is required") @Size(min = 4, max = 32, message = "Title must be between 4 and 32 characters") String getTitle() {
         return title;
     }
 
-    public Integer getPrice() {
-        return price;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setTitle(String title) {
+    public void setTitle(@NotBlank(message = "Title is required") @Size(min = 4, max = 32, message = "Title must be between 4 and 32 characters") String title) {
         this.title = title;
     }
 
-    public void setPrice(Integer price) {
+    public @NotNull(message = "Price is required") @Min(value = 0, message = "Price must be at least 0") @Max(value = 10_000_000, message = "Price must be less than 10 million") Integer getPrice() {
+        return price;
+    }
+
+    public void setPrice(@NotNull(message = "Price is required") @Min(value = 0, message = "Price must be at least 0") @Max(value = 10_000_000, message = "Price must be less than 10 million") Integer price) {
         this.price = price;
     }
 
-    public void setDescription(String description) {
+    public @Size(min = 8, max = 64, message = "Description must be between 8 and 64 characters") String getDescription() {
+        return description;
+    }
+
+    public void setDescription(@Size(min = 8, max = 64, message = "Description must be between 8 and 64 characters") String description) {
         this.description = description;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        CreateOrUpdateAd that = (CreateOrUpdateAd) o;
-        return Objects.equals(title, that.title) && Objects.equals(price, that.price) && Objects.equals(description, that.description);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, price, description);
-    }
-
-    @Override
-    public String toString() {
-        return "CreateOrUpdateAd{" +
-                "title='" + title + '\'' +
-                ", price=" + price +
-                ", description='" + description + '\'' +
-                '}';
     }
 }

@@ -1,72 +1,55 @@
 package ru.skypro.homework.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.service.impl.ImageServiceImpl;
 
-
-@Slf4j
-@CrossOrigin(value = "http://localhost:3000")
 @RestController
-@Tag(name = "Изображения", description = "API для работы с изображениями")
+@Tag(name = "Images", description = "API для отдачи изображений объявлений и пользователей")
 public class ImageController {
 
     private final ImageServiceImpl imageService;
-
-    private static final Logger log = LoggerFactory.getLogger(ImageController.class);
 
     public ImageController(ImageServiceImpl imageService) {
         this.imageService = imageService;
     }
 
-
-    @Operation(summary = "Обновление аватара пользователя", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized")
-    }
+    @Operation(
+            summary = "Получение изображения объявления",
+            description = "Возвращает изображение по имени файла."
     )
-    @PatchMapping("/users/me/image")
-    public ResponseEntity<?> updateUserImage(@RequestParam("image") MultipartFile image, Authentication authentication) {
-        log.info(" Обновить изображение пользователя ", authentication.getName());
+    @GetMapping("/images/ads/{filename:.+}")
+    public ResponseEntity<Resource> getAdImage(@PathVariable String filename) {
         try {
-        imageService.updateUserImage(image.getBytes(), authentication);
-        return ResponseEntity.ok().build();
-        }catch (Exception e){
-            log.error(" Ошибка обновления изображения ", e);
-            return ResponseEntity.badRequest().build();
+            Resource file = imageService.loadAsResource(filename, "ads");
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                    .body(file);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
         }
-        }
-
-    @Operation(summary = "Обновление картинки объявления", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/octet-stream")),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Not found")
     }
+
+    @Operation(
+            summary = "Получение аватара пользователя",
+            description = "Возвращает изображение профиля пользователя."
     )
-    @PatchMapping("/ads/{id}/image")
-    public ResponseEntity<?> updateAdImage(@PathVariable Integer id, @RequestParam("image") MultipartFile image,Authentication authentication) {
-        log.info("Обновить изображение объявления пользователя: {}", id, authentication.getName());
+    @GetMapping("/images/users/{filename:.+}")
+    public ResponseEntity<Resource> getUserImage(@PathVariable String filename) {
         try {
-            imageService.updateAdImage(id, image.getBytes());
-            return ResponseEntity.ok().build();
-        }catch (Exception e){
-            log.error(" Ошибка обновления объявления ", id, e);
-            return ResponseEntity.badRequest().build();
+            Resource file = imageService.loadAsResource(filename, "users");
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + file.getFilename() + "\"")
+                    .body(file);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
         }
-
-
     }
 }

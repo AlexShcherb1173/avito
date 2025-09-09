@@ -1,23 +1,25 @@
 package ru.skypro.homework.service;
 
-
-import org.springframework.security.core.Authentication;
-import ru.skypro.homework.dto.Ad;
-import ru.skypro.homework.dto.Ads;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.model.User;
+import ru.skypro.homework.responseDto.AdDto;
+import ru.skypro.homework.responseDto.AdsResponse;
+import ru.skypro.homework.responseDto.ExtendedAdDto;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
-import ru.skypro.homework.dto.ExtendedAd;
 
 public interface AdService {
-    Ads getAllAds();
+    AdDto createAdFromMultipart(UserDetails userDetails, CreateOrUpdateAd dto, MultipartFile image);
 
-    Ad addAd(CreateOrUpdateAd properties, byte[] image, Authentication authentication);
+    ExtendedAdDto getExtendedAd(Long id);
 
-    ExtendedAd getAd(Integer id);
+    AdDto updateAd(Long id, CreateOrUpdateAd dto);
 
-    void removeAd(Integer id);
+    void deleteAd(Long id);
 
-    Ad updateAd(Integer id, CreateOrUpdateAd updateAd);
+    AdsResponse getMyAds(User user);
 
-    Ads getAdsMe(Authentication authentication);
+    AdsResponse getAllAds();
 
+    String updateAdImage(Long id, MultipartFile image);
 }
