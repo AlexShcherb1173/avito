@@ -636,4 +636,4 @@ components:
         results:
           type: array
           items:
-            $ref: '#/components/schemas/Comment'
+           $ref: '#/components/schemas/Comment'
