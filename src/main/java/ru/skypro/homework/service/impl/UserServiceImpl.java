@@ -13,6 +13,13 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.security.SecurityUtils;
 import ru.skypro.homework.service.UserService;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -46,6 +53,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserImage(MultipartFile image) {
-        // TODO: implement image storing
+        User user = securityUtils.getCurrentUser();
+        user.setImageUrl(saveImage(image));
+        userRepository.save(user);
+    }
+
+    private String saveImage(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            return null;
+        }
+        try {
+            String originalFilename = image.getOriginalFilename();
+            String extension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+            }
+            Path imagesDir = Paths.get("images");
+            Files.createDirectories(imagesDir);
+            String filename = UUID.randomUUID() + extension;
+            Path target = imagesDir.resolve(filename);
+            Files.copy(image.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+            return "/images/" + filename;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store image", e);
+        }
     }
 }

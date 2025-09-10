@@ -56,6 +56,6 @@ public class AdController {
     @GetMapping("/me")
     @Operation(summary = "Получение объявлений авторизованного пользователя")
     public ResponseEntity<Ads> getMyAds() {
-        return ResponseEntity.ok(new Ads());
+        return ResponseEntity.ok(adService.getMy());
     }
 }

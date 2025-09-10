@@ -34,6 +34,9 @@ public class User implements UserDetails {
     @Column(nullable = true)
     private String phone;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
