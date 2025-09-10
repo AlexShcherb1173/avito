@@ -7,6 +7,7 @@ import ru.skypro.homework.enity.Ad;
 import ru.skypro.homework.enity.Comment;
 import ru.skypro.homework.enity.User;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 
 @Component
@@ -17,10 +18,13 @@ public final class CommentMapper {
         if (c == null) return null;
 
         CommentDto dto = new CommentDto();
-        dto.setId(c.getId() == null ? null : c.getId().intValue());
+        dto.setPk(c.getId() == null ? null : c.getId().intValue());
+        dto.setAuthor(c.getAuthor() != null ? c.getAuthor().getId().intValue() : null);
+        dto.setAuthorFirstName(c.getAuthor() != null ? c.getAuthor().getFirstName() : null);
+        dto.setAuthorImage(c.getAuthor() != null && c.getAuthor().getImageUrl() != null
+                ? "/users/" + c.getAuthor().getId() + "/image" : null);
+        dto.setCreatedAt(c.getCreatedAt() != null ? c.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli() : null);
         dto.setText(c.getText());
-        dto.setAuthor(c.getAuthor() != null ? c.getAuthor().getUsername() : null);
-        dto.setCreatedAt(c.getCreatedAt() != null ? c.getCreatedAt().toString() : null);
         return dto;
     }
 

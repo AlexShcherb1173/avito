@@ -129,6 +129,11 @@ public class AdServiceImpl implements AdService {
         wrapper.setResults(list);
         return wrapper;
     }
+    @Override
+    public Ad getEntity(Integer id) {
+        return adRepository.findById(id.longValue())
+                .orElseThrow(() -> new EntityNotFoundException("Ad not found"));
+    }
 
 
 

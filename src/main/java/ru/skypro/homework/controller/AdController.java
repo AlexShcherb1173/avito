@@ -3,16 +3,24 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.AdDto;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
+import ru.skypro.homework.enity.Ad;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/ads")
@@ -60,4 +68,29 @@ public class AdController {
     public ResponseEntity<Ads> getMyAds() {
         return ResponseEntity.ok(adService.getMy());
     }
+    @GetMapping("/{id}/image")
+    @Operation(summary = "Получение изображения объявления")
+    public ResponseEntity<byte[]> getImage(@PathVariable Integer id) {
+        Ad ad = adService.getEntity(id);
+        if (ad.getImageUrl() == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+        try {
+            String url = ad.getImageUrl();
+            Path path = Paths.get(url.startsWith("/") ? url.substring(1) : url);
+            byte[] bytes = Files.readAllBytes(path);
+            String contentType = Files.probeContentType(path);
+            if (contentType == null) {
+                contentType = url.toLowerCase().endsWith(".png") ? MediaType.IMAGE_PNG_VALUE : MediaType.IMAGE_JPEG_VALUE;
+            }
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(bytes);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
 }
+
+
+

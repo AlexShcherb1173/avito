@@ -17,6 +17,7 @@ import ru.skypro.homework.dto.CreateOrUpdateComment;
 import javax.persistence.EntityNotFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -78,10 +79,12 @@ public class CommentServiceImpl implements CommentService {
     // ===== Маппинг =====
     private CommentDto toDto(Comment c) {
         CommentDto dto = new CommentDto();
-        dto.setId(c.getId().intValue());
+        dto.setPk(c.getId().intValue());
+        dto.setAuthor(c.getAuthor().getId().intValue());
+        dto.setAuthorFirstName(c.getAuthor().getFirstName());
+        dto.setAuthorImage(c.getAuthor().getImageUrl() != null ? "/users/" + c.getAuthor().getId() + "/image" : null);
+        dto.setCreatedAt(c.getCreatedAt().toInstant(ZoneOffset.UTC).toEpochMilli());
         dto.setText(c.getText());
-        dto.setCreatedAt(c.getCreatedAt().toString());
-        dto.setAuthor(c.getAuthor().getUsername());
         return dto;
     }
 
