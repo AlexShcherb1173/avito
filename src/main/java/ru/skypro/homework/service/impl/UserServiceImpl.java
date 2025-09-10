@@ -1,9 +1,11 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.UserDto;
@@ -58,6 +60,12 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public User findById(Integer id) {
+        return userRepository.findById(id.longValue())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
     private String saveImage(MultipartFile image) {
         if (image == null || image.isEmpty()) {
             return null;
@@ -68,12 +76,12 @@ public class UserServiceImpl implements UserService {
             if (originalFilename != null && originalFilename.contains(".")) {
                 extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
             }
-            Path imagesDir = Paths.get("images");
+            Path imagesDir = Paths.get("images").toAbsolutePath();
             Files.createDirectories(imagesDir);
             String filename = UUID.randomUUID() + extension;
             Path target = imagesDir.resolve(filename);
             Files.copy(image.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-            return "/images/" + filename;
+            return target.toString();
         } catch (IOException e) {
             throw new RuntimeException("Failed to store image", e);
         }

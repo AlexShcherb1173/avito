@@ -11,6 +11,7 @@ import ru.skypro.homework.dto.AdDto;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
+import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
 
 @RestController
@@ -20,6 +21,7 @@ import ru.skypro.homework.service.AdService;
 public class AdController {
 
     private final AdService adService;
+    private final AdRepository adRepository;
 
     @GetMapping
     @Operation(summary = "Получение всех объявлений")

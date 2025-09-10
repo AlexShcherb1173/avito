@@ -149,12 +149,12 @@ public class AdServiceImpl implements AdService {
                 if (originalFilename != null && originalFilename.contains(".")) {
                     extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
                 }
-                Path imagesDir = Paths.get("images");
+                Path imagesDir = Paths.get("images").toAbsolutePath();
                 Files.createDirectories(imagesDir);
                 String filename = UUID.randomUUID() + extension;
                 Path target = imagesDir.resolve(filename);
                 Files.copy(image.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-                return "/images/" + filename;
+                return target.toString();
             } catch (IOException e) {
                 throw new RuntimeException("Failed to store image", e);
             }
