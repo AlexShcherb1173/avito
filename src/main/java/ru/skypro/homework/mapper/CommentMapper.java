@@ -11,6 +11,7 @@ import ru.skypro.homework.entity.Comment;
 
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
+
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
 
     Comment toEntity(CreateOrUpdateCommentDto dto);
@@ -23,6 +24,5 @@ public interface CommentMapper {
     @Mapping(source = "author.id", target = "author")
     CommentDto toDto(Comment comment);
 
-    void toEntityFromCreateUpdatDto(CreateOrUpdateCommentDto dto,
-                                    @MappingTarget Comment comment);
+    void toEntityFromCreateUpdatDto(CreateOrUpdateCommentDto dto, @MappingTarget Comment comment);
 }

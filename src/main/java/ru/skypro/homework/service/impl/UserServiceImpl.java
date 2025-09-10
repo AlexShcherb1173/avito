@@ -4,6 +4,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,9 @@ import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UpdateUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exception.ForbiddenException;
+import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.exception.UnauthorizedException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
@@ -25,6 +29,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final SecurityServiceImpl securityService;
+    private final PasswordEncoder encoder;
 
     /**
      * Метод по обновлению пароля.
@@ -33,28 +38,42 @@ public class UserServiceImpl implements UserService {
      * Если пароль, извлеченный из текущего пользователя, совпадает с паролем, введенным данным пользователем,
      * то обновляем пароль пользователя, получив новый пароль из модели по обновлению пароля (тоже введенный пользователем).
      * @param newPassword - новый пароль
-     * @return true, если пароль, введенный пользователем, совпал с паролем текущего пользователя, иначе - false.
+     * @return true, если пароль, введенный пользователем, совпал с паролем текущего пользователя.
+     * @throws UnauthorizedException, если введен неправильный текущий пароль
      */
     @Override
     @Transactional
     public boolean updatePassword(NewPasswordDto newPassword) {
         String email = securityService.getAuthenticatedUserName();
-        User user = getUserByEmailFromDb(email);
-
-        boolean isEqualsPass = user.getPassword().equals(newPassword.getCurrentPassword());
-        if (isEqualsPass) {
-            userMapper.updateUserPasswordFromDto(newPassword, user);
-            return true;
+        // В этом случае пользователь аутентифицирован, и в контексте безопасности уже хранится объект
+        // Authentication. Поэтому логин пользователя извлекаем из объекта Authentication
+        User user;
+        try {
+            user = getUserByEmailFromDb(email);
+        } catch (NotFoundException e) {
+            throw new ForbiddenException("Отсутствуют права доступа к запрошенному ресурсу");
         }
-        return false;
+
+        // В базе данных пароли хранятся в зашифрованном виде. Раскодировать их невозможно. Поэтому текущий пароль,
+        // извлеченный из NewPasswordDto, также зашифровываем с помощью этого же самого кодировщика и сравниваем с
+        // паролем, извлеченным из пользователя из базы данных
+        if (!encoder.matches(newPassword.getCurrentPassword(), user.getPassword())) {
+            log.error("Введен неправильный текущий пароль = {}", newPassword.getCurrentPassword());
+            throw new UnauthorizedException("Введен неправильный текущий пароль");
+        }
+
+        user.setPassword(encoder.encode(newPassword.getNewPassword()));
+        return true;
     }
 
     @Override
-    @Transactional(readOnly = true)                           // Метод будет выполняться в транзакции только для чтения
+    @Transactional(readOnly = true)
     public UserDto getAuthenticatedUser() {
         String email = securityService.getAuthenticatedUserName();
         User user = getUserByEmailFromDb(email);
         return userMapper.toDto(user);
+
+        // @Transactional(readOnly = true) - Метод будет выполняться в транзакции только для чтения
     }
 
     @Override
@@ -71,14 +90,13 @@ public class UserServiceImpl implements UserService {
     public UserDto updateAuthenticatedUserImage(MultipartFile file) {
         String username = securityService.getAuthenticatedUserName();
         User user = getUserByEmailFromDb(username);
-        try {
-            String urlImage = UploadImage.uploadImage(file);
-            user.setImage(urlImage);
-            // В сущность User сохраняется путь к файлу, состоящий из "/" и имени файла (без имени папки)
-        } catch (IOException e) {
-            log.error("Error uploading image file path = {}", user.getImage(), e);
-            throw new RuntimeException(e);
-        }
+
+        String urlImage = UploadImage.uploadImage(file);
+        user.setImage(urlImage);
+        // В сущность User сохраняется путь к файлу, состоящий из имени файла (без имени папки)
+        // В данном случае "/" - не удаляем, поскольку URL - путь, по которому фронтенд будет искать файл с картинкой,
+        // будет содержать только "/"
+
         userRepository.save(user);
         return userMapper.toDto(user);
     }
@@ -96,15 +114,27 @@ public class UserServiceImpl implements UserService {
 //    }
 
 
+    /**
+     *
+     * @param username - логин пользователя
+     * @return объект UserSecurityDetails, необходимый для интеграции Spring Security с конкретной моделью
+     * пользовательских данных и требованиями аутентификации конкретного приложения.
+     */
     @Override
     public UserDetails loadByUserName(String username) {
         User user = getUserByEmailFromDb(username);
         return new UserSecurityDetails(user);
+
+        // Реализуем метод loadByUserName(String username) интерфейса UserDetailsService, который использует метод
+        // getUserByEmailFromDb(String email) для получения данных пользователя из базы и преобразует их в объект
+        // UserSecurityDetails
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getUserByEmailFromDb(String email) {
-        return userRepository.findByEmail(email).orElse(null);
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
     }
+
 }

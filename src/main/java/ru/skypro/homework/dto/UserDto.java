@@ -2,10 +2,9 @@ package ru.skypro.homework.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+
+import javax.validation.constraints.*;
+
 import lombok.Builder;
 import lombok.Data;
 import ru.skypro.homework.util.OpenApiConstant;
@@ -30,6 +29,7 @@ public class UserDto {
             value = "Email пользователя",
             example = "user@example.com")
     @Size(min = 8, max = 32)
+    //@Email(message = "Неверный формат email")
     private String email;
 
     @NotBlank(message = "Имя не может быть пустым или состоять только из пробелов")

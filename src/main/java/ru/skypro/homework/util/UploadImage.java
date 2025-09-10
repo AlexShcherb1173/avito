@@ -35,18 +35,26 @@ public class UploadImage {
      *
      * @param imageFile - загружаемая для объявления или пользователя картинка
      * @return путь к файлу (без имени папки и "/")
-     * @throws IOException - исключение, выбрасываемое при загрузке файла
      */
-    public static String uploadImage(MultipartFile imageFile) throws IOException {
+    public static String uploadImage(MultipartFile imageFile) {
         String idImage = UUID.randomUUID().toString();
         Path filePath = Path.of("images", idImage + "." + getExtension(
                 Objects.requireNonNull(imageFile.getOriginalFilename())));
         // Создаем путь для хранения картинки на диске, состоящий из имени папки и имени файла
 
-        Files.createDirectories(filePath);
-        // Создаем папку для хранения файлов по созданному пути
-        Files.deleteIfExists(filePath);
-        // Если по созданному пути уже существует файл, то удаляем его
+        try {
+            Files.createDirectories(filePath.getParent());
+            // Создаем папку для хранения файлов по созданному пути
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to created directory" + e);
+        }
+
+        try {
+            Files.deleteIfExists(filePath);
+            // Если по созданному пути уже существует файл, то удаляем его
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to deleted file" + e);
+        }
 
         try (
                 InputStream is = imageFile.getInputStream();
@@ -62,11 +70,16 @@ public class UploadImage {
             throw new RuntimeException(e.getMessage());
         }
         return "/" + idImage + "." + getExtension(imageFile.getOriginalFilename());
-        // Данный метод возвращает только "/" и имя файла. В сущность Ad будет сохранен путь, состоящий только из имени
-        // файла (без имени папки и "/"), а в сущность User - путь, состоящий из "/" и имени файла (без имени папки)
+        // Данный метод возвращает только "/" и имя файла. В сущность Ad и сущность User будет сохранен путь, состоящий
+        // только из имени файла (без имени папки)
+        // "/" - используется для того, чтобы разграничить путь, по которому фронтенд будет искать файлы для объявлений,
+        // от пути, по которому фронтенд будет искать файлы для пользователей.
+        // В случае с пользователями URL-путь содержит только корень, а в случае с картинками в него добавляется имя
+        // "image"
     }
 
     static String getExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
+
 }

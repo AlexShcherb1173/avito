@@ -79,11 +79,13 @@ public class CommentController {
     })
     @DeleteMapping("/ads/{adId}/comments/{commentId}")
     public void deleteComment(@PathVariable("adId") Long adId, @PathVariable("commentId") Long commentId) {
-        try {
+//        try {
             commentsService.deleteComment(adId, commentId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Комментарий не найден");
-        }
+//        } catch (Exception e) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Комментарий не найден");
+//        }
+        // В связи с тем, что в GlobalExceptionHandler созданы обработчики исключений и ошибок, необходимость
+        // в создании данного исключения отсутствует
     }
 
     @ApiOperation(value = "Обновление комментария",

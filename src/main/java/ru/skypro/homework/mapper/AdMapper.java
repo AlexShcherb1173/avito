@@ -12,6 +12,7 @@ import ru.skypro.homework.entity.Ad;
 
 @Mapper(componentModel = "spring")
 public interface AdMapper {
+
     AdMapper INSTANCE = Mappers.getMapper(AdMapper.class);
 
     @Mapping(source = "author.id", target = "author")

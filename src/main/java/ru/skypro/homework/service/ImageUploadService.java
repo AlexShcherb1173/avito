@@ -1,5 +1,7 @@
 package ru.skypro.homework.service;
 
+import org.springframework.core.io.Resource;
+
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.nio.file.OpenOption;
@@ -20,5 +22,7 @@ public interface ImageUploadService {
      * @param urlPath - имя файла (без имени папки и "/")
      * @return картинку в виде массива байтов
      */
-    byte[] getImageByAdId(String urlPath);
+    byte[] getImageForUserOrAd(String urlPath);
+
+    Resource getImageForUserOrAd2(String urlPath);
 }

@@ -3,6 +3,9 @@ package ru.skypro.homework.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +16,7 @@ import ru.skypro.homework.util.OpenApiConstant;
 @ApiModel(value = "Ads", description = "Модель списка объявлений")
 public class AdsDto {
 
-    @Size(min = 0, message = "Количество объявлений не может быть отрицательным")
+    @PositiveOrZero(message = "Количество объявлений не может быть отрицательным")
     @ApiModelProperty(value = "Общее количество объявлений", example = OpenApiConstant.COUNT_ADS)
     private Integer count;
 

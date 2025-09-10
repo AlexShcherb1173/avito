@@ -37,6 +37,7 @@ public class ExtendedAdDto {
     @Size(min = 4, max = 32, message = "Заголовок должен быть от 4 до 32 символов")
     @ApiModelProperty(value = "Заголовок объявления", example = OpenApiConstant.TITLE)
     private String title;
+
     @NotBlank(message = "Email не может быть пустым или состоять только из пробелов")
     @Pattern(
             regexp = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$",

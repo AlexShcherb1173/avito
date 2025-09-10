@@ -4,7 +4,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import lombok.Data;
 import ru.skypro.homework.util.OpenApiConstant;
@@ -23,7 +22,7 @@ public class CommentDto {
     private String authorImage;
 
     @NotBlank(message = "Поле не может быть пустым или состоять только из пробелов")
-    @Size(min = 3, max = 16, message = "Имя должен быть от 3 до 16 символов")
+    @Size(min = 3, max = 10, message = "Имя должен быть от 3 до 20 символов")
     @ApiModelProperty(
             value = "Имя автора комментария",
             example = OpenApiConstant.NAME)

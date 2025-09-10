@@ -8,9 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -18,7 +15,7 @@ import org.hibernate.annotations.ColumnDefault;
 import ru.skypro.homework.dto.Role;
 
 @Entity
-@Table(name = "Users")
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,27 +24,30 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Email
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @NotBlank
+    //@NotBlank
+    @Column(nullable = false)
+    private String password;
+
+    @Column(nullable = false, length = 20)
     private String firstName;
 
-    @NotBlank
+    @Column(nullable = false, length = 20)
     private String lastName;
 
-    @NotBlank
+    @Column(nullable = false)
     private String phone;
 
-    @NotNull
     @ColumnDefault(value = "0")
+    @Column(name = "role", nullable = false, columnDefinition = "int")
     @Enumerated(EnumType.ORDINAL)
     private Role role;
 
+    @Column(name = "image_path")
     private String image;
     // Путь к файлу на диске, состоящий только из "/" и имени файла
 
-    @NotBlank
-    private String password;
+
 }

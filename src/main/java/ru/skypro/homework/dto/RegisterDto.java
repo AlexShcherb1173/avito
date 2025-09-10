@@ -26,7 +26,7 @@ public class RegisterDto {
 
     @ApiModelProperty(value = "Пароль пользователя", example = OpenApiConstant.USER_PASS)
     @NotBlank(message = "Password is mandatory")
-    @Size(min = 8, max = 16)
+    @Size(min = 8, max = 32)
     private String password;
 
     @ApiModelProperty(value = "Имя", example = OpenApiConstant.NAME)

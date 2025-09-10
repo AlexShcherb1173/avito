@@ -3,21 +3,17 @@ package ru.skypro.homework.service;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.skypro.homework.mapper.UserMapper;
-import ru.skypro.homework.repository.UserRepository;
+import org.springframework.core.io.Resource;
+import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.service.impl.ImageUploadServiceImpl;
-import ru.skypro.homework.service.impl.SecurityServiceImpl;
-import ru.skypro.homework.service.impl.UserSecurityDetails;
-import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import static ru.skypro.homework.ConstantGeneratorFotTest.USER_IMAGE;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static ru.skypro.homework.ConstantGeneratorFotTest.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ImageUploadServiceImplTest {
@@ -28,13 +24,39 @@ public class ImageUploadServiceImplTest {
 
 
     @Test
-    void getImageByAdId() throws IOException {
+    void getImageForUserOrAd_Success() throws IOException {
 
         Path path = Path.of("images/" + USER_IMAGE);
-        String name = USER_IMAGE.substring(0, USER_IMAGE.indexOf("."));
-        String contentType = Files.probeContentType(path);
-        byte[] content = Files.readAllBytes(path);
-        MockMultipartFile image = new MockMultipartFile(name, USER_IMAGE, contentType, content);
+        byte[] expected = Files.readAllBytes(path);
 
+        byte[] actual = imageUploadService.getImageForUserOrAd(USER_IMAGE);
+
+        assertNotNull(actual);
+        assertNotEquals(0, actual.length);
+        assertArrayEquals(expected, actual);
     }
+
+
+    @Test
+    void getImageForUserOrAd_NotFoundException() throws IOException {
+
+        String filePath = "images/99.jpg";
+
+        assertThrows(NotFoundException.class, () -> imageUploadService.getImageForUserOrAd(filePath));
+    }
+
+
+    @Test
+    void getImageForUserOrAd2_Success() throws IOException {
+
+        Path path = Path.of("images/" + AD_IMAGE_1);
+        byte[] expected = Files.readAllBytes(path);
+
+        Resource resource = imageUploadService.getImageForUserOrAd2(AD_IMAGE_1);
+
+        assertTrue(resource.exists());
+        assertArrayEquals(expected, resource.getInputStream().readAllBytes());
+        assertEquals(expected.length, resource.getInputStream().readAllBytes().length);
+    }
+
 }

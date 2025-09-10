@@ -22,10 +22,14 @@ public class ConstantGeneratorFotTest {
     public static final Long NEW_USER_ID = new Random().nextLong();
     public static final String NEW_USER_EMAIL = "new_test@gmail.com";
     public static final String NEW_USER_FIRST_NAME = "Marko";
+    public static final String NEW_USER_FIRST_NAME_2 = "Afanasy";
     public static final String NEW_USER_LAST_NAME = "Polo";
+    public static final String NEW_USER_LAST_NAME_2 = "Nikitin";
     public static final String NEW_USER_PHONE = "+7 (906) 112-44-33";
+    public static final String NEW_USER_PHONE_2 = "+7 (906) 114-48-39";
     public static final Role NEW_USER_ROLE = Role.ADMIN;
     public static final String NEW_USER_PASSWORD = "newPassword";
+    public static final String NEW_USER_PASSWORD_2 = "newPassword2";
     public static final String NEW_USER_IMAGE = "3.jpg";
 
     public static final String USER_INCORRECT_PASSWORD = "incorrect";
@@ -72,6 +76,10 @@ public class ConstantGeneratorFotTest {
     public static final Long AD_AUTHOR_ID_2 = AD_AUTHOR_2.getId();
 
 
+    /**
+     * Используется в тестах с объявлениями и комментариями
+     * @return пользователя
+     */
     public static User userGenerator() {
         User user = new User();
         user.setId(USER_ID);
@@ -85,6 +93,10 @@ public class ConstantGeneratorFotTest {
         return user;
     }
 
+    /**
+     * Используется в тестах с пользователями в связи с тем, что его поля соответствуют полям модели RegisterDto
+     * @return пользователя
+     */
     public static User newUserGenerator_1() {
         User user = new User();
         user.setId(NEW_USER_ID);

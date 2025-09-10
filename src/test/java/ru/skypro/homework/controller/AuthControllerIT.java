@@ -1,6 +1,7 @@
 package ru.skypro.homework.controller;
 
 import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,7 +18,7 @@ import static ru.skypro.homework.ConstantGeneratorFotTest.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AuthControllerIntegrationTest {
+public class AuthControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,19 +33,22 @@ public class AuthControllerIntegrationTest {
 
         RegisterDto registerDto = ConstantGeneratorFotTest.registerDtoGenerator();
         authService.register(registerDto);
+        // Зарегистрировали пользователя и сохранили его в базу данных
 
         JSONObject loginDto = new JSONObject();
-        loginDto.put("password", NEW_USER_PASSWORD);
         loginDto.put("username", NEW_USER_EMAIL);
+        loginDto.put("password", NEW_USER_PASSWORD);
+        // Подготовили объект для аутентификации пользователя
 
-        mockMvc.perform(MockMvcRequestBuilders
+        String contentAsString = mockMvc.perform(MockMvcRequestBuilders
                         .post("/login")
                         .content(loginDto.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-                //.andExpect(MockMvcResultMatchers.jsonPath("$.password").value(NEW_USER_PASSWORD))
-                //.andExpect(MockMvcResultMatchers.jsonPath("$.username").value(NEW_USER_EMAIL));
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertEquals("true", contentAsString);
     }
 
 
@@ -56,8 +60,8 @@ public class AuthControllerIntegrationTest {
         authService.register(registerDto);
 
         JSONObject loginDto = new JSONObject();
-        loginDto.put("password", NEW_USER_PASSWORD);
         loginDto.put("username", USER_EMAIL);
+        loginDto.put("password", NEW_USER_PASSWORD);
         // Введен некорректный логин
 
         mockMvc.perform(MockMvcRequestBuilders
@@ -66,7 +70,8 @@ public class AuthControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-
+        // Пользовательское исключение NotFoundException, которое выбрасывается при загрузке данных пользователя из базы
+        // данных в объект UserSecurityDetails, мы обернули в UnauthorizedException
     }
 
 
@@ -78,9 +83,9 @@ public class AuthControllerIntegrationTest {
         authService.register(registerDto);
 
         JSONObject loginDto = new JSONObject();
+        loginDto.put("username", NEW_USER_EMAIL);
         loginDto.put("password", USER_PASSWORD);
         // Введен некорректный пароль
-        loginDto.put("username", NEW_USER_EMAIL);
 
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/login")
@@ -88,6 +93,6 @@ public class AuthControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-
     }
+
 }

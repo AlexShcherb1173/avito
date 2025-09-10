@@ -85,8 +85,8 @@ class CommentServiceImplTest {
     @Test
     void addComment() {
         when(securityService.getAuthenticatedUserName()).thenReturn(user.getEmail());
-        when(adService.findAdById(1L)).thenReturn(ad);
         when(userService.getUserByEmailFromDb(anyString())).thenReturn(user);
+        when(adService.findAdById(1L)).thenReturn(ad);
         when(commentRepository.save(any(Comment.class))).thenReturn(comment);
         when(commentMapper.toDto(any(Comment.class))).thenReturn(commentDto);
 
@@ -129,4 +129,5 @@ class CommentServiceImplTest {
         verify(commentRepository, times(1)).findById(1L);
         verify(commentRepository, times(1)).save(any(Comment.class));
     }
+
 }

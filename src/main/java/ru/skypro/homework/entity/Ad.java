@@ -1,18 +1,8 @@
 package ru.skypro.homework.entity;
 
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -26,14 +16,14 @@ public class Ad {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    private String description;
+    @Column(nullable = false, length = 32)
+    private String title;
 
-    @NotNull
+    @Column(nullable = false)
     private Integer price;
 
-    @NotBlank
-    private String title;
+    @Column(nullable = false, length = 64)
+    private String description;
 
     private String imageUrl;
     // Путь к файлу на диске, состоящий только из имени файла (без имени папки и /)

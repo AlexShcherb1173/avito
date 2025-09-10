@@ -1,28 +1,23 @@
 package ru.skypro.homework.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
+@Table(name = "comments")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @Column(name = "created_at", nullable = false)
     private Long createdAt;
 
-    @NotBlank
+    @Column(nullable = false)
     private String text;
 
     @ManyToOne
@@ -36,4 +31,5 @@ public class Comment {
     public Comment() {
         this.createdAt = System.currentTimeMillis();
     }
+
 }

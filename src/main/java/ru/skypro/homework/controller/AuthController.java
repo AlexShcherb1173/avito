@@ -30,6 +30,9 @@ public class AuthController {
                     code = 200,
                     message = "OK"),
             @ApiResponse(
+                    code = 404,
+                    message = "Not found"),
+            @ApiResponse(
                     code = 401,
                     message = "Unauthorized")
     })
@@ -37,4 +40,5 @@ public class AuthController {
     public boolean login(@RequestBody LoginDto loginDto) {
         return authService.login(loginDto);
     }
+
 }

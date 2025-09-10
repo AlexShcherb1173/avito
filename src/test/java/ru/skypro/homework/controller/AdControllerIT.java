@@ -34,7 +34,11 @@ import static ru.skypro.homework.ConstantGeneratorFotTest.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AdControllerIntegrationTest {
+public class AdControllerIT {
+
+    // @SpringBootTest аннотация указывает, что это интеграционный тест, который должен загрузить полный Spring контекст.
+    // @AutoConfigureMockMvc аннотация автоматически конфигурирует MockMvc для использования в тесте.
+    // @Autowired private MockMvc mockMvc - внедряет MockMvc экземпляр в тест.
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,9 +55,7 @@ public class AdControllerIntegrationTest {
     @Autowired
     private UserService userService;
 
-//    @Mock
-//    private UserSecurityDetails userSecurityDetails;
-
+    @Autowired
     private ObjectMapper objectMapper;
     private User user;
     private User userAdmin;
@@ -70,22 +72,224 @@ public class AdControllerIntegrationTest {
         userAdmin = ConstantGeneratorFotTest.userAdminGenerator();
         // Модель для создания объявления
         createOrUpdateAdDto1 = ConstantGeneratorFotTest.createOrUpdateAdDtoGenerator1();
-
-//        when(userSecurityDetails.getUsername()).thenReturn(user.getEmail());
-//        SecurityContextHolder.getContext().setAuthentication(
-//                new UsernamePasswordAuthenticationToken(
-//                        userSecurityDetails,
-//                        null,
-//                        userSecurityDetails.getAuthorities())
-//        );
     }
+
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testGetAds_Success() throws Exception {
+
+        ad1 = ConstantGeneratorFotTest.adGenerator1();
+        ad1.setAuthor(user);
+        ad1 = adRepository.save(ad1);
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2.setAuthor(user);
+        ad2 = adRepository.save(ad2);
+
+        AdDto adDto1 = AdDto.builder()
+                .author(1L)
+                .image("/image/" + AD_IMAGE_1)
+                .pk(1L)
+                .price(AD_PRICE_1)
+                .title(AD_TITLE_1)
+                .build();
+        AdDto adDto2 = AdDto.builder()
+                .author(1L)
+                .image("/image/" + AD_IMAGE_2)
+                .pk(2L)
+                .price(AD_PRICE_2)
+                .title(AD_TITLE_2)
+                .build();
+        List<AdDto> expected = List.of(adDto1, adDto2);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.count").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results.size()").value(expected.size()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].author")
+                        .value(expected.get(1).getAuthor()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].image")
+                        .value(expected.get(1).getImage()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].pk")
+                        .value(expected.get(1).getPk()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].price")
+                        .value(expected.get(1).getPrice()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].title")
+                        .value(expected.get(1).getTitle()));
+    }
+
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testGetAdsByAuthenticatedUser_Success() throws Exception {
+
+        ad1 = ConstantGeneratorFotTest.adGenerator1();
+        ad1.setAuthor(user);
+        ad1 = adRepository.save(ad1);
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2.setAuthor(user);
+        ad2 = adRepository.save(ad2);
+
+        AdDto adDto1 = AdDto.builder()
+                .author(1L)
+                .image("/image/" + AD_IMAGE_1)
+                .pk(1L)
+                .price(AD_PRICE_1)
+                .title(AD_TITLE_1)
+                .build();
+        AdDto adDto2 = AdDto.builder()
+                .author(1L)
+                .image("/image/" + AD_IMAGE_2)
+                .pk(2L)
+                .price(AD_PRICE_2)
+                .title(AD_TITLE_2)
+                .build();
+        List<AdDto> expected = List.of(adDto1, adDto2);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/me")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.count").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results.size()").value(expected.size()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].author")
+                        .value(expected.get(0).getAuthor()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].image")
+                        .value(expected.get(0).getImage()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].pk")
+                        .value(expected.get(0).getPk()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].price")
+                        .value(expected.get(0).getPrice()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].title")
+                        .value(expected.get(0).getTitle()));
+    }
+
+
+    @Test
+    @WithAnonymousUser
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testGetAdsByAuthenticatedUser_UnauthorizedException() throws Exception {
+
+        ad1 = ConstantGeneratorFotTest.adGenerator1();
+        ad1.setAuthor(user);
+        ad1 = adRepository.save(ad1);
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2.setAuthor(user);
+        ad2 = adRepository.save(ad2);
+
+        AdDto adDto1 = AdDto.builder()
+                .author(1L)
+                .image("/image/" + AD_IMAGE_1)
+                .pk(1L)
+                .price(AD_PRICE_1)
+                .title(AD_TITLE_1)
+                .build();
+        AdDto adDto2 = AdDto.builder()
+                .author(1L)
+                .image("/image/" + AD_IMAGE_2)
+                .pk(2L)
+                .price(AD_PRICE_2)
+                .title(AD_TITLE_2)
+                .build();
+        List<AdDto> expected = List.of(adDto1, adDto2);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/me")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testGetExtendedAd_Success() throws Exception {
+
+        ad1 = ConstantGeneratorFotTest.adGenerator1();
+        ad1.setAuthor(user);
+        ad1 = adRepository.save(ad1);
+
+        ExtendedAdDto expected = ExtendedAdDto.builder()
+                .pk(1L)
+                .description(AD_DESCRIPTION_1)
+                .image("/image/" + ad1.getImageUrl())
+                .price(AD_PRICE_1)
+                .title(AD_TITLE_1)
+                .email(AD_AUTHOR_EMAIL_1)
+                .authorFirstName(AD_AUTHOR_FIRST_NAME_1)
+                .authorLastName(AD_AUTHOR_LAST_NAME_1)
+                .phone(AD_AUTHOR_PHONE_1)
+                .build();
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/{id}", ad1.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.pk").value(expected.getPk()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(expected.getTitle()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.price").value(expected.getPrice()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(expected.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.image").value(expected.getImage()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(expected.getEmail()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authorFirstName")
+                        .value(expected.getAuthorFirstName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authorLastName")
+                        .value(expected.getAuthorLastName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(expected.getPhone()));
+    }
+
+    @Test
+    @WithAnonymousUser
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testGetExtendedAd_UnauthorizedException() throws Exception {
+
+        ad1 = ConstantGeneratorFotTest.adGenerator1();
+        ad1.setAuthor(user);
+        ad1 = adRepository.save(ad1);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+
+    // Выброс исключения: объявление не найдено
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testGetExtendedAd_NotFoundException() throws Exception {
+
+        ad1 = ConstantGeneratorFotTest.adGenerator1();
+        ad1.setAuthor(user);
+        ad1 = adRepository.save(ad1);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
 
     @Test
     @WithMockUser(username = USER_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void testAddAd_Success() throws Exception {
 
-        // Необходимо создать в папке images реальный файл: 55.jpg
+        // Необходимо создать в папке <images> реальный файл: <55.jpg>. Папка <images> находится в папке текущего
+        // проекта. С этого пути будет скачан файл и загружен в эту же папку с рандомным номером.
         Path path = Path.of("images/" + AD_IMAGE_1);
         String contentType = Files.probeContentType(path);
         byte[] content = Files.readAllBytes(path);
@@ -123,6 +327,7 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(expected.getTitle()));
     }
 
+
     @Test
     @WithAnonymousUser
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -146,6 +351,7 @@ public class AdControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnauthorized());
     }
+
 
     @Test
     @WithMockUser(username = USER_EMAIL)
@@ -177,190 +383,11 @@ public class AdControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    @Test
-    @WithMockUser(username = USER_EMAIL)
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testGetExtendedAd_Success() throws Exception {
-
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        ad1.setAuthor(user);
-        ad1 = adRepository.save(ad1);
-
-        ExtendedAdDto expected = ExtendedAdDto.builder()
-                .pk(1L)
-                .description(AD_DESCRIPTION_1)
-                .image("/image/" + ad1.getImageUrl())
-                .price(AD_PRICE_1)
-                .title(AD_TITLE_1)
-                .email(AD_AUTHOR_EMAIL_1)
-                .authorFirstName(AD_AUTHOR_FIRST_NAME_1)
-                .authorLastName(AD_AUTHOR_LAST_NAME_1)
-                .phone(AD_AUTHOR_PHONE_1)
-                .build();
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads/{id}", ad1.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.pk").value(expected.getPk()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(expected.getTitle()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.price").value(expected.getPrice()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(expected.getDescription()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.image").value(expected.getImage()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(expected.getEmail()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.authorFirstName")
-                        .value(expected.getAuthorFirstName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.authorLastName")
-                        .value(expected.getAuthorLastName()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.phone").value(expected.getPhone()));
-    }
-
-    @Test
-    @WithAnonymousUser
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testGetExtendedAd_UnauthorizedException() throws Exception {
-
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        ad1.setAuthor(user);
-        ad1 = adRepository.save(ad1);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }
-
-    // Выброс исключения: объявление не найдено
-    @Test
-    @WithMockUser(username = USER_EMAIL)
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testGetExtendedAd_NotFoundException() throws Exception {
-
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        ad1.setAuthor(user);
-        ad1 = adRepository.save(ad1);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads/2")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
 
     @Test
     @WithMockUser(username = USER_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testRemoveAd_Success_1() throws Exception {
-
-        // Можно создать в папке images реальный файл: 60.jpg
-        ad2 = ConstantGeneratorFotTest.adGenerator2();
-        ad2.setAuthor(user);
-        ad2 = adRepository.save(ad2);
-
-        // Удаление объявления пользователя осуществляем с логина этого же пользователя
-        mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/ads/{id}", ad2.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads/{id}", ad2.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(username = USER_ADMIN_EMAIL)
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testRemoveAd_Success_2() throws Exception {
-
-        // Можно создать в папке images реальный файл: 60.jpg
-        ad2 = ConstantGeneratorFotTest.adGenerator2();
-        ad2.setAuthor(user);
-        ad2 = adRepository.save(ad2);
-
-        // Сохраняем в базу данных администратора
-        userAdmin = userRepository.save(userAdmin);
-
-        // Удаление объявления пользователя осуществляем с логина администратора
-        mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/ads/{id}", ad2.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNoContent());
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads/{id}", ad2.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
-    @Test
-    @WithAnonymousUser
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testRemoveAd_Unauthorized() throws Exception {
-
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        ad1.setAuthor(user);
-        ad1 = adRepository.save(ad1);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/ads/{id}", ad1.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(username = USER_EMAIL)
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testRemoveAd_NotFoundException() throws Exception {
-
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        ad1.setAuthor(user);
-        ad1 = adRepository.save(ad1);
-
-        mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/ads/2")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(username = USER_EMAIL)
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testRemoveAd_ForbiddenException() throws Exception {
-
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        user.setEmail(NEW_USER_EMAIL);
-        // Установили пользователю другой логин
-        user.setId(2L);
-        // Установили пользователю другой id
-        userRepository.save(user);
-        // Сохранили пользователя в базу данных
-        ad1.setAuthor(user);
-        // Установили в объявление измененного автора
-        ad1 = adRepository.save(ad1);
-
-        // Удаляем объявление с логина первоначального пользователя, который это объявление не создавал
-        mockMvc.perform(MockMvcRequestBuilders
-                        .delete("/ads/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username = USER_EMAIL)
-    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testUpdateAd_Success_1() throws Exception {
+    public void testUpdateAd_UserIsAuthorOfAd_Success() throws Exception {
 
         ad1 = ConstantGeneratorFotTest.adGenerator1();
         ad1.setAuthor(user);
@@ -379,13 +406,14 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(AD_NEW_TITLE_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.price").value(AD_NEW_PRICE_1));
-                // поле "description" из jsonPath извлечь нельзя, так как метод возвращает AdDto (а в нем нет такого поля)
+                // Поле "description" из jsonPath извлечь нельзя, так как метод возвращает AdDto (а в нем нет такого поля)
     }
+
 
     @Test
     @WithMockUser(username = USER_ADMIN_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testUpdateAd_Success_2() throws Exception {
+    public void testUpdateAd_Admin_Success() throws Exception {
 
         ad1 = ConstantGeneratorFotTest.adGenerator1();
         ad1.setAuthor(user);
@@ -407,8 +435,9 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.title").value(AD_NEW_TITLE_1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.price").value(AD_NEW_PRICE_1));
-        // поле "description" из jsonPath извлечь нельзя, так как метод возвращает AdDto (а в нем нет такого поля)
+        // Поле "description" из jsonPath извлечь нельзя, так как метод возвращает AdDto (а в нем нет такого поля)
     }
+
 
     @Test
     @WithAnonymousUser
@@ -432,6 +461,7 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
+
     @Test
     @WithMockUser(username = USER_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -453,6 +483,7 @@ public class AdControllerIntegrationTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+
 
     @Test
     @WithMockUser(username = USER_EMAIL)
@@ -485,6 +516,7 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
+
     @Test
     @WithMockUser(username = USER_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -507,15 +539,17 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 
+
     @Test
     @WithMockUser(username = USER_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testUpdateImageAd_Success_1() throws Exception {
+    public void testUpdateImageAd_UserIsAuthorOfAd_Success() throws Exception {
 
         ad1 = ConstantGeneratorFotTest.adGenerator1();
         ad1.setAuthor(user);
         ad1 = adRepository.save(ad1);
 
+        // В папку <images> будет загружен тестовый файл, содержащий текст <test image>.
         MockMultipartFile image = new MockMultipartFile(
                 "image",
                 "test.jpg",
@@ -538,10 +572,11 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
     }
 
+
     @Test
     @WithMockUser(username = USER_ADMIN_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testUpdateImageAd_Success_2() throws Exception {
+    public void testUpdateImageAd_Admin_Success() throws Exception {
 
         ad1 = ConstantGeneratorFotTest.adGenerator1();
         ad1.setAuthor(user);
@@ -570,6 +605,7 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
     }
+
 
     @Test
     @WithAnonymousUser
@@ -601,6 +637,7 @@ public class AdControllerIntegrationTest {
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 
+
     @Test
     @WithMockUser(username = USER_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
@@ -630,6 +667,7 @@ public class AdControllerIntegrationTest {
         mockMvc.perform(requestBuilder)
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+
 
     @Test
     @WithMockUser(username = USER_EMAIL)
@@ -669,130 +707,152 @@ public class AdControllerIntegrationTest {
     @Test
     @WithMockUser(username = USER_EMAIL)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testGetAdsByAuthenticatedUser_Success() throws Exception {
+    public void testRemoveAd_UserIsAuthorOfAd_Success() throws Exception {
 
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        ad1.setAuthor(user);
-        ad1 = adRepository.save(ad1);
-        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        // Можно создать в папке images реальный файл: 60.jpg
         ad2 = ConstantGeneratorFotTest.adGenerator2();
         ad2.setAuthor(user);
         ad2 = adRepository.save(ad2);
 
-        AdDto adDto1 = AdDto.builder()
-                .author(1L)
-                .image("/image/" + AD_IMAGE_1)
-                .pk(1L)
-                .price(AD_PRICE_1)
-                .title(AD_TITLE_1)
-                .build();
-        AdDto adDto2 = AdDto.builder()
-                .author(1L)
-                .image("/image/" + AD_IMAGE_2)
-                .pk(2L)
-                .price(AD_PRICE_2)
-                .title(AD_TITLE_2)
-                .build();
-        List<AdDto> expected = List.of(adDto1, adDto2);
+        // Удаление объявления пользователя осуществляем с логина этого же пользователя
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/ads/{id}", ad2.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads/me")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.count").value(2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results.size()").value(expected.size()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].author")
-                .value(expected.get(0).getAuthor()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].image")
-                        .value(expected.get(0).getImage()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].pk")
-                        .value(expected.get(0).getPk()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].price")
-                        .value(expected.get(0).getPrice()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[0].title")
-                        .value(expected.get(0).getTitle()));
+                        .get("/ads/{id}", ad2.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
+
+
+    @Test
+    @WithMockUser(username = USER_ADMIN_EMAIL)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testRemoveAd_Admin_Success() throws Exception {
+
+        // Можно создать в папке images реальный файл: 60.jpg
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2.setAuthor(user);
+        ad2 = adRepository.save(ad2);
+
+        // Сохраняем в базу данных администратора
+        userAdmin = userRepository.save(userAdmin);
+
+        // Удаление объявления пользователя осуществляем с логина администратора
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/ads/{id}", ad2.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNoContent());
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/ads/{id}", ad2.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
 
     @Test
     @WithAnonymousUser
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testGetAdsByAuthenticatedUser_UnauthorizedException() throws Exception {
+    public void testRemoveAd_Unauthorized() throws Exception {
 
-        ad1 = ConstantGeneratorFotTest.adGenerator1();
-        ad1.setAuthor(user);
-        ad1 = adRepository.save(ad1);
-        ad2 = ConstantGeneratorFotTest.adGenerator2();
         ad2 = ConstantGeneratorFotTest.adGenerator2();
         ad2.setAuthor(user);
         ad2 = adRepository.save(ad2);
 
-        AdDto adDto1 = AdDto.builder()
-                .author(1L)
-                .image("/image/" + AD_IMAGE_1)
-                .pk(1L)
-                .price(AD_PRICE_1)
-                .title(AD_TITLE_1)
-                .build();
-        AdDto adDto2 = AdDto.builder()
-                .author(1L)
-                .image("/image/" + AD_IMAGE_2)
-                .pk(2L)
-                .price(AD_PRICE_2)
-                .title(AD_TITLE_2)
-                .build();
-        List<AdDto> expected = List.of(adDto1, adDto2);
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/ads/{id}", ad2.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testRemoveAd_NotFoundException() throws Exception {
+
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        ad2.setAuthor(user);
+        ad2 = adRepository.save(ad2);
 
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads/me")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized());
+                        .delete("/ads/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+
+    @Test
+    @WithMockUser(username = USER_EMAIL)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testRemoveAd_ForbiddenException() throws Exception {
+
+        ad2 = ConstantGeneratorFotTest.adGenerator2();
+        user.setEmail(NEW_USER_EMAIL);
+        // Установили пользователю другой логин
+        user.setId(2L);
+        // Установили пользователю другой id
+        userRepository.save(user);
+        // Сохранили пользователя в базу данных
+        ad2.setAuthor(user);
+        // Установили в объявление измененного автора
+        ad2 = adRepository.save(ad2);
+
+        // Удаляем объявление с логина первоначального пользователя, который это объявление не создавал
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/ads/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
 
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testGetAds_Success() throws Exception {
+    public void testDownloadImageForAd_Success() throws Exception {
 
+        // Перед вызовом этого теста в базе данных создается пользователь с логином USER_EMAIL
         ad1 = ConstantGeneratorFotTest.adGenerator1();
         ad1.setAuthor(user);
         ad1 = adRepository.save(ad1);
-        ad2 = ConstantGeneratorFotTest.adGenerator2();
-        ad2 = ConstantGeneratorFotTest.adGenerator2();
-        ad2.setAuthor(user);
-        ad2 = adRepository.save(ad2);
+        // Создаем объявление, устанавливаем в его поле автора и сохраняем объявление в базу данных
 
-        AdDto adDto1 = AdDto.builder()
-                .author(1L)
-                .image("/image/" + AD_IMAGE_1)
-                .pk(1L)
-                .price(AD_PRICE_1)
-                .title(AD_TITLE_1)
-                .build();
-        AdDto adDto2 = AdDto.builder()
-                .author(1L)
-                .image("/image/" + AD_IMAGE_2)
-                .pk(2L)
-                .price(AD_PRICE_2)
-                .title(AD_TITLE_2)
-                .build();
-        List<AdDto> expected = List.of(adDto1, adDto2);
-
+        // Тестируем метод по выгрузке картинки из файловой системы для конкретного объявления
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/ads")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .get("/image/{imagePath}", AD_IMAGE_1)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.count").value(2))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results.size()").value(expected.size()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].author")
-                        .value(expected.get(1).getAuthor()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].image")
-                        .value(expected.get(1).getImage()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].pk")
-                        .value(expected.get(1).getPk()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].price")
-                        .value(expected.get(1).getPrice()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.results[1].title")
-                        .value(expected.get(1).getTitle()));
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.IMAGE_JPEG_VALUE));
+                // IMAGE_JPEG_VALUE или IMAGE_JPEG
+    }
+
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testDownloadImageForAd_NotFoundException() throws Exception {
+
+        // Перед вызовом этого теста в базе данных создается пользователь с логином USER_EMAIL
+        ad1 = ConstantGeneratorFotTest.adGenerator1();
+        ad1.setAuthor(user);
+        ad1 = adRepository.save(ad1);
+        // Создаем объявление, устанавливаем в его поле автора и сохраняем объявление в базу данных
+
+        // Тестируем метод по выгрузке картинки из файловой системы для конкретного объявления
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/image/80.jpg")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
 }

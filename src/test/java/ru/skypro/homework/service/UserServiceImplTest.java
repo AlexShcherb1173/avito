@@ -1,7 +1,6 @@
 package ru.skypro.homework.service;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,12 +13,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.ConstantGeneratorFotTest;
-import ru.skypro.homework.dto.AdDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UpdateUserDto;
 import ru.skypro.homework.dto.UserDto;
-import ru.skypro.homework.entity.Ad;
 import ru.skypro.homework.entity.User;
+import ru.skypro.homework.exception.ForbiddenException;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.exception.UnauthorizedException;
 import ru.skypro.homework.mapper.UserMapper;
@@ -41,10 +39,11 @@ import static org.mockito.Mockito.*;
 import static ru.skypro.homework.ConstantGeneratorFotTest.*;
 
 @ExtendWith(MockitoExtension.class)
+// @MockitoSettings(strictness = Strictness.LENIENT)
 public class UserServiceImplTest {
 
     @Mock
-    private PasswordEncoder encoder;
+    private PasswordEncoder passwordEncoder;
 
     @Mock
     private UserRepository userRepository;
@@ -55,35 +54,35 @@ public class UserServiceImplTest {
     @Mock
     private SecurityServiceImpl securityService;
 
-    @Mock
-    private UserSecurityDetails userSecurityDetails;
-
     @InjectMocks
     private UserServiceImpl userService;
 
 
     private User user;
-    private User userAdmin;
+    private UserDto userDto;
     private User newUser;
     private NewPasswordDto newPasswordDto;
-    private NewPasswordDto incorrectPasswordDto;
-    private UserDto userDto;
-    private UserDto newUserDto1;
     private UserDto newUserDto2;
+    private UserDto newUserDto1;
     private UpdateUserDto updateUserDto;
 
 
     @BeforeEach
     void setUp() {
         user = ConstantGeneratorFotTest.userGenerator();
-        newUser = ConstantGeneratorFotTest.newUserGenerator_3();
-        userAdmin = ConstantGeneratorFotTest.userAdminGenerator();
-        newPasswordDto = ConstantGeneratorFotTest.newPasswordDtoGenerator();
-        incorrectPasswordDto = ConstantGeneratorFotTest.IncorrectPasswordDtoGenerator();
+        // Первоначальный пользователь
         userDto = ConstantGeneratorFotTest.userDtoGenerator();
-        newUserDto1 = ConstantGeneratorFotTest.newUserDtoGenerator_1();
+        // Модель для создания первоначального пользователя
+        newUser = ConstantGeneratorFotTest.newUserGenerator_3();
+        // Пользователь, у которого обновлено поле "image"
         newUserDto2 = ConstantGeneratorFotTest.newUserDtoGenerator_2();
+        // Модель с обновленным полем "image"; все остальные поля прежние
+        newUserDto1 = ConstantGeneratorFotTest.newUserDtoGenerator_1();
+        // Модель, содержащая три обновленных поля: имя, фамилия и телефон; все остальные поля неизменные.
         updateUserDto = ConstantGeneratorFotTest.updateUserDtoGenerator();
+        // Модель, содержащая только три обновленных поля: имя, фамилия и телефон
+        newPasswordDto = ConstantGeneratorFotTest.newPasswordDtoGenerator();
+        // Модель, содержащая только первоначальный и обновленный пароли
     }
 
 
@@ -92,7 +91,7 @@ public class UserServiceImplTest {
 
         when(securityService.getAuthenticatedUserName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(user));
-        doNothing().when(userMapper).updateUserPasswordFromDto(newPasswordDto, user);
+        when(passwordEncoder.matches(newPasswordDto.getCurrentPassword(), user.getPassword())).thenReturn(true);
 
         // Пароль, извлеченный из user, и текущий пароль, извлеченный из newPasswordDto, совпадают.
         // Пароль изменен
@@ -101,22 +100,23 @@ public class UserServiceImplTest {
         assertTrue(isUpdatePassword);
         verify(securityService, times(1)).getAuthenticatedUserName();
         verify(userRepository, times(1)).findByEmail(user.getEmail());
+        verify(passwordEncoder, times(1)).matches(anyString(), anyString());
+        // Или
+//        verify(passwordEncoder, times(1))
+//                .matches("SecretPassword", "SecretPassword");
     }
 
-    @Disabled("Тест временно не работает")
     @Test
-    void testUpdatePassword_Unsuccessful() {
+    void testUpdatePassword_IncorrectPassword_ThrowsUnauthorizedException() {
 
         when(securityService.getAuthenticatedUserName()).thenReturn(user.getEmail());
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.ofNullable(user));
-        //newPasswordDto.setCurrentPassword(USER_INCORRECT_PASSWORD);
-        doNothing().when(userMapper).updateUserPasswordFromDto(incorrectPasswordDto, user);
+        newPasswordDto.setCurrentPassword(USER_INCORRECT_PASSWORD);
 
-        // Пароль, извлеченный из user, и текущий пароль, извлеченный из newPasswordDto, не совпадают.
-        // Пароль изменен
-        boolean isUpdatePassword = userService.updatePassword(incorrectPasswordDto);
-
-        assertFalse(isUpdatePassword);
+        // Пароль, извлеченный из user, и текущий пароль, извлеченный из newPasswordDto, не совпадают,
+        // так как пароль был изменен.
+        assertThrows(UnauthorizedException.class, () -> userService.updatePassword(newPasswordDto));
+        // Исключение выбрасывает тестируемый класс
         verify(securityService, times(1)).getAuthenticatedUserName();
         verify(userRepository, times(1)).findByEmail(user.getEmail());
     }
@@ -124,14 +124,19 @@ public class UserServiceImplTest {
     @Test
     void testUpdatePassword_UnauthorizedException() {
 
-        //when(userSecurityDetails.getUsername()).thenReturn(null);
+        // Аутентифицированный пользователь пытается изменить пароль у другого пользователя
         when(securityService.getAuthenticatedUserName()).thenReturn(user.getEmail());
-        when(userRepository.findByEmail(anyString())).thenThrow(new UnauthorizedException("Пользователь не авторизован"));
+        when(userRepository.findByEmail(anyString())).thenThrow(new NotFoundException("Пользователь не найден"));
+        // Данное исключение выбрасывает зависимый класс.
 
-        assertThrows(UnauthorizedException.class, () -> userService.updatePassword(newPasswordDto));
+        assertThrows(ForbiddenException.class, () -> userService.updatePassword(newPasswordDto));
         verify(securityService, times(1)).getAuthenticatedUserName();
         verify(userRepository, times(1)).findByEmail(user.getEmail());
     }
+
+    // Доступ к этому методу и всем последующим только для аутентифицированных пользователей осуществляется на уровне
+    // контроллера. Поэтому в сервисе негативный сценарий выполнения этих методов (закрытие методов для
+    // неаутентифицированных пользователей) можно не проверять.
 
     @Test
     void testGetAuthenticatedUser_Success() {
@@ -145,19 +150,9 @@ public class UserServiceImplTest {
         assertEquals(userDto, actual);
         verify(securityService, times(1)).getAuthenticatedUserName();
         verify(userRepository, times(1)).findByEmail(user.getEmail());
+        verify(userMapper, times(1)).toDto(any(User.class));
     }
 
-    @Test
-    void testGetAuthenticatedUser_UnauthorizedException() {
-
-        //when(userSecurityDetails.getUsername()).thenReturn(null);
-        when(securityService.getAuthenticatedUserName()).thenReturn(user.getEmail());
-        when(userRepository.findByEmail(anyString())).thenThrow(new UnauthorizedException("Пользователь не авторизован"));
-
-        assertThrows(UnauthorizedException.class, () -> userService.getAuthenticatedUser());
-        verify(securityService, times(1)).getAuthenticatedUserName();
-        verify(userRepository, times(1)).findByEmail(user.getEmail());
-    }
 
     @Test
     void testUpdateAuthenticatedUserInfo_Success() {
@@ -183,25 +178,13 @@ public class UserServiceImplTest {
         verify(securityService, times(1)).getAuthenticatedUserName();
         verify(userRepository, times(1)).findByEmail(user.getEmail());
     }
+    
 
-    @Test
-    void testUpdateAuthenticatedUserInfo_UnauthorizedException() {
-
-        //when(userSecurityDetails.getUsername()).thenReturn(null);
-        when(securityService.getAuthenticatedUserName()).thenReturn(user.getEmail());
-        when(userRepository.findByEmail(anyString())).thenThrow(new UnauthorizedException("Пользователь не авторизован"));
-
-        assertThrows(UnauthorizedException.class, () -> userService.updateAuthenticatedUserInfo(updateUserDto));
-        verify(securityService, times(1)).getAuthenticatedUserName();
-        verify(userRepository, times(1)).findByEmail(user.getEmail());
-    }
-
-    @Disabled("Тест временно не работает")
     @Test
     void testUpdateAuthenticatedUserImage_Success() throws IOException {
 
         // Необходимо добавить в папку images файл с именем - USER_IMAGE
-        Path path = Path.of("images" + NEW_USER_IMAGE);
+        Path path = Path.of("images/" + NEW_USER_IMAGE);
         String name = NEW_USER_IMAGE.substring(0, NEW_USER_IMAGE.indexOf("."));
         String contentType = Files.probeContentType(path);
         byte[] content = Files.readAllBytes(path);
@@ -212,7 +195,9 @@ public class UserServiceImplTest {
 //        user.setImage(NEW_USER_IMAGE);
 //        userDto.setImage(NEW_USER_IMAGE);
         when(userRepository.save(any(User.class))).thenReturn(newUser);
+        // Ожидаем сохранения в базу данных пользователя с обновленным полем "image"
         when(userMapper.toDto(any(User.class))).thenReturn(newUserDto2);
+        // Ожидаем на выходе получить модель пользователя с обновленным полем "image"
 
         UserDto expected = UserDto.builder()
                 .id(USER_ID)
@@ -227,7 +212,7 @@ public class UserServiceImplTest {
         // Мокируем вызов статического метода по загрузке картинки
         try (MockedStatic<UploadImage> utilities =  Mockito.mockStatic(UploadImage.class)) {
             // Задаем поведение мокированного метода
-            utilities.when(() -> UploadImage.uploadImage(any(MultipartFile.class))).thenReturn("/test.jpg");
+            utilities.when(() -> UploadImage.uploadImage(any(MultipartFile.class))).thenReturn("/" + NEW_USER_IMAGE);
 
             UserDto actual = userService.updateAuthenticatedUserImage(image);
 
@@ -236,30 +221,33 @@ public class UserServiceImplTest {
             assertEquals(expected.getImage(), actual.getImage());
             verify(securityService, times(1)).getAuthenticatedUserName();
             verify(userRepository, times(1)).findByEmail(user.getEmail());
-            verify(userRepository, times(1)).save(newUser);
+            verify(userRepository, times(1)).save(any(User.class));
         }
     }
+
 
     @Test
     void testUpdateAuthenticatedUserImage_UnauthorizedException() throws IOException {
 
+        // Доступ к этому методу только для аутентифицированных пользователей осуществляется на уровне контроллера.
+        // Экспериментальный тест
+
         // Необходимо добавить в папку images файл с именем - USER_IMAGE
-        Path path = Path.of("images" + NEW_USER_IMAGE);
+        Path path = Path.of("images/" + NEW_USER_IMAGE);
         String name = NEW_USER_IMAGE.substring(0, NEW_USER_IMAGE.indexOf("."));
         String contentType = Files.probeContentType(path);
         byte[] content = Files.readAllBytes(path);
         MockMultipartFile image = new MockMultipartFile(name, NEW_USER_IMAGE, contentType, content);
 
-        //when(userSecurityDetails.getUsername()).thenReturn(null);
         when(securityService.getAuthenticatedUserName()).thenReturn(user.getEmail());
-        when(userRepository.findByEmail(anyString())).thenThrow(new UnauthorizedException("Пользователь не авторизован"));
+        when(userRepository.findByEmail(anyString()))
+                .thenThrow(new UnauthorizedException("Пользователь не аутентифицирован"));
 
         assertThrows(UnauthorizedException.class, () -> userService.updateAuthenticatedUserImage(image));
         verify(securityService, times(1)).getAuthenticatedUserName();
         verify(userRepository, times(1)).findByEmail(user.getEmail());
     }
 
-    @Disabled("Тест временно не работает")
     @Test
     void testLoadByUserName_Success() {
 
@@ -268,7 +256,11 @@ public class UserServiceImplTest {
         UserDetails expected = new UserSecurityDetails(user);
         UserDetails actual = userService.loadByUserName(user.getEmail());
 
-        assertEquals(expected, actual);
+        //assertEquals(expected, actual);
+        assertEquals(expected.getUsername(), actual.getUsername());
+        assertEquals(expected.getPassword(), actual.getPassword());
+        assertEquals(expected.getAuthorities(), actual.getAuthorities());
+
         verify(userRepository, times(1)).findByEmail(user.getEmail());
     }
 
@@ -280,6 +272,16 @@ public class UserServiceImplTest {
         User actual = userService.getUserByEmailFromDb(user.getEmail());
 
         assertEquals(user, actual);
+        verify(userRepository, times(1)).findByEmail(user.getEmail());
+    }
+
+    @Test
+    void testGetUserByEmailFromDb_ThrowsNotFoundException() {
+
+        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        // Исключение выбрасывается в тестируемом классе
+
+        assertThrows(NotFoundException.class, () -> userService.getUserByEmailFromDb(user.getEmail()));
         verify(userRepository, times(1)).findByEmail(user.getEmail());
     }
 

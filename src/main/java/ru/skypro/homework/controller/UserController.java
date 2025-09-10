@@ -124,18 +124,19 @@ public class UserController {
     })
     @GetMapping(value = "/{imagePath}")
     public ResponseEntity<byte[]> downloadImageForUser(@PathVariable String imagePath) {
-        byte[] image = imageUploadService.getImageByAdId(imagePath);
-        // filePath, извлеченный из User, содержит только "/" и имя файла (без имени папки)
-        // в методе сервиса к нему добавляется имя папки и "/"
+        byte[] image = imageUploadService.getImageForUserOrAd(imagePath);
+        // filePath, извлеченный из User, содержит только имя файла (без имени папки).
+        // В методе сервиса к нему добавляется имя папки и "/"
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"image.jpg\"")
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(image);
     }
 
-    // Для того чтобы получить картинку из файловой системы, фронтенд обращается по адресу: localhost:8080
-    // и в качестве переменной передает в пути еще и имя файла картинки (путь к файлу без имени папки).
+    // Для того чтобы получить картинку из файловой системы, фронтенд обращается по адресу: "localhost:8080/",
+    // где в качестве переменной пути получает имя файла картинки (путь к файлу без имени папки).
     // Мы удаляем имя папки из пути к файлу по той причине, чтобы при подставлении фронтендом значения "путь
-    // к файлу" в путь localhost:8080, избежать получения эндпоинта: /images, которого в действительности нет.
+    // к файлу" в путь localhost:8080/image, избежать получения эндпоинта: /images, которого в действительности нет.
+    // Заголовок Content-Disposition указывает браузеру, что файл нужно скачать, а не отображать.
 
 }

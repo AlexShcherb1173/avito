@@ -39,4 +39,5 @@ public class RegisterController {
     public boolean register(@Valid @RequestBody RegisterDto registerDto) {
         return authService.register(registerDto);
     }
+
 }

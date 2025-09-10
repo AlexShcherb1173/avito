@@ -25,8 +25,7 @@ public class CreateOrUpdateAdDto {
     @NotNull(message = "Цена не может быть пустой или состоять только из пробелов")
     @Min(value = 0, message = "Цена не может быть меньше 0")
     @Max(value = 10_000_000, message = "Цена не может превышать 10 000 00")
-    @ApiModelProperty(value = "Создание или обновление цены объявления",
-            example = OpenApiConstant.PRICE)
+    @ApiModelProperty(value = "Создание или обновление цены объявления", example = OpenApiConstant.PRICE)
     private Integer price;
 
     @NotBlank(message = "Описание не может быть пустым или состоять только из пробелов")

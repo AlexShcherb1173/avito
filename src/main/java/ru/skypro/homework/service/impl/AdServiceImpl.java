@@ -57,16 +57,14 @@ public class AdServiceImpl implements AdService {
 
         adMapper.updateAdFromUpdateAdDto(createAd, ad);
         ad.setAuthor(user);
-        try {
-            final String urlImage = UploadImage.uploadImage(file);
-            String newUrlImage = urlImage.replace("/", "");
-            ad.setImageUrl(newUrlImage);
-            // В сущность Ad сохраняется путь к файлу, состоящий только из имени файла (без имени папки и "/")
 
-        } catch (IOException e) {
-            log.error("Error uploading image file path = {}", ad.getImageUrl(), e);
-            throw new RuntimeException(e);
-        }
+        final String urlImage = UploadImage.uploadImage(file);
+        String newUrlImage = urlImage.replace("/", "");
+        ad.setImageUrl(newUrlImage);
+        // В сущность Ad сохраняется путь к файлу, состоящий только из имени файла (без имени папки)
+        // "/" - удаляем, поскольку в URL - пути, по которому фронтенд будет искать файл с картинкой, будет еще имя
+        // "image"
+
         adRepository.save(ad);
         return adMapper.toDto(ad);
     }
@@ -94,6 +92,25 @@ public class AdServiceImpl implements AdService {
         adMapper.updateAdFromUpdateAdDto(dto, ad);
         adRepository.save(ad);
         return adMapper.toDto(ad);
+
+        // Атрибутно-ориентированный контроль доступа (ABAC) предлагает более детализированный и динамичный подход к
+        // авторизации по сравнению с традиционной ролевой моделью (RBAC). Вместо того чтобы полагаться исключительно на
+        // роли пользователя, ABAC оценивает запросы на доступ на основе комбинации атрибутов, связанных с пользователем,
+        // ресурсом, выполняемым над ресурсом действием и окружением.
+        // Spring Expression Language (SpEL) — это мощный язык выражений, поддерживающий запросы и манипуляции с
+        // объектами во время выполнения. Он может использоваться в Spring Security для определения сложных правил
+        // авторизации на основе атрибутов. Выражения SpEL оцениваются относительно корневого объекта, которым обычно
+        // является объект аутентификации или доменный объект.
+        // Spring Expression Language (SpEL) — это мощный язык выражений, который можно использовать для реализации
+        // динамических правил авторизации в Spring Security. Выражения SpEL могут обращаться к атрибутам пользователя,
+        // свойствам ресурса и даже вызывать методы бинов в контексте Spring.
+        // Аннотация @PreAuthorize используется для применения правил авторизации до выполнения метода. Она использует
+        // Spring Expression Language (SpEL) для определения условий, которые должны быть выполнены для вызова метода.
+        // Если выражение SpEL оценивается как true, метод выполняется; в противном случае выбрасывается исключение
+        // AccessDeniedException.
+        // "@adServiceImpl.isAdCreatorOrAdmin(#id)" - делегирует решение об авторизации пользовательскому бину Spring
+        // с именем adServiceImpl. Метод isAdCreatorOrAdmin() этого бина получает параметр id объявления в качестве
+        // аргумента. #id — это выражение SpEL, которое ссылается на параметр id метода updateAd().
     }
 
     @Override
@@ -115,24 +132,20 @@ public class AdServiceImpl implements AdService {
     @Transactional
     public AdDto updateImageAd(Long id, MultipartFile file) {
         Ad ad = findAdById(id);
-        try {
-            String urlImage = UploadImage.uploadImage(file).replace("/", "");
-            ad.setImageUrl(urlImage);
-            // В сущность Ad сохраняется путь к файлу, состоящий только из имени файла (без имени папки и "/")
 
-        } catch (IOException e) {
-            log.error("Error uploading image file path = {}", ad.getImageUrl(), e);
-            throw new RuntimeException(e);
-        }
+        String urlImage = UploadImage.uploadImage(file).replace("/", "");
+        ad.setImageUrl(urlImage);
+        // В сущность Ad сохраняется путь к файлу, состоящий только из имени файла (без имени папки)
+        // "/" - удаляем, поскольку в URL - пути, по которому фронтенд будет искать файл с картинкой, будет еще имя
+        // "image"
+
         adRepository.save(ad);
         return adMapper.toDto(ad);
     }
 
     @Override
     public Ad findAdById(Long id) {
-        return adRepository
-                .findById(id)
-                .orElseThrow(() -> new NotFoundException("Объявление не найдено"));
+        return adRepository.findById(id).orElseThrow(() -> new NotFoundException("Объявление не найдено"));
     }
 
     @Override
@@ -142,4 +155,5 @@ public class AdServiceImpl implements AdService {
         User user = userService.getUserByEmailFromDb(email);
         return user.getRole() == Role.ADMIN || email.equals(ad.getAuthor().getEmail());
     }
+
 }

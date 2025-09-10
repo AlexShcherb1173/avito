@@ -14,14 +14,14 @@ import ru.skypro.homework.util.OpenApiConstant;
 public class NewPasswordDto {
 
     @NotNull(message = "Текущий пароль не может быть Null")
-    @Size(min = 8, max = 16, message = "Пароль должен быть от 8 до 16 символов")
+    @Size(min = 8, max = 32, message = "Пароль должен быть от 8 до 32 символов")
     @ApiModelProperty(
             value = "Текущий пароль",
             example = OpenApiConstant.CURRENT_PASSWORD)
     private String currentPassword;
 
     @NotNull(message = "Новый пароль не может быть Null")
-    @Size(min = 8, max = 16, message = "Пароль должен быть от 8 до 16 символов")
+    @Size(min = 8, max = 32, message = "Пароль должен быть от 8 до 32 символов")
     @ApiModelProperty(
             value = "Новый пароль",
             example = OpenApiConstant.NEW_PASSWORD)

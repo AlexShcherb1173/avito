@@ -1,6 +1,7 @@
 package ru.skypro.homework.controller;
 
 import net.minidev.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,7 +19,7 @@ import static ru.skypro.homework.ConstantGeneratorFotTest.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class RegisterControllerTest {
+public class RegisterControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,15 +40,15 @@ public class RegisterControllerTest {
         registerDto.put("phone", USER_PHONE);
         registerDto.put("role", USER_ROLE);
 
-        mockMvc.perform(MockMvcRequestBuilders
+        String contentAsString = mockMvc.perform(MockMvcRequestBuilders
                         .post("/register")
                         .content(registerDto.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-                //.andExpect(MockMvcResultMatchers.jsonPath("$.email").value(USER_EMAIL))
-                //.andExpect(MockMvcResultMatchers.jsonPath("$.firstName").value(USER_FIRST_NAME));
-                //.andExpect(MockMvcResultMatchers.jsonPath("$.role").value(USER_ROLE.name()));
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        Assertions.assertEquals("true", contentAsString);
     }
 
 

@@ -79,10 +79,11 @@ public class CommentsServiceImpl implements CommentsService {
 
     @Override
     public boolean isCommentCreatorOrAdmin(Long id) {
-        Comment comment = commentRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("Комментарий не найден"));
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Комментарий не найден"));
         String email = securityService.getAuthenticatedUserName();
         User user = userService.getUserByEmailFromDb(email);
         return user.getRole() == Role.ADMIN || email.equals(comment.getAuthor().getEmail());
     }
+
 }

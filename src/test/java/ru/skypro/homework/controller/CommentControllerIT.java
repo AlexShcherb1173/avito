@@ -37,7 +37,7 @@ import ru.skypro.homework.service.impl.UserSecurityDetails;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(OrderAnnotation.class)
-public class CommentControllerIntegrationTest {
+public class CommentControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
@@ -69,26 +69,51 @@ public class CommentControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+
         // Сначала сохраняем пользователя
-        user = ConstantGeneratorFotTest.userGenerator(); // Используем email "testuser@example.com"
-        user = userRepository.save(user); // Сохраняем и получаем пользователя с ID
+        user = ConstantGeneratorFotTest.userGenerator();
+        // Используем email "testuser@example.com"
+        user = userRepository.save(user);
+        // Сохраняем и получаем пользователя с ID
 
         // Затем сохраняем объявление, убедившись, что автор установлен
         ad = ConstantGeneratorFotTest.adGenerator1();
         ad.setAuthor(user);
-        ad = adRepository.save(ad); // Сохраняем и получаем объявление с ID
+        ad = adRepository.save(ad);
+        // Сохраняем и получаем объявление с ID
 
         // Наконец, сохраняем комментарий
         comment = ConstantGeneratorFotTest.commentGenerator(ad, user);
         commentRepository.save(comment);
 
         when(userSecurityDetails.getUsername()).thenReturn(user.getEmail());
+        // UserSecurityDetails - это объект, который содержит информацию об аутентифицированном пользователе.
+        // Данный объект создается на основе данных пользователя, извлеченного из базы данных по его логину.
+        // Когда мы вызываем у объекта UserSecurityDetails метод getUsername(), то ожидаем получить логин текущего
+        // аутентифицированного пользователя "user".
         SecurityContextHolder.getContext().setAuthentication(
+                // Сохраняем в SecurityContext объект Authentication
                 new UsernamePasswordAuthenticationToken(
+                        // UsernamePasswordAuthenticationToken наследуется от AbstractAuthenticationToken, а последний
+                        // имплементирует интерфейс - Authentication
                         userSecurityDetails,
+                        // пользователь (из него извлекается идентификатор - логин)
                         null,
+                        // учетные данные (пароль)
                         userSecurityDetails.getAuthorities())
+                        // права пользователя
         );
+
+        // Можно записать так:
+        // Создаем кастомный объект Authentication
+        // Authentication authentication = new UsernamePasswordAuthenticationToken(USER_EMAIL, USER_PASSWORD,
+        // AuthorityUtils.createAuthorityList(Role.USER));
+
+        // Устанавливаем объект Authentication в SecurityContext
+        // SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Очищаем SecurityContext после теста
+        // SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -110,7 +135,7 @@ public class CommentControllerIntegrationTest {
     @Test
     @Order(2)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testUpdateComment() throws Exception {
+    public void testUpdateComment_Success() throws Exception {
         CreateOrUpdateCommentDto updateCommentDto = CreateOrUpdateCommentDto.builder()
                 .text("Updated Comment")
                 .build();
@@ -125,7 +150,21 @@ public class CommentControllerIntegrationTest {
     @Test
     @Order(3)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testGetComments() throws Exception {
+    public void testUpdateComment_ThrowsNotFoundException() throws Exception {
+        CreateOrUpdateCommentDto updateCommentDto = CreateOrUpdateCommentDto.builder()
+                .text("Updated Comment")
+                .build();
+
+        mockMvc.perform(patch("/ads/{adId}/comments/{commentId}", 5, 10)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateCommentDto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Order(4)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testGetComments_Success() throws Exception {
         mockMvc.perform(get("/ads/{adId}/comments", ad.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -134,11 +173,21 @@ public class CommentControllerIntegrationTest {
     }
 
     @Test
-    @Order(4)
+    @Order(5)
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void testDeleteComment() throws Exception {
+    public void testDeleteComment_Success() throws Exception {
         mockMvc.perform(delete("/ads/{adId}/comments/{commentId}", ad.getId(), comment.getId())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    @Order(6)
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    public void testDeleteComment_ThrowsNotFoundException() throws Exception {
+        mockMvc.perform(delete("/ads/{adId}/comments/{commentId}", ad.getId(), 10)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
 }

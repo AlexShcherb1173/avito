@@ -11,9 +11,9 @@ import ru.skypro.homework.util.OpenApiConstant;
 @ApiModel(value = "Login", description = "Модель для аутентификации пользователя")
 public class LoginDto {
 
-    @ApiModelProperty(value = "Пароль", example = OpenApiConstant.USER_PASS)
-    private String password;
-
     @ApiModelProperty(value = "Имя пользователя", example = OpenApiConstant.USER_NAME)
     private String username;
+
+    @ApiModelProperty(value = "Пароль", example = OpenApiConstant.USER_PASS)
+    private String password;
 }
