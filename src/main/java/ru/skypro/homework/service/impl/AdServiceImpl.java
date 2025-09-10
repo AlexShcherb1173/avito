@@ -15,9 +15,16 @@ import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.security.SecurityUtils;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +40,7 @@ public class AdServiceImpl implements AdService {
         dto.setId(e.getId().intValue());
         dto.setTitle(e.getTitle());
         dto.setPrice(e.getPrice());
-        dto.setImage(e.getImageUrl());
+        dto.setImage(e.getImageUrl() != null ? "/ads/" + e.getId() + "/image" : null);
         return dto;
     }
 
@@ -43,7 +50,7 @@ public class AdServiceImpl implements AdService {
         dto.setTitle(e.getTitle());
         dto.setDescription(e.getDescription());
         dto.setPrice(e.getPrice());
-        dto.setImage(e.getImageUrl());
+        dto.setImage(e.getImageUrl() != null ? "/ads/" + e.getId() + "/image" : null);
 
         UserDto author = new UserDto();
         author.setId(e.getAuthor().getId().intValue());
@@ -77,9 +84,7 @@ public class AdServiceImpl implements AdService {
         ad.setDescription(dto.getDescription());
         ad.setPrice(dto.getPrice());
         ad.setAuthor(author);
-
-        // TODO: сохранить image и выставить URL
-        ad.setImageUrl(null);
+        ad.setImageUrl(saveImage(image));
 
         ad = adRepository.save(ad);
         return map(ad);
@@ -126,6 +131,7 @@ public class AdServiceImpl implements AdService {
     }
 
 
+
     private void checkOwnerOrAdmin(User owner) {
         User current = securityUtils.getCurrentUser();
         if (!Objects.equals(current.getId(), owner.getId()) &&
@@ -133,4 +139,24 @@ public class AdServiceImpl implements AdService {
             throw new AccessDeniedException("Forbidden");
         }
     }
-}
+        private String saveImage(MultipartFile image) {
+            if (image == null || image.isEmpty()) {
+                return null;
+            }
+            try {
+                String originalFilename = image.getOriginalFilename();
+                String extension = "";
+                if (originalFilename != null && originalFilename.contains(".")) {
+                    extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+                }
+                Path imagesDir = Paths.get("images");
+                Files.createDirectories(imagesDir);
+                String filename = UUID.randomUUID() + extension;
+                Path target = imagesDir.resolve(filename);
+                Files.copy(image.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
+                return "/images/" + filename;
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to store image", e);
+            }
+        }
+    }

@@ -70,8 +70,10 @@ public class SecurityConfig {
         JdbcUserDetailsManager jdbcUserDetailsManager = new JdbcUserDetailsManager(dataSource);
 
         jdbcUserDetailsManager.setUserExistsSql("SELECT username FROM users WHERE username = ?");
-        jdbcUserDetailsManager.setUsersByUsernameQuery("SELECT username, password, enabled FROM users WHERE username = ?");
-        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery("SELECT username, role FROM users WHERE username = ?");
+        jdbcUserDetailsManager.setUsersByUsernameQuery("SELECT username, password, true as enabled FROM users WHERE username = ?");
+        jdbcUserDetailsManager.setAuthoritiesByUsernameQuery(
+                "SELECT u.username, ur.roles as authority FROM users u " +
+                        "JOIN user_roles ur ON u.id = ur.user_id WHERE u.username = ?");
 
 
         return jdbcUserDetailsManager;
