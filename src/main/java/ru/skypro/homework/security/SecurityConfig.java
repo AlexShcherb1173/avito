@@ -3,6 +3,7 @@ package ru.skypro.homework.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +13,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import ru.skypro.homework.filter.BasicAuthCorsFilter;
 
 import javax.sql.DataSource;
 
@@ -23,6 +26,7 @@ public class SecurityConfig {
 
 
     private final UserDetailsService userDetailsService;
+    private final BasicAuthCorsFilter basicAuthCorsFilter;
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
@@ -51,12 +55,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests(a -> a
-                        .mvcMatchers("/swagger-resources/**","/swagger-ui.html","/v3/api-docs","/webjars/**","/login","/register").permitAll()
-                        .mvcMatchers("/ads/**","/users/**").authenticated()
+                        .mvcMatchers(AUTH_WHITELIST).permitAll()
+                        .mvcMatchers(HttpMethod.GET, "/ads").permitAll()
+                        .mvcMatchers("/ads/**", "/users/**", "/profile/**").authenticated()
                 )
                 .userDetailsService(userDetailsService)
                 .cors().and()
                 .httpBasic();
+        http.addFilterAfter(basicAuthCorsFilter, BasicAuthenticationFilter.class);
         return http.build();
     }
     @Bean

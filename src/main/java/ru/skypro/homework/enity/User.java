@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @Entity
 @Table(name = "users")
 @Data
-
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,15 +41,7 @@ public class User implements UserDetails {
 
 
 
-    public User(Long id, String username, String password, String firstName, String lastName, String phone, Set<Role> roles) {
-        this.id = id;
-        this.username = username;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
-        this.roles = roles;
-    }
+
 
     @Override public Collection<? extends GrantedAuthority> getAuthorities() {
 

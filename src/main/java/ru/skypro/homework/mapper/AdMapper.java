@@ -4,7 +4,6 @@ package ru.skypro.homework.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.AdDto;
-
 import ru.skypro.homework.enity.Ad;
 import ru.skypro.homework.enity.User;
 import java.time.LocalDateTime;
