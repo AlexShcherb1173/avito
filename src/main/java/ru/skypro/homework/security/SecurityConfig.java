@@ -69,6 +69,7 @@ public class SecurityConfig {
                         .mvcMatchers(AUTH_WHITELIST).permitAll()
                         .mvcMatchers(HttpMethod.GET, "/ads").permitAll()
                         .mvcMatchers("/ads/**", "/users/**", "/profile/**").authenticated()
+                        .mvcMatchers(HttpMethod.GET, "/ads/**").permitAll()
                 )
                 .userDetailsService(userDetailsService)
                 .cors().and()

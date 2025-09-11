@@ -15,6 +15,8 @@ import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
 
 import javax.persistence.EntityNotFoundException;
+import javax.transaction.Transactional;
+
 import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -31,6 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final SecurityUtils securityUtils;
 
     @Override
+    @Transactional
     public Comments getForAd(Integer adId) {
         List<CommentDto> list = commentRepository.findByAdId(adId.longValue()).stream()
                 .map(this::toDto)

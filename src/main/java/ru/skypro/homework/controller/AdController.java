@@ -77,7 +77,7 @@ public class AdController {
         }
         try {
             String url = ad.getImageUrl();
-            Path path = Paths.get(url.startsWith("/") ? url.substring(1) : url);
+            Path path = Paths.get(url);
             byte[] bytes = Files.readAllBytes(path);
             String contentType = Files.probeContentType(path);
             if (contentType == null) {
