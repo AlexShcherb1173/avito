@@ -81,7 +81,7 @@ public class CommentServiceImpl implements CommentService {
         CommentDto result = new CommentDto();
         result.setPk(saved.getId().intValue());
         result.setAuthor(saved.getAuthor().getId().intValue());
-        result.setAuthorImage(saved.getAuthor().getImage());
+       // result.setAuthorImage(saved.getAuthor().getImage());
         result.setAuthorFirstName(saved.getAuthor().getFirstName());
         result.setCreatedAt(saved.getCreatedAt().toEpochSecond(ZoneOffset.UTC));
         result.setText(saved.getText());
@@ -114,7 +114,7 @@ public class CommentServiceImpl implements CommentService {
         CommentDto dto = new CommentDto();
         dto.setPk(Math.toIntExact(comment.getId()));
         dto.setAuthor(Math.toIntExact(comment.getAuthor().getId()));
-        dto.setAuthorImage("/images/users/" + comment.getAuthor().getImage()); // если есть
+      //  dto.setAuthorImage("/images/users/" + comment.getAuthor().getImage()); // если есть
         dto.setAuthorFirstName(comment.getAuthor().getFirstName());
         dto.setCreatedAt(comment.getCreatedAt().atZone(ZoneId.systemDefault()).toEpochSecond());
         dto.setText(comment.getText());

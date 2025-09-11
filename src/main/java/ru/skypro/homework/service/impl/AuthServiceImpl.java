@@ -1,105 +1,81 @@
 package ru.skypro.homework.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.Login;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Register;
-import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.responseDto.JwtResponse;
-import ru.skypro.homework.security.JwtTokenUtil;
 import ru.skypro.homework.service.AuthService;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    /**
-     * работаем напрямую с БД
-     */
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
 
-
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenUtil jwtTokenUtil;
-    private static final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
-
-    public AuthServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenUtil = jwtTokenUtil;
-    }
-
     @Override
-    public JwtResponse login(Login login) {
-        log.info("Попытка входа: {}", login.getUsername());
-
+    public boolean login(String userName, String password) {
         try {
-            /**
-             * Аутентифицируем пользователя
-             */
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(login.getUsername(), login.getPassword())
-            );
+            // Создаем объект для аутентификации
+            Authentication authToken = new UsernamePasswordAuthenticationToken(userName, password);
 
+            // Аутентифицируем пользователя
+            Authentication authentication = authenticationManager.authenticate(authToken);
+
+            // Устанавливаем аутентификацию в контекст безопасности
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String token = jwtTokenUtil.generateToken(userDetails);
+            log.info("Успешный вход пользователя: {}", userName);
+            return true;
 
-            log.info("Успешная аутентификация, токен сгенерирован для: {}", userDetails.getUsername());
-            return new JwtResponse(token);
-
-        } catch (BadCredentialsException e) {
-            log.warn("Неверные учётные данные для пользователя: {}", login.getUsername());
-            throw new BadCredentialsException("Invalid credentials");
-        } catch (DisabledException e) {
-            log.warn("Попытка входа отключённого пользователя: {}", login.getUsername());
-            throw new DisabledException("User is disabled");
         } catch (Exception e) {
-            log.error("Ошибка аутентификации: {}", e.getMessage(), e);
-            throw new RuntimeException("Authentication failed", e);
+            log.warn("Неверные учётные данные для пользователя: {}", userName);
+            return false;
         }
     }
 
     @Override
-    public boolean login(String username, String password) {
-        System.out.println("PasswordEncoder: " + passwordEncoder);
-        return userRepository.findByUsername(username)
-                .map(user -> passwordEncoder.matches(password, user.getPassword()))
-                .orElse(false);
-    }
+    @Transactional
+    public boolean register(Register registerReq) {
+        try {
+            // Проверяем, не существует ли уже пользователь с таким username
+            if (userRepository.existsByUsername(registerReq.getUsername())) {
+                log.warn("Пользователь с username {} уже существует", registerReq.getUsername());
+                return false;
+            }
 
-    @Override
-    public void register(Register dto) {
-        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
-            throw new RuntimeException("User already exists");
+            // Создаем нового пользователя
+            User user = new User();
+            user.setUsername(registerReq.getUsername());
+            user.setPassword(passwordEncoder.encode(registerReq.getPassword())); // Кодируем пароль!
+            user.setFirstName(registerReq.getFirstName());
+            user.setLastName(registerReq.getLastName());
+            user.setPhone(registerReq.getPhone());
+            user.setRole(registerReq.getRole()); // Убедитесь, что роль устанавливается правильно
+
+            // Сохраняем пользователя в базу данных
+            userRepository.save(user);
+
+            log.info("Зарегистрирован новый пользователь: {}", registerReq.getUsername());
+            return true;
+
+        } catch (Exception e) {
+            log.error("Ошибка при регистрации пользователя: {}", e.getMessage());
+            return false;
         }
-
-        User user = User.builder()
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .firstName(dto.getFirstName())
-                .lastName(dto.getLastName())
-                .phone(dto.getPhone())
-                .role(Role.USER)
-                .build();
-
-        userRepository.save(user);
     }
 }
-
 
 
 

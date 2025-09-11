@@ -3,9 +3,9 @@ CREATE INDEX idx_ads_author_id ON ads(author_id);
 CREATE INDEX idx_comments_ad_id ON comments(ad_id);
 CREATE INDEX idx_comments_author_id ON comments(author_id);
 
-INSERT INTO users (email, password, first_name, last_name, phone, role, image_url, created_at, enabled, username) VALUES
-('VICTTTORYA00@gmail.com', '$2a$10$JPOL9UM7S4', 'Виктория', 'Чеботарева', '+7 (909) 123-45-67', 'ADMIN', '/images/iphone.jpg', '2025-09-05 19:06:19.132965', true, 'VICTTTORYA00@gmail.com''),
-('user@example.com', '$2a$10$rDkPvvAFV8kqwvKJzwlRv.i.q.wz1w1pz0SFsHn/55jNeZFQvyeAy', 'Максим', 'Турин', '+7 (904) 765-43-21', 'USER', '/images/macbook.jpg', '2025-09-05 19:06:19.132965', true, 'user@example.com');
+INSERT INTO users (username, password, first_name, last_name, phone, role, enabled, created_at)
+VALUES ('admin@mail.ru', '{bcrypt}$2a$10$FLXrbZPHKvwk1SrGEu./uOyHj6rwCBTzWZ0KfFOPk4HszpBCU1234', 'Admin', 'User', '+79998887766', 'ADMIN', true, NOW());
+
 
 INSERT INTO ads (created_at, description, image_url, price, title, author_id,) VALUES
 ('2024-09-05 09:06:19.132', 'Отличается милым внешним видом и жизнерадостным характером', 'image1.jpg', 145000, 'Мальтипу', 14),

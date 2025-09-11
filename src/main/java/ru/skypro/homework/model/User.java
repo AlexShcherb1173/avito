@@ -5,27 +5,22 @@ package ru.skypro.homework.model;
  */
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchConnectionDetails;
 import ru.skypro.homework.dto.Role;
+import java.time.Instant;
 
-@Entity
-@Builder
-@Table(name = "users")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Entity
+@Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
     private String firstName;
@@ -35,74 +30,20 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    /**
-     * путь к аватарке
-     */
-    private String image;
+    @Column(nullable = false)
+    private Boolean enabled = true;
 
+    private Instant createdAt;
+    private Instant updatedAt;
 
-
-    public Long getId() {
-        return id;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = Instant.now();
+        enabled = true;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = Instant.now();
     }
 }
