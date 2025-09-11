@@ -39,9 +39,10 @@ public class AdServiceImpl implements AdService {
         AdDto dto = new AdDto();
         dto.setAuthor(e.getAuthor() != null ? e.getAuthor().getId().intValue() : null);
         dto.setPk(e.getId().intValue());
+        dto.setImage(e.getImageUrl() != null ? "/ads/" + e.getId() + "/image" : null);
+        dto.setPk(e.getId().intValue());
         dto.setPrice(e.getPrice());
         dto.setTitle(e.getTitle());
-        dto.setImage(e.getImageUrl() != null ? "/ads/" + e.getId() + "/image" : null);
         return dto;
     }
 
@@ -59,7 +60,8 @@ public class AdServiceImpl implements AdService {
         author.setFirstName(e.getAuthor().getFirstName());
         author.setLastName(e.getAuthor().getLastName());
         author.setPhone(e.getAuthor().getPhone());
-
+        dto.setPrice(e.getPrice());
+        dto.setTitle(e.getTitle());
         dto.setAuthor(author);
         return dto;
     }

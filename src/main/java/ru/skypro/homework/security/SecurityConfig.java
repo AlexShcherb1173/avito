@@ -67,9 +67,8 @@ public class SecurityConfig {
         http.csrf().disable()
                 .authorizeHttpRequests(a -> a
                         .mvcMatchers(AUTH_WHITELIST).permitAll()
-                        .mvcMatchers(HttpMethod.GET, "/ads").permitAll()
+                        .mvcMatchers(HttpMethod.GET, "/ads/**", "/users/**").permitAll()
                         .mvcMatchers("/ads/**", "/users/**", "/profile/**").authenticated()
-                        .mvcMatchers(HttpMethod.GET, "/ads/**").permitAll()
                 )
                 .userDetailsService(userDetailsService)
                 .cors().and()
