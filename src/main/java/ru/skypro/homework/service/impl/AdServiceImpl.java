@@ -37,19 +37,21 @@ public class AdServiceImpl implements AdService {
     // ===== Маппинг =====
     private AdDto map(Ad e) {
         AdDto dto = new AdDto();
-        dto.setId(e.getId().intValue());
-        dto.setTitle(e.getTitle());
+        dto.setAuthor(e.getAuthor() != null ? e.getAuthor().getId().intValue() : null);
+        dto.setPk(e.getId().intValue());
         dto.setPrice(e.getPrice());
+        dto.setTitle(e.getTitle());
         dto.setImage(e.getImageUrl() != null ? "/ads/" + e.getId() + "/image" : null);
         return dto;
     }
 
     private ExtendedAd mapExt(Ad e) {
         ExtendedAd dto = new ExtendedAd();
-        dto.setId(e.getId().intValue());
-        dto.setTitle(e.getTitle());
+        dto.setPk(e.getId().intValue());
+        dto.setAuthorFirstName(e.getAuthor().getFirstName());
+        dto.setAuthorLastName(e.getAuthor().getLastName());
         dto.setDescription(e.getDescription());
-        dto.setPrice(e.getPrice());
+        dto.setEmail(e.getAuthor().getUsername());
         dto.setImage(e.getImageUrl() != null ? "/ads/" + e.getId() + "/image" : null);
 
         UserDto author = new UserDto();
