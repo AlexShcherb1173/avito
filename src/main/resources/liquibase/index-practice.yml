@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - include:
+      file: liquibase/scripts/v1__create_comment_create.sql
+  - include:
+      file: liquibase/scripts/v2__create_users_table.sql
+  - include:
+      file: liquibase/scripts/v3__create_ad_table.sql
+  - include:
+      file: liquibase/scripts/v4__create_fk_ad_users.sql
+  - include:
+      file: liquibase/scripts/v5__create_fk_comment_ad.sql
