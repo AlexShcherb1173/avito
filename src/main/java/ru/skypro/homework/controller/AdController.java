@@ -28,7 +28,7 @@ public class AdController {
 
     //добавление объявления
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdDto> addAd(@PathVariable("createOrUpdateAd") CreateOrUpdateAdDto createOrUpdateAdDto,
+    public ResponseEntity<AdDto> addAd(@RequestBody CreateOrUpdateAdDto createOrUpdateAdDto,
                                        @RequestParam("image") MultipartFile image) {
         AdDto adDto = new AdDto();
         adDto.setTitle(createOrUpdateAdDto.getTitle());
