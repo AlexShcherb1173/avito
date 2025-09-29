@@ -5,24 +5,24 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.user.NewPassword;
-import ru.skypro.homework.dto.user.UpdateUser;
-import ru.skypro.homework.dto.user.User;
+import ru.skypro.homework.dto.user.NewPasswordDto;
+import ru.skypro.homework.dto.user.UpdateUserDto;
+import ru.skypro.homework.dto.user.UserDto;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
     @PostMapping("/set_password")
-    ResponseEntity<?> setPassword(@RequestBody NewPassword newPassword) {
+    ResponseEntity<?> setPassword(@RequestBody NewPasswordDto newPasswordDto) {
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/me")
-    ResponseEntity<User> getUser() {
-        User user = new User();
+    ResponseEntity<UserDto> getUser() {
+        UserDto userDto = new UserDto();
         if (true) {
-            return ResponseEntity.ok(user);
+            return ResponseEntity.ok(userDto);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -30,9 +30,9 @@ public class UserController {
 
     //обновление информации об авторизованном пользователе
     @PatchMapping("/me")
-    public ResponseEntity<UpdateUser> updateUser(@RequestBody UpdateUser updateUser) {
+    public ResponseEntity<UpdateUserDto> updateUser(@RequestBody UpdateUserDto updateUserDto) {
         if (true) {
-            return ResponseEntity.ok(updateUser);
+            return ResponseEntity.ok(updateUserDto);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

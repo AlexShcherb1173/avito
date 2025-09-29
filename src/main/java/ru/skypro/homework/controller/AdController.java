@@ -9,10 +9,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.ads.Ad;
-import ru.skypro.homework.dto.ads.Ads;
-import ru.skypro.homework.dto.ads.CreateOrUpdateAd;
-import ru.skypro.homework.dto.ads.ExtendedAd;
+import ru.skypro.homework.dto.ads.AdDto;
+import ru.skypro.homework.dto.ads.AdsDto;
+import ru.skypro.homework.dto.ads.CreateOrUpdateAdDto;
+import ru.skypro.homework.dto.ads.ExtendedAdDto;
 
 @Slf4j
 @RestController
@@ -21,20 +21,20 @@ public class AdController {
 
     //получение всех объявлений
     @GetMapping
-    public ResponseEntity<Ads> getAllAds() {
-        Ads ads = new Ads();
-        return ResponseEntity.ok(ads);
+    public ResponseEntity<AdsDto> getAllAds() {
+        AdsDto adsDto = new AdsDto();
+        return ResponseEntity.ok(adsDto);
     }
 
     //добавление объявления
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Ad> addAd(@PathVariable("createOrUpdateAd") CreateOrUpdateAd createOrUpdateAd,
-                                    @RequestParam("image") MultipartFile image) {
-        Ad ad = new Ad();
-        ad.setTitle(createOrUpdateAd.getTitle());
-        ad.setPrice(createOrUpdateAd.getPrice());
+    public ResponseEntity<AdDto> addAd(@PathVariable("createOrUpdateAd") CreateOrUpdateAdDto createOrUpdateAdDto,
+                                       @RequestParam("image") MultipartFile image) {
+        AdDto adDto = new AdDto();
+        adDto.setTitle(createOrUpdateAdDto.getTitle());
+        adDto.setPrice(createOrUpdateAdDto.getPrice());
         if (true) {
-            return ResponseEntity.ok(ad);
+            return ResponseEntity.ok(adDto);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -42,13 +42,13 @@ public class AdController {
 
     //получение информации об объявлении
     @GetMapping("/{id}")
-    public ResponseEntity<ExtendedAd> getAds(@PathVariable Integer id) {
-        ExtendedAd extendedAd = new ExtendedAd();
+    public ResponseEntity<ExtendedAdDto> getAds(@PathVariable Integer id) {
+        ExtendedAdDto extendedAdDto = new ExtendedAdDto();
         if (id == null) {
             return ResponseEntity.notFound().build();   //404
         }
         if (true) {
-            return ResponseEntity.ok(extendedAd);       //200
+            return ResponseEntity.ok(extendedAdDto);       //200
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();  //401
         }
@@ -62,19 +62,19 @@ public class AdController {
 
     //обновление информации об объявлении
     @PatchMapping("/{id}")
-    public ResponseEntity<Ad> updateAds(@PathVariable("id") Integer adId,
-                                        @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        Ad ad = new Ad();
-        ad.setTitle(createOrUpdateAd.getTitle());
-        ad.setPrice(createOrUpdateAd.getPrice());
-        return ResponseEntity.ok(ad);
+    public ResponseEntity<AdDto> updateAds(@PathVariable("id") Integer adId,
+                                           @RequestBody CreateOrUpdateAdDto createOrUpdateAdDto) {
+        AdDto adDto = new AdDto();
+        adDto.setTitle(createOrUpdateAdDto.getTitle());
+        adDto.setPrice(createOrUpdateAdDto.getPrice());
+        return ResponseEntity.ok(adDto);
     }
 
     //получение объявлений авторизированного пользователя
     @GetMapping("/me")
-    public ResponseEntity<Ads> getAdsMe() {
-        Ads ads = new Ads();
-        return ResponseEntity.ok(ads);
+    public ResponseEntity<AdsDto> getAdsMe() {
+        AdsDto adsDto = new AdsDto();
+        return ResponseEntity.ok(adsDto);
     }
 
     //обновление картинки объявления

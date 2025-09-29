@@ -12,11 +12,11 @@
   </parent>
 
   <groupId>ru.skypro</groupId>
-  <artifactId>ads</artifactId>
+  <artifactId>adsDto</artifactId>
   <version>0.0.1-SNAPSHOT</version
   >
   <name>Ads application</name>
-  <description>Application for managing ads</description>
+  <description>Application for managing adsDto</description>
 
   <properties>
     <java.version>11</java.version>
@@ -74,11 +74,6 @@
       <artifactId>springdoc-openapi-ui</artifactId>
       <version>${springdoc.version}</version>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.springdoc</groupId>-->
-<!--      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>-->
-<!--      <version>2.6.0</version>-->
-<!--    </dependency>-->
 
   </dependencies>
 
