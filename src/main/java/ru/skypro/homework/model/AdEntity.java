@@ -1,11 +1,10 @@
 package ru.skypro.homework.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -35,5 +34,19 @@ public class AdEntity {
     private UserEntity author;
 
     @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<CommentEntity> comments;
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        AdEntity adEntity = (AdEntity) o;
+        return Objects.equals(id, adEntity.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

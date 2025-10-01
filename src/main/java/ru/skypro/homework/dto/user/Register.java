@@ -23,5 +23,5 @@ public class Register {
             message = "Телефон должен быть в формате +7 XXX XXX-XX-XX")
     private String phone;
     
-    private Role role;
+    private String role;
 }

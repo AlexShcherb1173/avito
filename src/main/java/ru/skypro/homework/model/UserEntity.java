@@ -6,6 +6,7 @@ import ru.skypro.homework.dto.user.Role;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -51,4 +52,15 @@ public class UserEntity {
     @EqualsAndHashCode.Exclude
     private List<CommentEntity> comments;
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }
