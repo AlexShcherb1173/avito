@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- Таблица пользователей -->
+    <changeSet id="1" author="yuma">
+        <createTable tableName="users">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(255)"/>
+            <column name="last_name" type="varchar(255)"/>
+            <column name="phone" type="varchar(20)"/>
+            <column name="role" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица объявлений -->
+    <changeSet id="2" author="yuma">
+        <createTable tableName="ads">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="varchar(255)"/>
+            <column name="description" type="text"/>
+            <column name="price" type="numeric(10,2)"/>
+            <column name="image" type="varchar(255)"/>
+            <column name="author_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица комментариев -->
+    <changeSet id="3" author="yuma">
+        <createTable tableName="comments">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="text" type="text"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="author_id" type="int"/>
+            <column name="ad_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Тестовые данные -->
+    <changeSet id="4" author="yuma">
+        <insert tableName="users">
+            <column name="id" value="1"/>
+            <column name="username" value="testuser"/>
+            <column name="password" value="password123"/>
+            <column name="first_name" value="Юма"/>
+            <column name="last_name" value="Тестова"/>
+            <column name="phone" value="+79998887766"/>
+            <column name="role" value="USER"/>
+        </insert>
+
+        <insert tableName="ads">
+            <column name="id" value="1"/>
+            <column name="title" value="Продам велосипед"/>
+            <column name="description" value="Почти новый, 2023 года"/>
+            <column name="price" value="15000"/>
+            <column name="image" value="bike.png"/>
+            <column name="author_id" value="1"/>
+        </insert>
+
+        <insert tableName="comments">
+            <column name="id" value="1"/>
+            <column name="text" value="Отличное объявление!"/>
+            <column name="created_at" valueDate="2025-10-01T20:55:00"/>
+            <column name="author_id" value="1"/>
+            <column name="ad_id" value="1"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
