@@ -2,13 +2,13 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "User registration data")
-public class Register {
-    @Schema(description = "Username")
-    private String username;
+@Schema(description = "User information")
+public class User {
+    @Schema(description = "User ID")
+    private Integer id;
 
-    @Schema(description = "Password")
-    private String password;
+    @Schema(description = "Email (username)")
+    private String email;
 
     @Schema(description = "First name")
     private String firstName;
@@ -20,13 +20,13 @@ public class Register {
     private String phone;
 
     @Schema(description = "User role (e.g. USER, ADMIN)")
-    private Role role;
+    private String role;
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
@@ -37,6 +37,6 @@ public class Register {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }
