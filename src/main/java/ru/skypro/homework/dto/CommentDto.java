@@ -3,7 +3,7 @@ package ru.skypro.homework.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Comment data")
-public class Comment {
+public class CommentDto {
     @Schema(description = "Comment ID")
     private Integer id;
 

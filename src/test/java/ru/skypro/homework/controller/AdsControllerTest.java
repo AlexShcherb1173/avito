@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.skypro.homework.dto.CreateOrUpdateAd;
+import ru.skypro.homework.dto.CreateOrUpdateAdDto;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,7 +30,7 @@ class AdsControllerTest {
 
     @Test
     void createAdShouldReturn200() throws Exception {
-        CreateOrUpdateAd ad = new CreateOrUpdateAd();
+        CreateOrUpdateAdDto ad = new CreateOrUpdateAdDto();
         ad.setTitle("Test Ad");
         ad.setDescription("Description");
         ad.setPrice(100);
@@ -55,7 +55,7 @@ class AdsControllerTest {
 
     @Test
     void updateAdShouldReturn200() throws Exception {
-        CreateOrUpdateAd ad = new CreateOrUpdateAd();
+        CreateOrUpdateAdDto ad = new CreateOrUpdateAdDto();
         ad.setTitle("Updated Ad");
         ad.setDescription("New desc");
         ad.setPrice(200);

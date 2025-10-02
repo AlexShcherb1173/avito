@@ -3,10 +3,9 @@ package ru.skypro.homework.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.dto.RegisterDto;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.model.Role;
 
 @Service
@@ -24,7 +23,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean register(Register register) {
+    public boolean register(RegisterDto register) {
         if (userRepository.findByEmail(register.getUsername()).isPresent()) {
             return false;
         }

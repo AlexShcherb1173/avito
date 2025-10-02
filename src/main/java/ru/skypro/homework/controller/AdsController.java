@@ -1,33 +1,42 @@
 package ru.skypro.homework.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.*;
+import ru.skypro.homework.dto.AdDto;
+import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateOrUpdateAdDto;
+import ru.skypro.homework.service.AdService;
 
 @RestController
 @RequestMapping("/ads")
+@RequiredArgsConstructor
 public class AdsController {
 
-    @GetMapping
-    public Ads getAllAds() {
-        return new Ads();
-    }
+    private final AdService adService;
 
-    @PostMapping
-    public Ad createAd(@RequestBody CreateOrUpdateAd ad) {
-        return new Ad();
+    @GetMapping
+    public AdsDto getAllAds() {
+        return adService.getAllAds();
     }
 
     @GetMapping("/{id}")
-    public Ad getAd(@PathVariable Integer id) {
-        return new Ad();
+    public AdDto getAd(@PathVariable Integer id) {
+        return adService.getAdById(id);
+    }
+
+    @PostMapping
+    public AdDto createAd(Authentication authentication, @RequestBody CreateOrUpdateAdDto ad) {
+        return adService.createAd(authentication, ad);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAd(@PathVariable Integer id) {
+    public void deleteAd(Authentication authentication, @PathVariable Integer id) {
+        adService.deleteAd(authentication, id);
     }
 
     @PatchMapping("/{id}")
-    public Ad updateAd(@PathVariable Integer id, @RequestBody CreateOrUpdateAd ad) {
-        return new Ad();
+    public AdDto updateAd(Authentication authentication, @PathVariable Integer id, @RequestBody CreateOrUpdateAdDto ad) {
+        return adService.updateAd(authentication, id, ad);
     }
 }

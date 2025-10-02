@@ -3,7 +3,7 @@ package ru.skypro.homework.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Login data")
-public class Login {
+public class LoginDto {
     @Schema(description = "Username")
     private String username;
 

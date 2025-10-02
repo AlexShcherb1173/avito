@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.UpdateUser;
-import ru.skypro.homework.dto.User;
-import ru.skypro.homework.model.Role;
+import ru.skypro.homework.dto.UpdateUserDto;
+import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.service.UserService;
 
 @Service
 @RequiredArgsConstructor
@@ -17,8 +15,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    private User mapToDto(ru.skypro.homework.model.User entity) {
-        User dto = new User();
+    private UserDto mapToDto(ru.skypro.homework.model.User entity) {
+        UserDto dto = new UserDto();
         dto.setId(entity.getId());
         dto.setEmail(entity.getEmail());
         dto.setFirstName(entity.getFirstName());
@@ -29,7 +27,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getCurrentUser(Authentication authentication) {
+    public UserDto getCurrentUser(Authentication authentication) {
         ru.skypro.homework.model.User entity = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
         return mapToDto(entity);
@@ -44,7 +42,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UpdateUser updateUser(Authentication authentication, UpdateUser updateUser) {
+    public UpdateUserDto updateUser(Authentication authentication, UpdateUserDto updateUser) {
         ru.skypro.homework.model.User entity = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 

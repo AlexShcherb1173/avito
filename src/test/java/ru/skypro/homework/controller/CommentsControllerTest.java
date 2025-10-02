@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.dto.CreateOrUpdateCommentDto;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,7 +30,7 @@ class CommentsControllerTest {
 
     @Test
     void addCommentShouldReturn200() throws Exception {
-        CreateOrUpdateComment comment = new CreateOrUpdateComment();
+        CreateOrUpdateCommentDto comment = new CreateOrUpdateCommentDto();
         comment.setText("Test comment");
 
         mockMvc.perform(post("/ads/1/comments")
@@ -47,7 +47,7 @@ class CommentsControllerTest {
 
     @Test
     void updateCommentShouldReturn200() throws Exception {
-        CreateOrUpdateComment comment = new CreateOrUpdateComment();
+        CreateOrUpdateCommentDto comment = new CreateOrUpdateCommentDto();
         comment.setText("Updated comment");
 
         mockMvc.perform(patch("/ads/1/comments/1")

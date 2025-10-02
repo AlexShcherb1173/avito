@@ -3,7 +3,8 @@ package ru.skypro.homework.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Request for password change")
-public class NewPassword {
+public class NewPasswordDto
+{
     @Schema(description = "New password")
     private String newPassword;
 

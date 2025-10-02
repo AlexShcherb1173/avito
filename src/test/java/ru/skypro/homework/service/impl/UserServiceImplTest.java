@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.skypro.homework.dto.UpdateUser;
-import ru.skypro.homework.dto.User;
+import ru.skypro.homework.dto.UpdateUserDto;
+import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.model.Role;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserServiceImpl;
@@ -53,7 +53,7 @@ class UserServiceImplTest {
     void getCurrentUser_Success() {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(entity));
 
-        User dto = userService.getCurrentUser(authentication);
+        UserDto dto = userService.getCurrentUser(authentication);
 
         assertEquals("test@mail.com", dto.getEmail());
         assertEquals("John", dto.getFirstName());
@@ -74,12 +74,12 @@ class UserServiceImplTest {
     void updateUser_Success() {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(entity));
 
-        UpdateUser updateUser = new UpdateUser();
+        UpdateUserDto updateUser = new UpdateUserDto();
         updateUser.setFirstName("Jane");
         updateUser.setLastName("Smith");
         updateUser.setPhone("67890");
 
-        UpdateUser result = userService.updateUser(authentication, updateUser);
+        UpdateUserDto result = userService.updateUser(authentication, updateUser);
 
         assertEquals("Jane", entity.getFirstName());
         assertEquals("Smith", entity.getLastName());

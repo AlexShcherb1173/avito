@@ -7,8 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.skypro.homework.dto.Login;
-import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.dto.LoginDto;
+import ru.skypro.homework.dto.RegisterDto;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,7 +25,7 @@ class AuthControllerTest {
 
     @Test
     void loginEndpointShouldReturn200() throws Exception {
-        Login login = new Login();
+        LoginDto login = new LoginDto();
         login.setUsername("test@test.com");
         login.setPassword("password");
 
@@ -37,7 +37,7 @@ class AuthControllerTest {
 
     @Test
     void registerEndpointShouldReturn200() throws Exception {
-        Register register = new Register();
+        RegisterDto register = new RegisterDto();
         register.setUsername("new@test.com");
         register.setPassword("password");
         register.setRole("USER");

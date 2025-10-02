@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.dto.RegisterDto;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthServiceImpl;
@@ -73,7 +73,7 @@ class AuthServiceImplTest {
 
     @Test
     void register_Success() {
-        Register reg = new Register();
+        RegisterDto reg = new RegisterDto();
         reg.setUsername("new@mail.com");
         reg.setPassword("rawPass");
         reg.setRole("USER");
@@ -89,7 +89,7 @@ class AuthServiceImplTest {
 
     @Test
     void register_Fail_UserAlreadyExists() {
-        Register reg = new Register();
+        RegisterDto reg = new RegisterDto();
         reg.setUsername("exists@mail.com");
         reg.setPassword("rawPass");
         reg.setRole("USER");

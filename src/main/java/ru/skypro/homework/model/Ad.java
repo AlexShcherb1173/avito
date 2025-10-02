@@ -28,5 +28,5 @@ public class Ad {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User author; // владелец объявления
+    private User author;
 }
