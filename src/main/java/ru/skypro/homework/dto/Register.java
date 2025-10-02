@@ -20,7 +20,7 @@ public class Register {
     private String phone;
 
     @Schema(description = "User role (e.g. USER, ADMIN)")
-    private String role;
+    private Role role;
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
@@ -37,6 +37,6 @@ public class Register {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 }
