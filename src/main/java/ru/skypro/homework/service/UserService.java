@@ -1,10 +1,11 @@
 package ru.skypro.homework.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.dto.UserDto;
 
 @Service
 public class UserService {
@@ -12,16 +13,16 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public UserDto getUserById(Integer id) {
-        User user = userRepository.findById(id).orElseThrow();
-        return new UserDto(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getPhone(), user.getRole(), user.getImage());
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-    public void updateUser(Integer id, UserDto userDto) {
-        User user = userRepository.findById(id).orElseThrow();
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setPhone(userDto.getPhone());
-        userRepository.save(user);
+    public boolean changePassword(String username, String currentPassword, String newPassword) {
+        User user = userRepository.findByEmail(username);
+        if (user != null && passwordEncoder.matches(currentPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+            return true;
+        }
+        return false;
     }
 }

@@ -1,35 +1,42 @@
 package ru.skypro.homework.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.CommentDto;
-
-import java.util.ArrayList;
-import java.util.List;
+import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.model.Comment;
 
 @RestController
 @RequestMapping("/ads/{adId}/comments")
 public class CommentController {
 
-    @GetMapping
-    public List<CommentDto> getComments(@PathVariable Integer adId) {
-        // Логика для получения комментариев объявления
-        return new ArrayList<>(); // Возвращаем список комментариев
-    }
+    @Autowired
+    private CommentService commentService;
 
     @PostMapping
-    public CommentDto addComment(@PathVariable Integer adId, @RequestBody CommentDto commentDto) {
-        // Логика для добавления комментария
-        return commentDto; // Возвращаем добавленный комментарий
-    }
-
-    @DeleteMapping("/{commentId}")
-    public void deleteComment(@PathVariable Integer adId, @PathVariable Integer commentId) {
-        // Логика для удаления комментария
+    public Comment addComment(@RequestBody CommentDto commentDto, @PathVariable Integer adId, Authentication authentication) {
+        Comment comment = new Comment();
+        comment.setText(commentDto.getText());
+        return commentService.addComment(comment, authentication);
     }
 
     @PatchMapping("/{commentId}")
-    public CommentDto updateComment(@PathVariable Integer adId, @PathVariable Integer commentId, @RequestBody CommentDto commentDto) {
-        // Логика для обновления комментария
-        return commentDto; // Возвращаем обновленный комментарий
+    public Comment updateComment(@PathVariable Integer adId, @PathVariable Integer commentId, @RequestBody CommentDto commentDto, Authentication authentication) {
+        if (commentService.canEditComment(commentId, authentication)) {
+            Comment comment = new Comment();
+            comment.setText(commentDto.getText());
+            return commentService.addComment(comment, authentication);
+        }
+        throw new SecurityException("You are not authorized to edit this comment.");
+    }
+
+    @DeleteMapping("/{commentId}")
+    public void deleteComment(@PathVariable Integer adId, @PathVariable Integer commentId, Authentication authentication) {
+        if (commentService.canEditComment(commentId, authentication)) {
+            commentService.deleteComment(commentId);
+        } else {
+            throw new SecurityException("You are not authorized to delete this comment.");
+        }
     }
 }

@@ -1,10 +1,12 @@
 package ru.skypro.homework.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.model.Ad;
+import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
-import ru.skypro.homework.dto.AdDto;
+import ru.skypro.homework.repository.UserRepository;
 
 @Service
 public class AdService {
@@ -12,19 +14,18 @@ public class AdService {
     @Autowired
     private AdRepository adRepository;
 
-    public AdDto getAdById(Integer id) {
-        Ad ad = adRepository.findById(id).orElseThrow();
-        return new AdDto(ad.getPk(), ad.getTitle(), ad.getPrice(), ad.getDescription(), ad.getAuthor().getId(), ad.getImage());
+    @Autowired
+    private UserRepository userRepository;
+
+    public boolean canEditAd(Integer adId, Authentication authentication) {
+        Ad ad = adRepository.findById(adId).orElseThrow();
+        User user = userRepository.findByEmail(authentication.getName());
+        return ad.getAuthor().getId().equals(user.getId()) || user.getRole().equals(User.Role.ADMIN);
     }
 
-    public AdDto createAd(AdDto adDto) {
-        Ad ad = new Ad();
-        ad.setTitle(adDto.getTitle());
-        ad.setPrice(adDto.getPrice());
-        ad.setDescription(adDto.getDescription());
-        ad.setImage(adDto.getImage());
-        ad.setAuthor(new User()); // Привязка к пользователю
-        adRepository.save(ad);
-        return new AdDto(ad.getPk(), ad.getTitle(), ad.getPrice(), ad.getDescription(), ad.getAuthor().getId(), ad.getImage());
+    public Ad createAd(Ad ad, Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName());
+        ad.setAuthor(user);
+        return adRepository.save(ad);
     }
 }

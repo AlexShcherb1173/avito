@@ -1,44 +1,47 @@
 package ru.skypro.homework.controller;
 
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.AdDto;
-
-import java.util.ArrayList;
-import java.util.List;
+import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.model.Ad;
 
 @RestController
 @RequestMapping("/ads")
-
 public class AdController {
 
-    @GetMapping
-    public List<AdDto> getAllAds() {
-        // Логика для получения всех объявлений
-        return new ArrayList<>(); // Возвращаем список объявлений
-    }
+    @Autowired
+    private AdService adService;
 
     @PostMapping
-    public AdDto addAd(@RequestBody AdDto adDto) {
-        // Логика для добавления нового объявления
-        return adDto; // Возвращаем добавленное объявление
-    }
-
-    @GetMapping("/{id}")
-    public AdDto getAdById(@PathVariable Integer id) {
-        // Логика для получения объявления по ID
-        return new AdDto(); // Возвращаем объявление по ID
+    public Ad createAd(@RequestBody AdDto adDto, Authentication authentication) {
+        Ad ad = new Ad();
+        // Преобразование DTO в сущность
+        ad.setTitle(adDto.getTitle());
+        ad.setPrice(adDto.getPrice());
+        ad.setDescription(adDto.getDescription());
+        return adService.createAd(ad, authentication);
     }
 
     @PatchMapping("/{id}")
-    public AdDto updateAd(@PathVariable Integer id, @RequestBody AdDto adDto) {
-        // Логика для обновления объявления
-        return adDto; // Возвращаем обновленное объявление
+    public Ad updateAd(@PathVariable Integer id, @RequestBody AdDto adDto, Authentication authentication) {
+        if (adService.canEditAd(id, authentication)) {
+            Ad ad = new Ad();
+            ad.setTitle(adDto.getTitle());
+            ad.setPrice(adDto.getPrice());
+            ad.setDescription(adDto.getDescription());
+            return adService.createAd(ad, authentication);
+        }
+        throw new SecurityException("You are not authorized to edit this ad.");
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAd(@PathVariable Integer id) {
-        // Логика для удаления объявления
+    public void deleteAd(@PathVariable Integer id, Authentication authentication) {
+        if (adService.canEditAd(id, authentication)) {
+            adService.deleteAd(id);
+        } else {
+            throw new SecurityException("You are not authorized to delete this ad.");
+        }
     }
 }
-
