@@ -16,8 +16,10 @@ import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Role;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
+import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,6 +41,9 @@ class AdsControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private User user;
@@ -47,6 +52,7 @@ class AdsControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        commentRepository.deleteAll();
         adRepository.deleteAll();
         userRepository.deleteAll();
 
@@ -54,12 +60,16 @@ class AdsControllerIntegrationTest {
         user.setEmail("user@mail.ru");
         user.setPassword(passwordEncoder.encode("pass"));
         user.setRole(Role.USER);
+        user.setFirstName("User");
+        user.setLastName("Test");
         userRepository.save(user);
 
         admin = new User();
         admin.setEmail("admin@mail.ru");
         admin.setPassword(passwordEncoder.encode("pass"));
         admin.setRole(Role.ADMIN);
+        admin.setFirstName("Admin");
+        admin.setLastName("Test");
         userRepository.save(admin);
 
         ad = new Ad();
@@ -71,9 +81,17 @@ class AdsControllerIntegrationTest {
     }
 
     @Test
-    void getAllAds_withoutAuth_shouldReturnOk() throws Exception {
+    @WithMockUser(username = "user@mail.ru", roles = {"USER"})
+    void getAllAds_withAuth_shouldReturnOk() throws Exception {
         mockMvc.perform(get("/ads"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").exists());
+    }
+
+    @Test
+    void getAllAds_withoutAuth_shouldReturnUnauthorized() throws Exception {
+        mockMvc.perform(get("/ads"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -127,6 +145,9 @@ class AdsControllerIntegrationTest {
     void deleteAd_asOwner_shouldReturnOk() throws Exception {
         mockMvc.perform(delete("/ads/" + ad.getId()))
                 .andExpect(status().isOk());
+
+        // Проверяем, что объявление удалено из БД
+        assertTrue(adRepository.findById(ad.getId()).isEmpty());
     }
 
     @Test
@@ -134,5 +155,17 @@ class AdsControllerIntegrationTest {
     void deleteAd_asAdmin_shouldReturnOk() throws Exception {
         mockMvc.perform(delete("/ads/" + ad.getId()))
                 .andExpect(status().isOk());
+
+        // Проверяем, что объявление удалено из БД
+        assertTrue(adRepository.findById(ad.getId()).isEmpty());
+    }
+
+    @Test
+    @WithMockUser(username = "user@mail.ru", roles = {"USER"})
+    void getAd_shouldReturnAd() throws Exception {
+        mockMvc.perform(get("/ads/" + ad.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Test Ad"))
+                .andExpect(jsonPath("$.price").value(100));
     }
 }

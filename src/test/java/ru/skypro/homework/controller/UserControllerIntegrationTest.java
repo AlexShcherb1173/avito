@@ -15,6 +15,8 @@ import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UpdateUserDto;
 import ru.skypro.homework.model.Role;
 import ru.skypro.homework.model.User;
+import ru.skypro.homework.repository.AdRepository;
+import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,62 +37,68 @@ class UserControllerIntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private AdRepository adRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private User testUser;
+    private User user;
 
     @BeforeEach
     void setUp() {
+        commentRepository.deleteAll();
+        adRepository.deleteAll();
         userRepository.deleteAll();
 
-        testUser = new User();
-        testUser.setEmail("testuser@mail.ru");
-        testUser.setPassword(passwordEncoder.encode("pass"));
-        testUser.setRole(Role.USER);
-        testUser.setFirstName("Иван");
-        testUser.setLastName("Иванов");
-        testUser.setPhone("+79998887766");
-
-        userRepository.save(testUser);
+        user = new User();
+        user.setEmail("user@mail.ru");
+        user.setPassword(passwordEncoder.encode("pass"));
+        user.setRole(Role.USER);
+        user.setFirstName("John");
+        user.setLastName("Doe");
+        user.setPhone("+79991234567");
+        userRepository.save(user);
     }
 
     @Test
-    @WithMockUser(username = "testuser@mail.ru", roles = {"USER"})
-    void getCurrentUser_shouldReturnUser() throws Exception {
+    @WithMockUser(username = "user@mail.ru", roles = {"USER"})
+    void getUser_shouldReturnUser() throws Exception {
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("testuser@mail.ru"))
-                .andExpect(jsonPath("$.firstName").value("Иван"))
-                .andExpect(jsonPath("$.lastName").value("Иванов"))
-                .andExpect(jsonPath("$.phone").value("+79998887766"));
+                .andExpect(jsonPath("$.email").value("user@mail.ru"))
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"));
     }
 
     @Test
-    @WithMockUser(username = "testuser@mail.ru", roles = {"USER"})
-    void setPassword_shouldReturnOk() throws Exception {
-        NewPasswordDto newPassword = new NewPasswordDto();
-        newPassword.setNewPassword("newPassword123");
-
-        mockMvc.perform(post("/users/set_password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newPassword)))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(username = "testuser@mail.ru", roles = {"USER"})
+    @WithMockUser(username = "user@mail.ru", roles = {"USER"})
     void updateUser_shouldReturnUpdatedUser() throws Exception {
-        UpdateUserDto updateUser = new UpdateUserDto();
-        updateUser.setFirstName("Пётр");
-        updateUser.setLastName("Петров");
-        updateUser.setPhone("+79991112233");
+        UpdateUserDto dto = new UpdateUserDto();
+        dto.setFirstName("Jane");
+        dto.setLastName("Smith");
+        dto.setPhone("+79998765432");
 
         mockMvc.perform(patch("/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateUser)))
+                        .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value("Пётр"))
-                .andExpect(jsonPath("$.lastName").value("Петров"))
-                .andExpect(jsonPath("$.phone").value("+79991112233"));
+                .andExpect(jsonPath("$.firstName").value("Jane"))
+                .andExpect(jsonPath("$.lastName").value("Smith"))
+                .andExpect(jsonPath("$.phone").value("+79998765432"));
+    }
+
+    @Test
+    @WithMockUser(username = "user@mail.ru", roles = {"USER"})
+    void setPassword_shouldReturnOk() throws Exception {
+        NewPasswordDto passwordDto = new NewPasswordDto();
+        passwordDto.setNewPassword("newpass123");
+
+        mockMvc.perform(post("/users/set_password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passwordDto)))
+                .andExpect(status().isOk());
     }
 }
