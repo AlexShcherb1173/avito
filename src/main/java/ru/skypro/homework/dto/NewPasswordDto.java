@@ -2,9 +2,12 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для смены пароля пользователя.
+ * Содержит новый пароль для установки.
+ */
 @Schema(description = "Request for password change")
-public class NewPasswordDto
-{
+public class NewPasswordDto {
     @Schema(description = "New password")
     private String newPassword;
 

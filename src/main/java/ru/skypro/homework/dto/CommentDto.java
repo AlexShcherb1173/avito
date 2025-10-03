@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для представления комментария.
+ * Используется для передачи данных о комментариях между клиентом и сервером.
+ */
 @Schema(description = "Comment data")
 public class CommentDto {
     @Schema(description = "Comment ID")

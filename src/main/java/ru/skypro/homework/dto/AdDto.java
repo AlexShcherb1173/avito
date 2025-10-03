@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для представления объявления.
+ * Используется для передачи данных между клиентом и сервером.
+ */
 @Schema(description = "Advertisement data")
 public class AdDto {
     @Schema(description = "Ad ID")

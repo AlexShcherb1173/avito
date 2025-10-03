@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для регистрации нового пользователя.
+ * Содержит все необходимые данные для создания новой учетной записи.
+ */
 @Schema(description = "User registration data")
 public class RegisterDto {
     @Schema(description = "Username")

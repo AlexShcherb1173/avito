@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для представления информации о пользователе.
+ * Содержит полные данные пользователя для отображения клиенту.
+ */
 @Schema(description = "User information")
 public class UserDto {
     @Schema(description = "User ID")

@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для создания или обновления объявления.
+ * Используется при создании нового объявления или редактировании существующего.
+ */
 @Schema(description = "Create or update ad request")
 public class CreateOrUpdateAdDto {
     @Schema(description = "Title")

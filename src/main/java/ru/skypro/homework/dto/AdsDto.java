@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для представления списка объявлений.
+ * Содержит общее количество и список DTO объявлений.
+ */
 @Schema(description = "List of ads")
 public class AdsDto {
     @Schema(description = "Total count")

@@ -5,8 +5,18 @@ import ru.skypro.homework.dto.CreateOrUpdateAdDto;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.User;
 
+/**
+ * Маппер для преобразования между сущностью Ad и DTO объектами.
+ * Обеспечивает конвертацию данных между слоем базы данных и API.
+ */
 public class AdMapper {
 
+    /**
+     * Преобразует сущность Ad в DTO объект.
+     *
+     * @param entity сущность объявления из базы данных
+     * @return DTO объект для передачи клиенту
+     */
     public static AdDto toDto(Ad entity) {
         AdDto dto = new AdDto();
         dto.setId(entity.getId());
@@ -16,6 +26,13 @@ public class AdMapper {
         return dto;
     }
 
+    /**
+     * Преобразует DTO объект в сущность Ad.
+     *
+     * @param dto DTO объект с данными от клиента
+     * @param author сущность пользователя-автора объявления
+     * @return сущность объявления для сохранения в базу данных
+     */
     public static Ad toEntity(CreateOrUpdateAdDto dto, User author) {
         Ad entity = new Ad();
         entity.setTitle(dto.getTitle());

@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для обновления информации о пользователе.
+ * Не включает изменение роли пользователя.
+ */
 @Schema(description = "User update data (without role change)")
 public class UpdateUserDto {
     @Schema(description = "First name")

@@ -2,6 +2,10 @@ package ru.skypro.homework.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * Data Transfer Object для представления списка комментариев.
+ * Содержит общее количество и список DTO комментариев.
+ */
 @Schema(description = "List of comments")
 public class CommentsDto {
     @Schema(description = "Total count")
