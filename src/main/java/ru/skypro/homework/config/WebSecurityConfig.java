@@ -22,14 +22,13 @@ public class WebSecurityConfig {
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/webjars/**",
-            "/login",
-            "/register"
+            "/auth/**"
     };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
+        http
+                .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .mvcMatchers(AUTH_WHITELIST).permitAll()
                         .mvcMatchers("/ads/**", "/users/**").authenticated()

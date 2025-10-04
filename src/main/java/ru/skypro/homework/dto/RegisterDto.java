@@ -4,11 +4,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Data Transfer Object для регистрации нового пользователя.
- * Содержит все необходимые данные для создания новой учетной записи.
+ * Если роль не указана, по умолчанию присваивается USER.
  */
 @Schema(description = "User registration data")
 public class RegisterDto {
-    @Schema(description = "Username")
+
+    @Schema(description = "Username (email)")
     private String username;
 
     @Schema(description = "Password")
@@ -23,8 +24,8 @@ public class RegisterDto {
     @Schema(description = "Phone number")
     private String phone;
 
-    @Schema(description = "User role (e.g. USER, ADMIN)")
-    private String role;
+    @Schema(description = "User role (по умолчанию USER)", example = "USER")
+    private String role = "USER";
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
