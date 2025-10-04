@@ -19,7 +19,7 @@ public class AdMapper {
 
         AdDto dto = new AdDto();
         dto.setAuthor(entity.getAuthor().getId());
-        dto.setImage(entity.getImage()); // Прямое маппинг image -> image
+        dto.setImage(entity.getImage());
         dto.setPk(entity.getId());
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
@@ -35,7 +35,7 @@ public class AdMapper {
         ExtendedAdDto dto = new ExtendedAdDto();
         dto.setPk(entity.getId());
         dto.setDescription(entity.getDescription());
-        dto.setImage(entity.getImage()); // Прямое маппинг image -> image
+        dto.setImage(entity.getImage());
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
 
@@ -64,7 +64,7 @@ public class AdMapper {
         return entity;
     }
 
-    public void updateEntityFromDto(CreateOrUpdateAd dto, AdEntity entity) {
+    public void updateEntityFromDto(AdEntity entity, CreateOrUpdateAdDto dto) {
         if (dto == null || entity == null) {
             return;
         }
@@ -78,7 +78,6 @@ public class AdMapper {
         if (dto.getDescription() != null) {
             entity.setDescription(dto.getDescription());
         }
-        // image не обновляем через этот метод
     }
 
 }

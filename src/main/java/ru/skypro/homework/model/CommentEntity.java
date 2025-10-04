@@ -1,6 +1,8 @@
 package ru.skypro.homework.model;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -9,8 +11,10 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
+@Getter
+@Setter
 @NoArgsConstructor
-@ToString
+@Table(name = "comments")
 public class CommentEntity {
 
     @Id
@@ -24,10 +28,12 @@ public class CommentEntity {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    //автор комментария
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
 
+    //id объявления
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ad_id", nullable = false)
     private AdEntity ad;

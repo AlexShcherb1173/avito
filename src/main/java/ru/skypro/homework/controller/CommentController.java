@@ -37,7 +37,8 @@ public class CommentController {
     @Operation(summary = "обновление комментария")
     @PatchMapping("/{id}/comments/{commentId}")
     public ResponseEntity<CommentDto> updateComment(@PathVariable Integer adId,
-                                                    @PathVariable Integer commentId) {
+                                                    @PathVariable Integer commentId,
+                                                    @RequestBody CreateOrUpdateCommentDto comment) {
         CommentDto commentDto = new CommentDto();
         return ResponseEntity.ok().body(commentDto);
     }

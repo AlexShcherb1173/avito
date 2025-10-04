@@ -34,8 +34,6 @@ public class AdEntity {
     private UserEntity author;
 
     @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private List<CommentEntity> comments;
 
     @Override
