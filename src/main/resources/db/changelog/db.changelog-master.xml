@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <!-- Таблица пользователей -->
+    <changeSet id="1" author="yuma">
+        <createTable tableName="users">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(255)"/>
+            <column name="last_name" type="varchar(255)"/>
+            <column name="phone" type="varchar(20)"/>
+            <column name="role" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- Таблица объявлений -->
+    <changeSet id="2" author="yuma">
+        <createTable tableName="ads">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="text"/>
+            <column name="price" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="ads"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_ads_user"/>
+    </changeSet>
+
+    <!-- Таблица комментариев -->
+    <changeSet id="3" author="yuma">
+        <createTable tableName="comments">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="text" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ad_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="comments"
+                                 baseColumnNames="user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_comments_user"/>
+
+        <addForeignKeyConstraint baseTableName="comments"
+                                 baseColumnNames="ad_id"
+                                 referencedTableName="ads"
+                                 referencedColumnNames="id"
+                                 constraintName="fk_comments_ad"/>
+    </changeSet>
+
+    <!-- Тестовые данные -->
+    <changeSet id="4" author="yuma">
+        <insert tableName="users">
+            <column name="id" value="1"/>
+            <column name="email" value="testuser@mail.ru"/>
+            <column name="password" value="$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTV6UiC"/> <!-- password123 -->
+            <column name="first_name" value="Юма"/>
+            <column name="last_name" value="Тестова"/>
+            <column name="phone" value="+79998887766"/>
+            <column name="role" value="USER"/>
+        </insert>
+
+        <insert tableName="ads">
+            <column name="id" value="1"/>
+            <column name="title" value="Продам велосипед"/>
+            <column name="description" value="Почти новый, 2023 года"/>
+            <column name="price" value="15000"/>
+            <column name="user_id" value="1"/>
+        </insert>
+
+        <insert tableName="comments">
+            <column name="id" value="1"/>
+            <column name="text" value="Отличное объявление!"/>
+            <column name="user_id" value="1"/>
+            <column name="ad_id" value="1"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
