@@ -3,7 +3,9 @@ package ru.skypro.homework.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.ads.AdDto;
+import ru.skypro.homework.dto.ads.AdsDto;
 import ru.skypro.homework.dto.comments.CommentDto;
+import ru.skypro.homework.dto.comments.CommentsDto;
 import ru.skypro.homework.model.AdEntity;
 import ru.skypro.homework.model.CommentEntity;
 
@@ -38,5 +40,18 @@ public class CollectionMapper {
                 .collect(Collectors.toList());
     }
 
-    //для пагинации
+    //для пагинации и т.д.
+    public AdsDto toAdsDto(List<AdEntity> entities) {
+        AdsDto adsDto = new AdsDto();
+        adsDto.setCount(entities.size());
+        adsDto.setResults(adsToDto(entities));
+        return adsDto;
+    }
+
+    public CommentsDto toCommentsDto(List<CommentEntity> entities) {
+        CommentsDto commentsDto = new CommentsDto();
+        commentsDto.setCount(entities.size());
+        commentsDto.setResults(commentsToDto(entities));
+        return commentsDto;
+    }
 }
