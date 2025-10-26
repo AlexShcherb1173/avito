@@ -1,0 +1,51 @@
+002-create-ads-table.sql
+sql
+-- liquibase formatted sql
+
+-- changeset developer:003
+CREATE TABLE ads (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(32) NOT NULL,
+    price INTEGER NOT NULL CHECK (price >= 0),
+    description VARCHAR(64) NOT NULL,
+    image VARCHAR(500),
+    author_id INTEGER NOT NULL,
+//    created_at TIMESTAMP DEFAULT
+//    CURRENT_TIMESTAMP,
+
+    CONSTRAINT ads_author_fk FOREIGN KEY (author
+    _id)        REFERENCES users(id) ON DELETE
+    CASCADE);
+
+-- changeset developer:004
+CREATE INDEX ads_author_id_index ON
+ads (author_id);
+
+
+5. 003-create-comments-table.sql
+sql
+-- liquibase formatted sql
+
+-- changeset developer:004
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    text VARCHAR(64) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_
+    TIMESTAMP,
+    author_id INTEGER NOT NULL,
+    ad_id INTEGER NOT NULL,
+
+    CONSTRAINT comments_author_fk FOREIGN
+    KEY (author_id)
+        REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT comments_ad_fk FOREIGN
+    KEY (ad_id)
+        REFERENCES ads(id) ON DELETE CASCADE
+);
+
+-- changeset developer:007
+CREATE INDEX comments_author_id_index ON
+comments (author_id);
+CREATE INDEX comments_ad_id_index ON
+comments (ad_id);
+

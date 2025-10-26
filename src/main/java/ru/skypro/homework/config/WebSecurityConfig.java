@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import ru.skypro.homework.dto.user.Role;
 
@@ -53,15 +54,15 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
                 .authorizeHttpRequests(authorization -> authorization
-                        .antMatchers(AUTH_WHITELIST).permitAll()
-                        .antMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .antMatchers(AUTH_WHITELIST).permitAll()                // 1. Белый список
+                        .antMatchers("/admin/**").hasRole("ADMIN")   // 2. Проверка ролей
+                        .anyRequest().authenticated()                           // 3. Все остальное - под авторизацией
                 )
                 .cors()
                 .and()
-                .httpBasic()
-                .and()
-                .userDetailsService(userDetailsService);
+                .httpBasic()                                                     // 4. Тип аутентификации
+                .and()                              //(Spring Security ищет заголовок Authorization: Basic base64encoded)
+                .userDetailsService(userDetailsService);        //Если есть → передает логин/пароль в UserDetailsService
 
         return httpSecurity.build();
 
