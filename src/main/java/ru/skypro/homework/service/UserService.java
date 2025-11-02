@@ -1,8 +1,11 @@
 package ru.skypro.homework.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
+
+import java.io.IOException;
 
 public interface UserService {
     UserDto getUser(String username);
@@ -11,5 +14,9 @@ public interface UserService {
 
     boolean updatePassword(NewPasswordDto newPasswordDto, String username);
 
-    boolean updateUserImage(byte[] image, String username);
+    boolean updateUserImage(MultipartFile image, String username) throws IOException;
+
+    byte[] getUserImage(Integer userId) throws IOException;
+
+    boolean deleteUserImage(String username) throws IOException;
 }

@@ -13,6 +13,7 @@ import ru.skypro.homework.repository.UserRepository;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+//UserDetailsService ищет пользователя в БД по логину
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;

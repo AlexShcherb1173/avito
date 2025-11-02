@@ -14,7 +14,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import ru.skypro.homework.dto.user.Role;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -27,50 +32,52 @@ public class WebSecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
-            "/swagger-ui/**",           // Добавьте это
-            "/v3/api-docs/**",          // Добавьте это
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
             "/v3/api-docs",
             "/webjars/**",
             "/login",
             "/register",
-            "/api-docs/**",              // Добавьте это
+            "/api-docs/**",
             "/ads",
-            "/ads/image/**"
+            "/ads/image/**",
+            "/logout"
     };
-
-//    @Bean
-//    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-//        UserDetails user =
-//                User.builder()
-//                        .username("user@gmail.com")
-//                        .password("password")
-//                        .passwordEncoder(passwordEncoder::encode)
-//                        .roles(Role.USER.name())
-//                        .build();
-//        return new InMemoryUserDetailsManager(user);
-//    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf().disable()
-                .authorizeHttpRequests(authorization -> authorization
-                        .antMatchers(AUTH_WHITELIST).permitAll()                // 1. Белый список
-                        .antMatchers("/admin/**").hasRole("ADMIN")   // 2. Проверка ролей
-                        .anyRequest().authenticated()                           // 3. Все остальное - под авторизацией
+        httpSecurity.csrf()
+                .disable()
+                .authorizeHttpRequests(authorization ->
+                        authorization
+                        .mvcMatchers(AUTH_WHITELIST).permitAll()                // 1. Белый список
+                        .anyRequest().authenticated()                           // 2. Все остальное - под авторизацией
                 )
-                .cors()
-                .and()
-                .httpBasic()                                                     // 4. Тип аутентификации
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .httpBasic()                                                     // 3. Тип аутентификации
                 .and()                              //(Spring Security ищет заголовок Authorization: Basic base64encoded)
                 .userDetailsService(userDetailsService);        //Если есть → передает логин/пароль в UserDetailsService
 
         return httpSecurity.build();
+    }
 
+//  разрешает фронтенду на localhost:3000 обращаться к нашему API
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // разрешает фронтенд
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));    // Все заголовки
+        configuration.setAllowCredentials(true);    // разрешает куки/авторизацию
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // применяем ко всем путям
+        return source;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // безопасное хеширование паролей
     }
 
 }
