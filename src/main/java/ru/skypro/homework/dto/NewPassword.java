@@ -8,23 +8,23 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Size;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Schema(description = "Модель данных для логина и пароля")
-public class Login {
+@Schema(description = "Модель данных для смены пароля")
+public class NewPassword {
     @Schema(
             type = "string",
-            description = "пароль"
+            description = "текущий пароль"
     )
     @Size(min = 8, max = 16)
-    private String password;
+    private String currentPassword;
+
     @Schema(
             type = "string",
-            description = "логин"
+            description = "новый пароль"
     )
-    @Size(min = 4, max = 32)
-    private String username;
+    @Size(min = 8, max = 16)
+    private String newPassword;
 }
