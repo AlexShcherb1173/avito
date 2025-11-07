@@ -1,7 +1,9 @@
 package ru.skypro.homework.mapper;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.skypro.homework.config.FileStorageConfig;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.dto.user.Role;
 import ru.skypro.homework.dto.user.UpdateUserDto;
@@ -9,10 +11,10 @@ import ru.skypro.homework.dto.user.UserDto;
 import ru.skypro.homework.model.UserEntity;
 
 @Component
+@RequiredArgsConstructor
 public class UserMapper {
 
-    @Value("${app.base-url:http://localhost:8080}")
-    String baseUrl;
+    private final FileStorageConfig fileStorageConfig;
 
     public UserDto toDto(UserEntity entity) {
         if (entity == null) {
@@ -31,12 +33,13 @@ public class UserMapper {
         }
 
         // Преобразуем относительный путь в полный URL
-        if (entity.getImage() != null) {
-            dto.setImage(baseUrl + entity.getImage());
+        if (entity.getImage() != null && !entity.getImage().isEmpty()) {
+            // entity.getImage() хранит имя файла, например "avatar-uuid.png"
+            String imagePath = "/users/images/" + entity.getImage();
+            dto.setImage(fileStorageConfig.getBaseUrl() + imagePath);
         } else {
             dto.setImage(null);
         }
-
         return dto;
     }
 
@@ -71,20 +74,6 @@ public class UserMapper {
         if (dto.getPhone() != null) {
             entity.setPhone(dto.getPhone());
         }
-    }
-
-    // Метод для установки относительного пути к изображению пользователя
-    public void setUserImagePath(UserEntity entity, String fileName) {
-        if (fileName != null && entity.getId() != null) {
-            entity.setImage("/users/images/" + entity.getId());
-        } else {
-            entity.setImage(null);
-        }
-    }
-
-    // Метод для удаления изображения пользователя
-    public void removeUserImagePath(UserEntity entity) {
-        entity.setImage(null);
     }
 
 }
