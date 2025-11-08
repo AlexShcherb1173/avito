@@ -67,8 +67,8 @@ public class WebSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // разрешает фронтенд
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));    // Все заголовки
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // разрешает методы
+        configuration.setAllowedHeaders(Arrays.asList("*"));    // разрешает все заголовки
         configuration.setAllowCredentials(true);    // разрешает куки/авторизацию
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

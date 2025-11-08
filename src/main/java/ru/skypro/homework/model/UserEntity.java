@@ -38,7 +38,7 @@ public class UserEntity {
     private Role role;
 
     @Column(name = "image")
-    private String image;   // относительный путь, например: "/users/images/1"
+    private String image;   // имя файла
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AdEntity> ads;
