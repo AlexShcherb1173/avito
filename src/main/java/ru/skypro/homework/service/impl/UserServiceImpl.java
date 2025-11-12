@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -204,7 +206,10 @@ public class UserServiceImpl implements UserService {
     }
 
     private String generateFileName(String extension){
-        return UUID.randomUUID().toString() + (extension != null ? extension : "");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
+        String timestamp = LocalDateTime.now().format(formatter);
+
+        return "avatar_" + timestamp + (extension != null ? extension : "");
     }
 
     private String getFileExtension(String fileName) {
@@ -213,6 +218,4 @@ public class UserServiceImpl implements UserService {
         }
         return fileName.substring(fileName.lastIndexOf("."));
     }
-
-
 }
