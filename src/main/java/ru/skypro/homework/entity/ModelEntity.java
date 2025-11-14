@@ -1,8 +1,10 @@
 package ru.skypro.homework.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class ModelEntity {
 
     public ru.skypro.homework.entity.PhotoEntity photo;
