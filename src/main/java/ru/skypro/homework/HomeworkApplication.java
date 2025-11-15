@@ -1,7 +1,4 @@
-package ru.skypro.homework;
-
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package example.src.main.java.ru.skypro.homework;
 
 @SpringBootApplication
 public class HomeworkApplication {
