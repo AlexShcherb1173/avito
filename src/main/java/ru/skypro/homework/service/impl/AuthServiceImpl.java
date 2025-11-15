@@ -1,12 +1,7 @@
-package ru.skypro.homework.service.impl;
+package example.src.main.java.ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
-import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.Register;
-import ru.skypro.homework.service.AuthService;
+
+import example.src.main.java.ru.skypro.homework.service.AuthService;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -30,7 +25,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean register(Register register) {
+    public boolean register(ru.skypro.homework.dto.Register register) {
         if (manager.userExists(register.getUsername())) {
             return false;
         }

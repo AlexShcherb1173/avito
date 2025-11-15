@@ -1,4 +1,4 @@
-package ru.skypro.homework.dto;
+package example.src.main.java.ru.skypro.homework.dto;
 
 import lombok.Data;
 
