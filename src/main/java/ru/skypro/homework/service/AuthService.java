@@ -1,9 +1,13 @@
 package ru.skypro.homework.service;
 
-import ru.skypro.homework.dto.Register;
 
+import org.springframework.stereotype.Service;
+import ru.skypro.homework.dto.LoginDto;
+import ru.skypro.homework.dto.RegisterDto;
+
+@Service
 public interface AuthService {
-    boolean login(String userName, String password);
+    void login(LoginDto loginDto);
 
-    boolean register(Register register);
+    boolean register(RegisterDto registerDto);
 }
