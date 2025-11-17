@@ -14,7 +14,6 @@ import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.Role;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
-import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;

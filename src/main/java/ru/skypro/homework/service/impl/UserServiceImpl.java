@@ -10,7 +10,7 @@ import ru.skypro.homework.config.FileStorageConfig;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
-import ru.skypro.homework.exception.UserNotFoundException;
+import ru.skypro.homework.exception.EntityNotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
@@ -25,7 +25,6 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -51,14 +50,14 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public UserDto getUser(String username) {
         UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
         return userMapper.toDto(userEntity);
     }
 
     @Override
     public UpdateUserDto updateUser(UpdateUserDto updateUserDto, String username) {
         UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
         userMapper.updateEntityFromDto(updateUserDto, userEntity);
         UserEntity savedEntity = userRepository.save(userEntity);
@@ -74,7 +73,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updatePassword(NewPasswordDto newPasswordDto, String username) {
         UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
         if (!passwordEncoder.matches(newPasswordDto.getCurrentPassword(), userEntity.getPassword())) {
             return false;
@@ -88,7 +87,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updateUserImage(MultipartFile image, String username) throws IOException {
         UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
         validateImageFile(image);
 
@@ -121,7 +120,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public byte[] getUserImage(String username) throws IOException {
         UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
         if (userEntity.getImage() == null || userEntity.getImage().isEmpty()) {
             throw new IOException("User has no image: " + username);
@@ -137,7 +136,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public String getUserImageContentType(String username) throws IOException {
         UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
         if (userEntity.getImage() == null || userEntity.getImage().isEmpty()) {
             throw new IOException("User has no image: " + username);
@@ -161,7 +160,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean deleteUserImage(String username) throws IOException {
         UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
+                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
         return deleteOldUserImage(userEntity);
     }
