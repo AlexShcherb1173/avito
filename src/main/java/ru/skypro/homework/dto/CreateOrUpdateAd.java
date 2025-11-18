@@ -22,6 +22,7 @@ public class CreateOrUpdateAd {
     )
     @Size(min = 4, max = 32)
     private String title;
+
     @Schema(
             type = "integer",
             format = "int32",
@@ -30,6 +31,7 @@ public class CreateOrUpdateAd {
     @Min(value = 0)
     @Max(value = 10000000)
     private Integer price;
+
     @Schema(
             type = "string",
             description = "описание объявления"

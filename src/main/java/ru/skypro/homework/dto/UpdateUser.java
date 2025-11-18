@@ -21,12 +21,14 @@ public class UpdateUser {
     )
     @Size(min = 3, max = 10)
     private String firstName;
+
     @Schema(
             type = "string",
             description = "фамилия пользователя"
     )
     @Size(min = 3, max = 10)
     private String lastName;
+
     @Schema(
             type = "string",
             description = "телефон пользователя"

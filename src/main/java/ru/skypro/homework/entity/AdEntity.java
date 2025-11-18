@@ -27,7 +27,6 @@ public class AdEntity extends ModelEntity {
     private Collection<CommentEntity> commentEntities;
     @OneToOne
     private PhotoEntity photo;
-
     private String image;
     private String filePath;
 

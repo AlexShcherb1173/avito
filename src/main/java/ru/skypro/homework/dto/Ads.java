@@ -21,6 +21,7 @@ public class Ads {
             description = "общее количество объявлений"
     )
     private Integer count;
+
     @Schema(
             type = "array"
     )

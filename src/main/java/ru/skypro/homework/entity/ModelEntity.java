@@ -6,8 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ModelEntity {
-
-    public ru.skypro.homework.entity.PhotoEntity photo;
+    public PhotoEntity photo;
     private String filePath;
     private String image;
 }

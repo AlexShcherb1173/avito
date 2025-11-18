@@ -22,17 +22,12 @@ public class UserEntity extends ModelEntity {
     private String lastName;
     private String phone;
     private Role role;
-
     @OneToOne
     private PhotoEntity photo;
-
     @OneToMany(mappedBy = "author")
     private Collection<AdEntity> ads;
-
     @OneToMany(mappedBy = "author")
     private Collection<CommentEntity> comments;
-
-
     private String filePath;
     private String image;
 }

@@ -19,42 +19,50 @@ public class ExtendedAd {
             description = "id объявления"
     )
     private Integer pk;
+
     @Schema(
             type = "string",
             description = "имя автора объявления"
     )
     private String authorFirstName;
+
     @Schema(
             type = "string",
             description = "фамилия автора объявления"
     )
     private String authorLastName;
+
     @Schema(
             type = "string",
             description = "описание объявления"
     )
     private String description;
+
     @Schema(
             type = "string",
             description = "логин автора объявления"
     )
     private String email;
+
     @Schema(
             type = "string",
             description = "ссылка на картинку объявления"
     )
     private String image;
+
     @Schema(
             type = "string",
             description = "телефон автора объявления"
     )
     private String phone;
+
     @Schema(
             type = "integer",
             format = "int32",
             description = "цена объявления"
     )
     private Integer price;
+
     @Schema(
             type = "string",
             description = "заголовок объявления"

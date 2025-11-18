@@ -21,6 +21,7 @@ public class Comments {
             description = "общее количество комментариев"
     )
     private Integer count;
+
     @Schema(
             type = "array"
     )

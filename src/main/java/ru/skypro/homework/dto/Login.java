@@ -21,6 +21,7 @@ public class Login {
     )
     @Size(min = 8, max = 16)
     private String password;
+
     @Schema(
             type = "string",
             description = "логин"

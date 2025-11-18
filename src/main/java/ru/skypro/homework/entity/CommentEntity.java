@@ -21,7 +21,6 @@ public class CommentEntity {
     @ManyToOne
     @JoinColumn(name = "author_id")
     private UserEntity author;
-
     @ManyToOne
     @JoinColumn(name = "ad_id")
     private AdEntity adEntity;

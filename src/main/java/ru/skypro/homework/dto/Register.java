@@ -17,24 +17,28 @@ public class Register {
     )
     @Size(min = 4, max = 32)
     private String username;
+
     @Schema(
             type = "string",
             description = "пароль"
     )
     @Size(min = 8, max = 16)
     private String password;
+
     @Schema(
             type = "string",
             description = "имя пользователя"
     )
     @Size(min = 2, max = 16)
     private String firstName;
+
     @Schema(
             type = "string",
             description = "фамилия пользователя"
     )
     @Size(min = 2, max = 16)
     private String lastName;
+
     @Schema(
             type = "string",
             description = "телефон пользователя",
@@ -42,6 +46,7 @@ public class Register {
             example = "string"
     )
     private String phone;
+
     @Schema(
             type = "string",
             description = "роль пользователя",
