@@ -35,7 +35,6 @@ public class UsersController {
     @PostMapping("/set_password")
     public ResponseEntity<Void> setPassword(@Valid @RequestBody NewPassword newPassword) {
         log.info("Updating password");
-        // TODO: Implement in service layer
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -54,7 +53,6 @@ public class UsersController {
     @PatchMapping("/me")
     public ResponseEntity<User> updateUser(@Valid @RequestBody UpdateUser updateUser) {
         log.info("Updating user info");
-        // TODO: Implement in service layer
         User user = new User();
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
@@ -74,7 +72,6 @@ public class UsersController {
     @GetMapping("/me")
     public ResponseEntity<User> getUser() {
         log.info("Getting current user info");
-        // TODO: Implement in service layer
         User user = new User();
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
@@ -89,7 +86,6 @@ public class UsersController {
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateUserImage(@RequestParam("image") MultipartFile image) {
         log.info("Updating user image");
-        // TODO: Implement in service layer
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }

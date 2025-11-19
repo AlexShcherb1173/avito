@@ -39,7 +39,6 @@ public class CommentsController {
     @GetMapping("/{id}/comments")
     public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id) {
         log.info("Getting comments for ad with id: {}", id);
-        // TODO: Implement in service layer
         Comments comments = new Comments();
         return ResponseEntity.status(HttpStatus.OK).body(comments);
     }
@@ -61,7 +60,6 @@ public class CommentsController {
     public ResponseEntity<Comment> addComment(@PathVariable("id") Integer id,
                                               @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment) {
         log.info("Adding comment to ad with id: {}", id);
-        // TODO: Implement in service layer
         Comment comment = new Comment();
         return ResponseEntity.status(HttpStatus.OK).body(comment);
     }
@@ -79,7 +77,6 @@ public class CommentsController {
     public ResponseEntity<Void> deleteComment(@PathVariable("adId") Integer adId,
                                               @PathVariable("commentId") Integer commentId) {
         log.info("Deleting comment with id: {} from ad with id: {}", commentId, adId);
-        // TODO: Implement in service layer
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -102,7 +99,6 @@ public class CommentsController {
                                                  @PathVariable("commentId") Integer commentId,
                                                  @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment) {
         log.info("Updating comment with id: {} for ad with id: {}", commentId, adId);
-        // TODO: Implement in service layer
         Comment comment = new Comment();
         return ResponseEntity.status(HttpStatus.OK).body(comment);
     }
