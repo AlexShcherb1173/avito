@@ -10,7 +10,6 @@ import java.util.Collection;
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "ads")
 public class AdEntity extends ModelEntity {
