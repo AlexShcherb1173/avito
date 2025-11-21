@@ -15,15 +15,16 @@ public interface AdService {
 
     AdsDto getMyAds(String username);
 
-    AdDto createAd(CreateOrUpdateAdDto createOrUpdateAdDto, String userName, MultipartFile image) throws IOException;
-
-    AdDto updateAd(Integer id, CreateOrUpdateAdDto createOrUpdateAdDto, String username);
+    AdDto createAd(CreateOrUpdateAdDto createOrUpdateAdDto, String username, MultipartFile image) throws IOException;
 
     void deleteAd(Integer id, String username);
 
+    AdDto updateAd(Integer id, CreateOrUpdateAdDto createOrUpdateAdDto, String username);
+
     byte[] getAdImage(Integer id) throws IOException;
 
-    String getAdImageImageContentType(Integer id) throws IOException;
+    String getAdImageContentType(Integer id) throws IOException;
 
-    boolean updateAdImage(Integer id, MultipartFile image, String username) throws IOException;
+    AdDto updateAdImage(Integer id, MultipartFile image, String username) throws IOException;
+
 }

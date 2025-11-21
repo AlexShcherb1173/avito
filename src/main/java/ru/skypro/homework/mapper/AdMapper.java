@@ -59,7 +59,6 @@ public class AdMapper {
         entity.setTitle(dto.getTitle());
         entity.setPrice(dto.getPrice());
         entity.setDescription(dto.getDescription());
-        // image и author устанавливаются отдельно
 
         return entity;
     }

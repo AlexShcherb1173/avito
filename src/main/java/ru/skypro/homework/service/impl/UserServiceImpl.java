@@ -35,16 +35,18 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ImageServiceImpl imageService;
     private final FileStorageConfig fileStorageConfig;
 
     // Директория для хранения изображений
-    private Path IMAGE_DIR;
+    private static final String USERS_IMAGE_DIR = "users";
+    private static final String BEGIN = "avatar_";
 
-    @PostConstruct
-    public void init() {
-        this.IMAGE_DIR = Paths.get(fileStorageConfig.getUploadDir(), "users").toAbsolutePath().normalize();
-        log.info("Avatar storage location: {}", IMAGE_DIR);
-    }
+//    @PostConstruct
+//    public void init() {
+//        this.USERS_IMAGE_DIR = Paths.get(fileStorageConfig.getUploadDir(), "users").toAbsolutePath().normalize();
+//        log.info("Avatar storage location: {}", USERS_IMAGE_DIR);
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -89,24 +91,11 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
-        validateImageFile(image);
-
-        // Создаем директорию если не существует
-        if (!Files.exists(IMAGE_DIR)) {
-            Files.createDirectories(IMAGE_DIR);
-            log.info("Created avatar directory: {}", IMAGE_DIR);
-        }
-
         // Удаляем старое изображение если есть
-        deleteOldUserImage(userEntity);
+        imageService.deleteImage(userEntity.getImage(), USERS_IMAGE_DIR);
 
-        // Генерируем уникальное имя файла
-        String fileExtension = getFileExtension(image.getOriginalFilename());
-        String fileName = generateFileName(fileExtension);
-
-        // Сохраняем файл
-        Path targetLocation = IMAGE_DIR.resolve(fileName);
-        Files.copy(image.getInputStream(), targetLocation);
+        // Сохраняем новое изображение
+        String fileName = imageService.saveImage(image, USERS_IMAGE_DIR, BEGIN);
 
         // Обновляем поле в БД - сохраняем только имя файла
         userEntity.setImage(fileName);
@@ -126,11 +115,7 @@ public class UserServiceImpl implements UserService {
             throw new IOException("User has no image: " + username);
         }
 
-        Path filePath = IMAGE_DIR.resolve(userEntity.getImage()).normalize();
-        if (!Files.exists(filePath)) {
-            throw new FileNotFoundException("Image not found: " + filePath);
-        }
-        return Files.readAllBytes(filePath);
+        return imageService.getImage(userEntity.getImage(), USERS_IMAGE_DIR);
     }
 
     @Override
@@ -142,19 +127,7 @@ public class UserServiceImpl implements UserService {
             throw new IOException("User has no image: " + username);
         }
 
-        return determineContentType(userEntity.getImage());
-    }
-
-    private String determineContentType(String fileName) {
-        if (fileName.toLowerCase().endsWith(".png")) {
-            return "image/png";
-        } else if (fileName.toLowerCase().endsWith(".gif")) {
-            return "image/gif";
-        } else if (fileName.toLowerCase().endsWith(".jpeg") || fileName.toLowerCase().endsWith(".jpg")) {
-            return "image/jpeg";
-        } else {
-            return "application/octet-stream";
-        }
+        return imageService.getImageContentType(userEntity.getImage());
     }
 
     @Override
@@ -162,26 +135,12 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
 
-        return deleteOldUserImage(userEntity);
-    }
-
-    private boolean deleteOldUserImage(UserEntity userEntity) throws IOException {
-        if (userEntity.getImage() != null && !userEntity.getImage().isEmpty()) {
-            //извлекаем имя файла из пути
-            String currentFilename = userEntity.getImage();
-
-            Path oldFilePath = IMAGE_DIR.resolve(currentFilename).normalize();
-            if (Files.exists(oldFilePath)) {
-                Files.delete(oldFilePath);
-                log.info("Deleted old user image: {}", oldFilePath);
-            }
-
-            //Очищаем поле в БД
+        boolean deleted = imageService.deleteImage(userEntity.getImage(), USERS_IMAGE_DIR);
+        if (deleted) {
             userEntity.setImage(null);
             userRepository.save(userEntity);
-            return true;
         }
-        return false;
+        return deleted;
     }
 
     private void validateImageFile(MultipartFile file) {

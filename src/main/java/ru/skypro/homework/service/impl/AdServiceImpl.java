@@ -3,6 +3,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,21 +39,24 @@ public class AdServiceImpl implements AdService {
     private final FileStorageConfig fileStorageConfig;
 
     private static final String ADS_IMAGE_DIR = "ads";
+    private static final String BEGIN = "ad_image_";
 
     @Override
+    @Transactional(readOnly = true)
     public AdsDto getAllAds() {
         List<AdEntity> ads = adRepository.findAll();
         return collectionMapper.toAdsDto(ads);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ExtendedAdDto getAd(Integer id) {
-        AdEntity ad = adRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Ad not found with id: " + id));
-        return adMapper.toExtendedAdDto(ad);
+        AdEntity adEntity = getAdById(id);
+        return adMapper.toExtendedAdDto(adEntity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AdsDto getMyAds(String username) {
         UserEntity user = getUserByUsername(username);
         List<AdEntity> userAds = adRepository.findByAuthorId(user.getId());
@@ -65,37 +69,98 @@ public class AdServiceImpl implements AdService {
 
         AdEntity adEntity = adMapper.toEntity(createOrUpdateAdDto);
         adEntity.setAuthor(author);
-        
-        return null;
+
+        // Сохраняем изображение
+        String imageFilename = imageService.saveImage(image, ADS_IMAGE_DIR, BEGIN);
+        adEntity.setImage(imageFilename);
+
+        AdEntity savedAd = adRepository.save(adEntity);
+        log.info("Created ad with id: {} for user: ", savedAd.getId(), username);
+
+        return adMapper.toDto(savedAd);
     }
 
     @Override
-    public AdDto updateAd(Integer id, CreateOrUpdateAdDto createOrUpdateAdDto, String username) {
-        return null;
-    }
-
-    @Override
+    @PreAuthorize("has role('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
     public void deleteAd(Integer id, String username) {
+        AdEntity adEntity = getAdById(id);
 
+        try {
+            imageService.deleteImage(adEntity.getImage(), ADS_IMAGE_DIR);
+        } catch (IOException e) {
+            log.warn("Failed to delete image for ad {}: {}", id, e.getMessage());
+        }
+        adRepository.delete(adEntity);
+        log.info("Deleted ad with id: {}, by user: {}", id, username);
     }
 
     @Override
+    @PreAuthorize("has role('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
+    public AdDto updateAd(Integer id, CreateOrUpdateAdDto createOrUpdateAdDto, String username) {
+        AdEntity adEntity = getAdById(id);
+
+        adMapper.updateEntityFromDto(adEntity, createOrUpdateAdDto);
+        AdEntity updatedAdEntity = adRepository.save(adEntity);
+
+        log.info("Updated ad with id: {}, by user: {}", id, username);
+        return adMapper.toDto(updatedAdEntity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public byte[] getAdImage(Integer id) throws IOException {
-        return new byte[0];
+        AdEntity adEntity = getAdById(id);
+        String image = adEntity.getImage();
+
+        if (image == null || image.isEmpty()) {
+            throw new IOException("Ad has no image: " + id);
+        }
+        return imageService.getImage(image, ADS_IMAGE_DIR);
     }
 
     @Override
-    public String getAdImageImageContentType(Integer id) throws IOException {
-        return "";
+    @Transactional(readOnly = true)
+    public String getAdImageContentType(Integer id) throws IOException {
+        AdEntity adEntity = getAdById(id);
+        String image = adEntity.getImage();
+
+        if (image == null || image.isEmpty()) {
+            throw new IOException("Ad has no image: " + id);
+        }
+
+        return imageService.getImageContentType(image);
     }
 
     @Override
-    public boolean updateAdImage(Integer id, MultipartFile image, String username) throws IOException {
-        return false;
+    @PreAuthorize("has role('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
+    public AdDto updateAdImage(Integer id, MultipartFile image, String username) throws IOException {
+        AdEntity adEntity = getAdById(id);
+
+        imageService.deleteImage(adEntity.getImage(), ADS_IMAGE_DIR);
+
+        String newImageFileName = imageService.saveImage(image, ADS_IMAGE_DIR, BEGIN);
+        adEntity.setImage(newImageFileName);
+
+        AdEntity savedAd = adRepository.save(adEntity);
+        log.info("Updated image for ad: {}, by user: {}", id, username);
+
+        return adMapper.toDto(savedAd);
+    }
+
+    //метод для SpEL выражения в @PreAuthorize
+    public boolean isAdAuthor(Integer adId, String username) {
+        AdEntity adEntity = getAdById(adId);
+        UserEntity userEntity = getUserByUsername(username);
+        return adEntity.getAuthor().getId().equals(userEntity.getId());
     }
 
     private UserEntity getUserByUsername(String username) {
         return userRepository.findByEmail(username)
                 .orElseThrow(() -> new EntityNotFoundException("User not found exception: " + username));
+    }
+
+    private AdEntity getAdById(Integer id) {
+        return adRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ad not found with id: " + id));
     }
 }

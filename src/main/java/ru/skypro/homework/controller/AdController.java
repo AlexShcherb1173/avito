@@ -3,78 +3,82 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.ads.AdDto;
 import ru.skypro.homework.dto.ads.AdsDto;
 import ru.skypro.homework.dto.ads.CreateOrUpdateAdDto;
 import ru.skypro.homework.dto.ads.ExtendedAdDto;
+import ru.skypro.homework.service.AdService;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import java.io.IOException;
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/ads")
 public class AdController {
 
-    //получение всех объявлений
+    private final AdService adService;
+
     @GetMapping
     public ResponseEntity<AdsDto> getAllAds() {
-        AdsDto adsDto = new AdsDto();
+        AdsDto adsDto = adService.getAllAds();
         return ResponseEntity.ok(adsDto);
     }
 
-    //добавление объявления
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdDto> addAd(@RequestBody CreateOrUpdateAdDto createOrUpdateAdDto,
-                                       @RequestParam("image") MultipartFile image) {
-        AdDto adDto = new AdDto();
-        adDto.setTitle(createOrUpdateAdDto.getTitle());
-        adDto.setPrice(createOrUpdateAdDto.getPrice());
-        if (true) {
-            return ResponseEntity.ok(adDto);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    @GetMapping("/me")
+    public ResponseEntity<AdsDto> getMyAds(Authentication authentication) {
+        String username = authentication.getName();
+        AdsDto adsDto = adService.getMyAds(username);
+        return ResponseEntity.ok(adsDto);
     }
 
-    //получение информации об объявлении
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdDto> addAd(@RequestPart("properties") CreateOrUpdateAdDto properties,
+                                       @RequestPart("image") MultipartFile image,
+                                       Authentication authentication) throws IOException {
+        String username = authentication.getName();
+        AdDto adDto = adService.createAd(properties, username, image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(adDto);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAdDto> getAds(@PathVariable Integer id) {
-        ExtendedAdDto extendedAdDto = new ExtendedAdDto();
-        if (id == null) {
-            return ResponseEntity.notFound().build();   //404
-        }
-        if (true) {
-            return ResponseEntity.ok(extendedAdDto);       //200
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();  //401
-        }
+        ExtendedAdDto extendedAdDto = adService.getAd(id);
+        return ResponseEntity.ok(extendedAdDto);
     }
 
-    //удаление объявления
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeAd(@PathVariable("id") Integer adId) {
+    public ResponseEntity<?> removeAd(@PathVariable("id") Integer adId, Authentication authentication) {
+        adService.deleteAd(adId, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
-    //обновление информации об объявлении
     @PatchMapping("/{id}")
     public ResponseEntity<AdDto> updateAds(@PathVariable("id") Integer adId,
-                                           @RequestBody CreateOrUpdateAdDto createOrUpdateAdDto) {
-        AdDto adDto = new AdDto();
-        adDto.setTitle(createOrUpdateAdDto.getTitle());
-        adDto.setPrice(createOrUpdateAdDto.getPrice());
-        return ResponseEntity.ok(adDto);
+                                           @RequestBody CreateOrUpdateAdDto createOrUpdateAdDto,
+                                           Authentication authentication) {
+        String username = authentication.getName();
+        AdDto updateAd = adService.updateAd(adId, createOrUpdateAdDto, username);
+        return ResponseEntity.ok(updateAd);
     }
 
-    //получение объявлений авторизированного пользователя
-    @GetMapping("/me")
-    public ResponseEntity<AdsDto> getAdsMe() {
-        AdsDto adsDto = new AdsDto();
-        return ResponseEntity.ok(adsDto);
+    @GetMapping("/image/{id}")
+    public ResponseEntity<byte[]> getAdImage(@PathVariable Integer id) throws IOException {
+        byte[] image = adService.getAdImage(id);
+        String contentType = adService.getAdImageContentType(id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(image);
     }
 
     //обновление картинки объявления
@@ -89,16 +93,12 @@ public class AdController {
             @ApiResponse(responseCode = "404", description = "Объявление не найдено")
     })
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<byte[]> updateImage(@PathVariable("adId") Integer adId,
-                                              @RequestParam("image") MultipartFile image) {
-        try {
-            byte[] imageData = new byte[100];
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(imageData);
-        } catch(RuntimeException e){
-            log.error("Error updating image for ad: {}", adId, e);
-            return ResponseEntity.notFound().build();   //404
-        }
+    public ResponseEntity<AdDto> updateImage(@PathVariable("adId") Integer adId,
+                                             @RequestParam("image") MultipartFile image,
+                                             Authentication authentication) throws IOException {
+        String username = authentication.getName();
+        AdDto updatedAd = adService.updateAdImage(adId, image, username);
+
+        return ResponseEntity.ok(updatedAd);
     }
 }

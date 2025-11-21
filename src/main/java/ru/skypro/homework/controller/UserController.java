@@ -122,7 +122,7 @@ public class UserController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(contentType));
-            headers.setCacheControl("max-age=3600");
+            headers.setCacheControl("max-age=60");
 
             return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
         } catch (IOException e) {
