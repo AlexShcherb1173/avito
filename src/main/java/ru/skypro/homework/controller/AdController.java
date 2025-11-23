@@ -93,11 +93,11 @@ public class AdController {
             @ApiResponse(responseCode = "404", description = "Объявление не найдено")
     })
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdDto> updateImage(@PathVariable("adId") Integer adId,
+    public ResponseEntity<AdDto> updateImage(@PathVariable("adId") Integer id,
                                              @RequestParam("image") MultipartFile image,
                                              Authentication authentication) throws IOException {
         String username = authentication.getName();
-        AdDto updatedAd = adService.updateAdImage(adId, image, username);
+        AdDto updatedAd = adService.updateAdImage(id, image, username);
 
         return ResponseEntity.ok(updatedAd);
     }

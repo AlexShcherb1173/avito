@@ -35,7 +35,7 @@ public class AdServiceImpl implements AdService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
     private final CollectionMapper collectionMapper;
-    private ImageService imageService;
+    private final ImageService imageService;
     private final FileStorageConfig fileStorageConfig;
 
     private static final String ADS_IMAGE_DIR = "ads";
@@ -75,13 +75,13 @@ public class AdServiceImpl implements AdService {
         adEntity.setImage(imageFilename);
 
         AdEntity savedAd = adRepository.save(adEntity);
-        log.info("Created ad with id: {} for user: ", savedAd.getId(), username);
+        log.info("Created ad with id: {} for user: {}", savedAd.getId(), username);
 
         return adMapper.toDto(savedAd);
     }
 
     @Override
-    @PreAuthorize("has role('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
+    @PreAuthorize("hasRole('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
     public void deleteAd(Integer id, String username) {
         AdEntity adEntity = getAdById(id);
 
@@ -95,7 +95,7 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
-    @PreAuthorize("has role('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
+    @PreAuthorize("hasRole('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
     public AdDto updateAd(Integer id, CreateOrUpdateAdDto createOrUpdateAdDto, String username) {
         AdEntity adEntity = getAdById(id);
 
@@ -132,7 +132,7 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
-    @PreAuthorize("has role('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
+    @PreAuthorize("hasRole('ADMIN') or @adServiceImpl.isAdAuthor(#id, #username)")
     public AdDto updateAdImage(Integer id, MultipartFile image, String username) throws IOException {
         AdEntity adEntity = getAdById(id);
 
