@@ -42,14 +42,31 @@ public class AdController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdDto> addAd(@RequestPart("properties") CreateOrUpdateAdDto properties,
+    public ResponseEntity<AdDto> addAd(@RequestParam("title") String title,
+                                       @RequestParam("price") Integer price,
+                                       @RequestParam("description") String description,
                                        @RequestPart("image") MultipartFile image,
                                        Authentication authentication) throws IOException {
         String username = authentication.getName();
-        AdDto adDto = adService.createAd(properties, username, image);
-        return ResponseEntity.status(HttpStatus.CREATED).body(adDto);
+
+        CreateOrUpdateAdDto properties = new CreateOrUpdateAdDto();
+        properties.setTitle(title);
+        properties.setPrice(price);
+        properties.setDescription(description);
+
+        try {
+            AdDto adDto = adService.createAd(properties, username, image);
+            return ResponseEntity.status(HttpStatus.CREATED).body(adDto);
+        } catch (IOException e) {
+            log.error("Failed to create ad", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
     }
 
+    @Operation(
+            summary = "Получение информации об объявлении"
+    )
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAdDto> getAds(@PathVariable Integer id) {
         ExtendedAdDto extendedAdDto = adService.getAd(id);
@@ -93,7 +110,7 @@ public class AdController {
             @ApiResponse(responseCode = "404", description = "Объявление не найдено")
     })
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdDto> updateImage(@PathVariable("adId") Integer id,
+    public ResponseEntity<AdDto> updateImage(@PathVariable("id") Integer id,
                                              @RequestParam("image") MultipartFile image,
                                              Authentication authentication) throws IOException {
         String username = authentication.getName();
