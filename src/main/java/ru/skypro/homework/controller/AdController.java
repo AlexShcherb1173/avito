@@ -28,12 +28,14 @@ public class AdController {
 
     private final AdService adService;
 
+    @Operation(summary = "Получение всех объявлений")
     @GetMapping
     public ResponseEntity<AdsDto> getAllAds() {
         AdsDto adsDto = adService.getAllAds();
         return ResponseEntity.ok(adsDto);
     }
 
+    @Operation(summary = "Получение объявлений авторизованного пользователя")
     @GetMapping("/me")
     public ResponseEntity<AdsDto> getMyAds(Authentication authentication) {
         String username = authentication.getName();
@@ -41,6 +43,7 @@ public class AdController {
         return ResponseEntity.ok(adsDto);
     }
 
+    @Operation(summary = "Добавление объявления")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdDto> addAd(@RequestParam("title") String title,
                                        @RequestParam("price") Integer price,
@@ -64,21 +67,21 @@ public class AdController {
 
     }
 
-    @Operation(
-            summary = "Получение информации об объявлении"
-    )
+    @Operation(summary = "Получение информации об объявлении по id")
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAdDto> getAds(@PathVariable Integer id) {
         ExtendedAdDto extendedAdDto = adService.getAd(id);
         return ResponseEntity.ok(extendedAdDto);
     }
 
+    @Operation(summary = "Удаление объявления")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeAd(@PathVariable("id") Integer adId, Authentication authentication) {
         adService.deleteAd(adId, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Обновление объявления")
     @PatchMapping("/{id}")
     public ResponseEntity<AdDto> updateAds(@PathVariable("id") Integer adId,
                                            @RequestBody CreateOrUpdateAdDto createOrUpdateAdDto,
@@ -88,6 +91,7 @@ public class AdController {
         return ResponseEntity.ok(updateAd);
     }
 
+    @Operation(summary = "Получить картинку объявления")
     @GetMapping("/image/{id}")
     public ResponseEntity<byte[]> getAdImage(@PathVariable Integer id) throws IOException {
         byte[] image = adService.getAdImage(id);

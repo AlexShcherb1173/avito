@@ -9,7 +9,7 @@ public interface CommentService {
 
     CommentsDto getComments(Integer adId);
 
-    CommentsDto createComment(Integer adId, CreateOrUpdateCommentDto createOrUpdateCommentDto, String username);
+    CommentDto createComment(Integer adId, CreateOrUpdateCommentDto createOrUpdateCommentDto, String username);
 
     CommentDto updateComment(Integer adId, Integer commentId, CreateOrUpdateCommentDto createOrUpdateCommentDto, String username);
 
