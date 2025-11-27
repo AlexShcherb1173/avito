@@ -10,5 +10,5 @@ public class UserDto {
     private String lastName;
     private String phone;
     private String role;
-    private String image;       // полный URL, например: "http://localhost:8080/users/images/1"
+    private String image;
 }

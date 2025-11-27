@@ -54,7 +54,6 @@ public class UserMapper {
         entity.setLastName(dto.getLastName());
         entity.setPhone(dto.getPhone());
         entity.setRole(Role.valueOf(dto.getRole()));
-        // image не устанавливаем при регистрации
 
         return entity;
     }

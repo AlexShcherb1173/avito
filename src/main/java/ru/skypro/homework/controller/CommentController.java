@@ -37,7 +37,7 @@ public class CommentController {
     }
 
     @Operation(summary = "удаление комментария")
-    @DeleteMapping("/{id}/comments/{commentId}")
+    @DeleteMapping("/{adId}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Integer adId,
                                               @PathVariable Integer commentId,
                                               Authentication authentication) {
@@ -54,8 +54,7 @@ public class CommentController {
                                                     Authentication authentication) {
         String username = authentication.getName();
         CommentDto updatedDto = commentService.updateComment(adId, commentId, createOrUpdateCommentDto, username);
-        CommentDto commentDto = new CommentDto();
-        return ResponseEntity.ok().body(commentDto);
+        return ResponseEntity.ok().body(updatedDto);
     }
 
 }
