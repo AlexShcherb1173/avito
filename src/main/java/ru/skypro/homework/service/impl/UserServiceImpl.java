@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
         userMapper.updateEntityFromDto(updateUser, userEntity);
         UserEntity savedEntity = userRepository.save(userEntity);
 
-        return userMapper.toDtoFromUpdate(savedEntity, updateUser);
+        return userMapper.toDto(savedEntity);
     }
 
     @Override
