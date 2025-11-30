@@ -21,4 +21,7 @@ public interface AdRepository extends JpaRepository<AdEntity, Integer> {
 
     @Query("SELECT COUNT(a) FROM AdEntity a WHERE a.author.id = :userId")
     Integer countByUserId(@Param("userId") Integer userId);
+
+    @Query("SELECT a FROM AdEntity a WHERE a.author.email = :username")
+    List<AdEntity> findByAuthorEmail(@Param("username") String username);
 }

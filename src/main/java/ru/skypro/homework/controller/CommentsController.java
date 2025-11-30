@@ -44,7 +44,7 @@ public class CommentsController {
     public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id) {
         log.info("Getting comments for ad with id: {}", id);
         Comments comments = commentsService.getComments(id);
-        return ResponseEntity.status(HttpStatus.OK).body(comments);
+        return ResponseEntity.ok(comments);
     }
 
     @Operation(
@@ -66,7 +66,7 @@ public class CommentsController {
                                               Principal principal) {
         log.info("Adding comment to ad with id: {} by user: {}", id, principal.getName());
         Comment comment = commentsService.addComment(id, createOrUpdateComment, principal.getName());
-        return ResponseEntity.status(HttpStatus.OK).body(comment);
+        return ResponseEntity.ok(comment);
     }
 
     @Operation(
@@ -84,7 +84,7 @@ public class CommentsController {
                                               Principal principal) {
         log.info("Deleting comment with id: {} from ad with id: {} by user: {}", commentId, adId, principal.getName());
         commentsService.deleteComment(adId, commentId, principal.getName());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -108,6 +108,6 @@ public class CommentsController {
                                                  Principal principal) {
         log.info("Updating comment with id: {} for ad with id: {} by user: {}", commentId, adId, principal.getName());
         Comment comment = commentsService.updateComment(adId, commentId, createOrUpdateComment, principal.getName());
-        return ResponseEntity.status(HttpStatus.OK).body(comment);
+        return ResponseEntity.ok(comment);
     }
 }

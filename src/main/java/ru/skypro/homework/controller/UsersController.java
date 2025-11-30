@@ -48,7 +48,7 @@ public class UsersController {
         userService.updatePassword(principal.getName(),
                 newPassword.getCurrentPassword(),
                 newPassword.getNewPassword());
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -68,7 +68,7 @@ public class UsersController {
                                            Principal principal) {
         log.info("Updating user info for: {}", principal.getName());
         User user = userService.updateUser(principal.getName(), updateUser);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        return ResponseEntity.ok(user);
     }
 
     @Operation(
@@ -87,7 +87,7 @@ public class UsersController {
     public ResponseEntity<User> getUser(Principal principal) {
         log.info("Getting current user info for: {}", principal.getName());
         User user = userService.getCurrentUser(principal.getName());
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+        return ResponseEntity.ok(user);
     }
 
     @Operation(
@@ -104,7 +104,7 @@ public class UsersController {
         try {
             String imagePath = saveUserImage(image);
             userService.updateUserImage(principal.getName(), imagePath);
-            return ResponseEntity.status(HttpStatus.OK).build();
+            return ResponseEntity.ok().build();
         } catch (IOException e) {
             log.error("Failed to save user image", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
