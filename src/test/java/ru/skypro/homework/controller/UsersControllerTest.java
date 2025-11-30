@@ -37,12 +37,10 @@ class UsersControllerTest {
     @Test
     @WithMockUser
     void setPassword_ShouldReturnOk() throws Exception {
-        // Given
         NewPassword newPassword = new NewPassword();
         newPassword.setCurrentPassword("currentPass");
         newPassword.setNewPassword("newPass123");
 
-        // When & Then
         mockMvc.perform(post("/users/set_password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newPassword)))
@@ -54,7 +52,6 @@ class UsersControllerTest {
     @Test
     @WithMockUser
     void getUser_ShouldReturnUser() throws Exception {
-        // Given
         User user = new User();
         user.setId(1);
         user.setEmail("test@example.com");
@@ -62,7 +59,6 @@ class UsersControllerTest {
 
         when(userService.getCurrentUser(any())).thenReturn(user);
 
-        // When & Then
         mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -73,7 +69,6 @@ class UsersControllerTest {
     @Test
     @WithMockUser
     void updateUser_ShouldReturnUser() throws Exception {
-        // Given
         UpdateUser updateUser = new UpdateUser();
         updateUser.setFirstName("John");
         updateUser.setLastName("Doe");
@@ -86,7 +81,6 @@ class UsersControllerTest {
 
         when(userService.updateUser(any(), any(UpdateUser.class))).thenReturn(updatedUser);
 
-        // When & Then
         mockMvc.perform(patch("/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateUser)))
@@ -98,7 +92,6 @@ class UsersControllerTest {
     @Test
     @WithMockUser
     void updateUserImage_ShouldReturnOk() throws Exception {
-        // Given
         MockMultipartFile image = new MockMultipartFile(
                 "image",
                 "test.jpg",
@@ -106,7 +99,6 @@ class UsersControllerTest {
                 "test image content".getBytes()
         );
 
-        // When & Then
         mockMvc.perform(multipart("/users/me/image")
                         .file(image)
                         .with(request -> {

@@ -39,14 +39,12 @@ class CommentsControllerTest {
     @Test
     @WithMockUser
     void getComments_ShouldReturnComments() throws Exception {
-        // Given
         Comments comments = new Comments();
         comments.setCount(2);
         comments.setResults(List.of(new Comment(), new Comment()));
 
         when(commentsService.getComments(1)).thenReturn(comments);
 
-        // When & Then
         mockMvc.perform(get("/ads/1/comments"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").value(2))
@@ -56,7 +54,6 @@ class CommentsControllerTest {
     @Test
     @WithMockUser
     void addComment_ShouldReturnComment() throws Exception {
-        // Given
         CreateOrUpdateComment commentDto = new CreateOrUpdateComment();
         commentDto.setText("Test comment");
 
@@ -66,7 +63,6 @@ class CommentsControllerTest {
 
         when(commentsService.addComment(eq(1), any(CreateOrUpdateComment.class), any())).thenReturn(expectedComment);
 
-        // When & Then
         mockMvc.perform(post("/ads/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto)))
@@ -78,7 +74,6 @@ class CommentsControllerTest {
     @Test
     @WithMockUser
     void deleteComment_ShouldReturnOk() throws Exception {
-        // When & Then
         mockMvc.perform(delete("/ads/1/comments/1"))
                 .andExpect(status().isOk());
 
@@ -88,7 +83,6 @@ class CommentsControllerTest {
     @Test
     @WithMockUser
     void updateComment_ShouldReturnComment() throws Exception {
-        // Given
         CreateOrUpdateComment commentDto = new CreateOrUpdateComment();
         commentDto.setText("Updated comment");
 
@@ -98,7 +92,6 @@ class CommentsControllerTest {
 
         when(commentsService.updateComment(eq(1), eq(1), any(CreateOrUpdateComment.class), any())).thenReturn(expectedComment);
 
-        // When & Then
         mockMvc.perform(patch("/ads/1/comments/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(commentDto)))

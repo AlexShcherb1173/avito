@@ -16,7 +16,6 @@ class UserMapperTest {
 
     @Test
     void toEntity_ShouldMapRegisterToUserEntity() {
-        // Given
         Register register = new Register();
         register.setUsername("test@example.com");
         register.setPassword("password");
@@ -25,10 +24,8 @@ class UserMapperTest {
         register.setPhone("+79999999999");
         register.setRole(Role.USER);
 
-        // When
         UserEntity userEntity = userMapper.toEntity(register);
 
-        // Then
         assertNotNull(userEntity);
         assertEquals("test@example.com", userEntity.getEmail());
         assertEquals("John", userEntity.getFirstName());
@@ -39,7 +36,6 @@ class UserMapperTest {
 
     @Test
     void toDto_ShouldMapUserEntityToUser() {
-        // Given
         UserEntity userEntity = new UserEntity();
         userEntity.setId(1);
         userEntity.setEmail("test@example.com");
@@ -49,10 +45,8 @@ class UserMapperTest {
         userEntity.setRole(Role.USER);
         userEntity.setImage("avatar.jpg");
 
-        // When
         User user = userMapper.toDto(userEntity);
 
-        // Then
         assertNotNull(user);
         assertEquals(1, user.getId());
         assertEquals("test@example.com", user.getEmail());
@@ -65,23 +59,19 @@ class UserMapperTest {
 
     @Test
     void toDto_ShouldHandleNullImage() {
-        // Given
         UserEntity userEntity = new UserEntity();
         userEntity.setId(1);
         userEntity.setEmail("test@example.com");
         userEntity.setImage(null);
 
-        // When
         User user = userMapper.toDto(userEntity);
 
-        // Then
         assertNotNull(user);
         assertNull(user.getImage());
     }
 
     @Test
     void updateEntityFromDto_ShouldUpdateUserEntity() {
-        // Given
         UpdateUser updateUser = new UpdateUser();
         updateUser.setFirstName("Jane");
         updateUser.setLastName("Smith");
@@ -96,14 +86,11 @@ class UserMapperTest {
         userEntity.setRole(Role.USER);
         userEntity.setPassword("password");
 
-        // When
         userMapper.updateEntityFromDto(updateUser, userEntity);
 
-        // Then
         assertEquals("Jane", userEntity.getFirstName());
         assertEquals("Smith", userEntity.getLastName());
         assertEquals("+78888888888", userEntity.getPhone());
-        // Ensure other fields are not changed
         assertEquals(1, userEntity.getId());
         assertEquals("old@example.com", userEntity.getEmail());
         assertEquals(Role.USER, userEntity.getRole());

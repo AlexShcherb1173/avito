@@ -16,8 +16,6 @@ import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.UserService;
 
-import javax.persistence.EntityNotFoundException;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +44,6 @@ class CommentsServiceImplTest {
 
     @Test
     void getComments_ShouldReturnComments_WhenCommentsExist() {
-        // Given
         Integer adId = 1;
         CommentEntity commentEntity1 = new CommentEntity();
         commentEntity1.setId(1);
@@ -63,10 +60,8 @@ class CommentsServiceImplTest {
         when(commentMapper.toDto(commentEntity1)).thenReturn(comment1);
         when(commentMapper.toDto(commentEntity2)).thenReturn(comment2);
 
-        // When
         Comments result = commentsService.getComments(adId);
 
-        // Then
         assertNotNull(result);
         assertEquals(2, result.getCount());
         assertEquals(2, result.getResults().size());
@@ -75,7 +70,6 @@ class CommentsServiceImplTest {
 
     @Test
     void addComment_ShouldSaveComment() {
-        // Given
         Integer adId = 1;
         String username = "user@example.com";
         CreateOrUpdateComment commentDto = new CreateOrUpdateComment();
@@ -99,10 +93,8 @@ class CommentsServiceImplTest {
         when(commentRepository.save(any(CommentEntity.class))).thenReturn(commentEntity);
         when(commentMapper.toDto(commentEntity)).thenReturn(expectedComment);
 
-        // When
         Comment result = commentsService.addComment(adId, commentDto, username);
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.getPk());
         verify(commentRepository, times(1)).save(any(CommentEntity.class));
@@ -111,7 +103,6 @@ class CommentsServiceImplTest {
 
     @Test
     void deleteComment_ShouldDeleteComment_WhenUserIsOwner() {
-        // Given
         Integer adId = 1;
         Integer commentId = 1;
         String username = "owner@example.com";
@@ -130,16 +121,13 @@ class CommentsServiceImplTest {
         when(userService.getUserEntity(username)).thenReturn(userEntity);
         when(commentRepository.findByIdAndAdId(commentId, adId)).thenReturn(Optional.of(commentEntity));
 
-        // When
         commentsService.deleteComment(adId, commentId, username);
 
-        // Then
         verify(commentRepository, times(1)).delete(commentEntity);
     }
 
     @Test
     void deleteComment_ShouldThrowSecurityException_WhenUserIsNotOwner() {
-        // Given
         Integer adId = 1;
         Integer commentId = 1;
         String username = "notowner@example.com";
@@ -158,7 +146,6 @@ class CommentsServiceImplTest {
         when(userService.getUserEntity(username)).thenReturn(userEntity);
         when(commentRepository.findByIdAndAdId(commentId, adId)).thenReturn(Optional.of(commentEntity));
 
-        // When & Then
         assertThrows(SecurityException.class, () -> {
             commentsService.deleteComment(adId, commentId, username);
         });
@@ -168,7 +155,6 @@ class CommentsServiceImplTest {
 
     @Test
     void updateComment_ShouldUpdateComment_WhenUserIsOwner() {
-        // Given
         Integer adId = 1;
         Integer commentId = 1;
         String username = "owner@example.com";
@@ -193,10 +179,8 @@ class CommentsServiceImplTest {
         when(commentRepository.save(commentEntity)).thenReturn(commentEntity);
         when(commentMapper.toDto(commentEntity)).thenReturn(expectedComment);
 
-        // When
         Comment result = commentsService.updateComment(adId, commentId, updateDto, username);
 
-        // Then
         assertNotNull(result);
         assertEquals(commentId, result.getPk());
         verify(commentMapper, times(1)).updateEntityFromDto(updateDto, commentEntity);
@@ -205,7 +189,6 @@ class CommentsServiceImplTest {
 
     @Test
     void isCommentOwner_ShouldReturnTrue_WhenUserIsOwner() {
-        // Given
         Integer commentId = 1;
         String username = "owner@example.com";
 
@@ -222,16 +205,13 @@ class CommentsServiceImplTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(commentEntity));
         when(userService.getUserEntity(username)).thenReturn(userEntity);
 
-        // When
         boolean result = commentsService.isCommentOwner(commentId, username);
 
-        // Then
         assertTrue(result);
     }
 
     @Test
     void isCommentOwner_ShouldReturnFalse_WhenUserIsNotOwner() {
-        // Given
         Integer commentId = 1;
         String username = "notowner@example.com";
 
@@ -248,10 +228,8 @@ class CommentsServiceImplTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(commentEntity));
         when(userService.getUserEntity(username)).thenReturn(userEntity);
 
-        // When
         boolean result = commentsService.isCommentOwner(commentId, username);
 
-        // Then
         assertFalse(result);
     }
 }

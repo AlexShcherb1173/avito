@@ -16,9 +16,6 @@ import ru.skypro.homework.service.UserService;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +41,6 @@ class AdsServiceImplTest {
 
     @Test
     void getAllAds_ShouldReturnAds_WhenAdsExist() {
-        // Given
         AdEntity adEntity1 = new AdEntity();
         adEntity1.setId(1);
         AdEntity adEntity2 = new AdEntity();
@@ -60,10 +56,8 @@ class AdsServiceImplTest {
         when(adMapper.toDto(adEntity1)).thenReturn(ad1);
         when(adMapper.toDto(adEntity2)).thenReturn(ad2);
 
-        // When
         Ads result = adsService.getAllAds();
 
-        // Then
         assertNotNull(result);
         assertEquals(2, result.getCount());
         assertEquals(2, result.getResults().size());
@@ -72,13 +66,10 @@ class AdsServiceImplTest {
 
     @Test
     void getAllAds_ShouldReturnEmptyList_WhenNoAdsExist() {
-        // Given
         when(adRepository.findAll()).thenReturn(List.of());
 
-        // When
         Ads result = adsService.getAllAds();
 
-        // Then
         assertNotNull(result);
         assertEquals(0, result.getCount());
         assertTrue(result.getResults().isEmpty());
@@ -86,7 +77,6 @@ class AdsServiceImplTest {
 
     @Test
     void getExtendedAd_ShouldReturnExtendedAd_WhenAdExists() {
-        // Given
         Integer adId = 1;
         AdEntity adEntity = new AdEntity();
         adEntity.setId(adId);
@@ -96,10 +86,8 @@ class AdsServiceImplTest {
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
         when(adMapper.toExtendedAd(adEntity)).thenReturn(extendedAd);
 
-        // When
         ExtendedAd result = adsService.getExtendedAd(adId);
 
-        // Then
         assertNotNull(result);
         assertEquals(adId, result.getPk());
         verify(adRepository, times(1)).findById(adId);
@@ -107,11 +95,9 @@ class AdsServiceImplTest {
 
     @Test
     void getExtendedAd_ShouldThrowException_WhenAdNotFound() {
-        // Given
         Integer adId = 999;
         when(adRepository.findById(adId)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(EntityNotFoundException.class, () -> {
             adsService.getExtendedAd(adId);
         });
@@ -119,7 +105,6 @@ class AdsServiceImplTest {
 
     @Test
     void addAd_ShouldSaveAd_WithImage() throws IOException {
-        // Given
         String username = "user@example.com";
         CreateOrUpdateAd properties = new CreateOrUpdateAd();
         properties.setTitle("Test Ad");
@@ -145,10 +130,8 @@ class AdsServiceImplTest {
         when(adRepository.save(any(AdEntity.class))).thenReturn(adEntity);
         when(adMapper.toDto(adEntity)).thenReturn(expectedAd);
 
-        // When
         Ad result = adsService.addAd(properties, image, username);
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.getPk());
         verify(userService, times(1)).getUserEntity(username);
@@ -157,7 +140,6 @@ class AdsServiceImplTest {
 
     @Test
     void removeAd_ShouldDeleteAd_WhenUserIsOwner() {
-        // Given
         Integer adId = 1;
         String username = "owner@example.com";
 
@@ -175,25 +157,22 @@ class AdsServiceImplTest {
         when(userService.getUserEntity(username)).thenReturn(userEntity);
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
 
-        // When
         adsService.removeAd(adId, username);
 
-        // Then
         verify(adRepository, times(1)).delete(adEntity);
     }
 
     @Test
     void removeAd_ShouldThrowSecurityException_WhenUserIsNotOwner() {
-        // Given
         Integer adId = 1;
         String username = "notowner@example.com";
 
         UserEntity userEntity = new UserEntity();
-        userEntity.setId(2); // Different ID
+        userEntity.setId(2);
         userEntity.setRole(Role.USER);
 
         UserEntity adOwner = new UserEntity();
-        adOwner.setId(1); // Different owner
+        adOwner.setId(1);
 
         AdEntity adEntity = new AdEntity();
         adEntity.setId(adId);
@@ -202,7 +181,6 @@ class AdsServiceImplTest {
         when(userService.getUserEntity(username)).thenReturn(userEntity);
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
 
-        // When & Then
         assertThrows(SecurityException.class, () -> {
             adsService.removeAd(adId, username);
         });
@@ -212,7 +190,6 @@ class AdsServiceImplTest {
 
     @Test
     void getAdsByUser_ShouldReturnUserAds() {
-        // Given
         String username = "user@example.com";
         UserEntity userEntity = new UserEntity();
         userEntity.setId(1);
@@ -228,10 +205,8 @@ class AdsServiceImplTest {
         when(adRepository.findByAuthorId(1)).thenReturn(userAds);
         when(adMapper.toDto(adEntity)).thenReturn(ad);
 
-        // When
         Ads result = adsService.getAdsByUser(username);
 
-        // Then
         assertNotNull(result);
         assertEquals(1, result.getCount());
         assertEquals(1, result.getResults().size());
@@ -240,7 +215,6 @@ class AdsServiceImplTest {
 
     @Test
     void isAdOwner_ShouldReturnTrue_WhenUserIsOwner() {
-        // Given
         Integer adId = 1;
         String username = "owner@example.com";
 
@@ -257,16 +231,13 @@ class AdsServiceImplTest {
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
         when(userService.getUserEntity(username)).thenReturn(userEntity);
 
-        // When
         boolean result = adsService.isAdOwner(adId, username);
 
-        // Then
         assertTrue(result);
     }
 
     @Test
     void isAdOwner_ShouldReturnFalse_WhenUserIsNotOwner() {
-        // Given
         Integer adId = 1;
         String username = "notowner@example.com";
 
@@ -283,25 +254,20 @@ class AdsServiceImplTest {
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
         when(userService.getUserEntity(username)).thenReturn(userEntity);
 
-        // When
         boolean result = adsService.isAdOwner(adId, username);
 
-        // Then
         assertFalse(result);
     }
 
     @Test
     void isAdOwner_ShouldReturnFalse_WhenAdNotFound() {
-        // Given
         Integer adId = 999;
         String username = "user@example.com";
 
         when(adRepository.findById(adId)).thenReturn(Optional.empty());
 
-        // When
         boolean result = adsService.isAdOwner(adId, username);
 
-        // Then
         assertFalse(result);
     }
 }

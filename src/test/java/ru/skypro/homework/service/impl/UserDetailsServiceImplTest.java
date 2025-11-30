@@ -27,7 +27,6 @@ class UserDetailsServiceImplTest {
 
     @Test
     void loadUserByUsername_ShouldReturnUserDetails_WhenUserExists() {
-        // Given
         String email = "test@example.com";
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(email);
@@ -36,10 +35,8 @@ class UserDetailsServiceImplTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(userEntity));
 
-        // When
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        // Then
         assertNotNull(userDetails);
         assertEquals(email, userDetails.getUsername());
         assertEquals("encodedPassword", userDetails.getPassword());
@@ -51,11 +48,9 @@ class UserDetailsServiceImplTest {
 
     @Test
     void loadUserByUsername_ShouldThrowException_WhenUserNotFound() {
-        // Given
         String email = "nonexistent@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(UsernameNotFoundException.class, () -> {
             userDetailsService.loadUserByUsername(email);
         });
@@ -65,7 +60,6 @@ class UserDetailsServiceImplTest {
 
     @Test
     void loadUserByUsername_ShouldReturnCorrectRole_WhenUserIsAdmin() {
-        // Given
         String email = "admin@example.com";
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(email);
@@ -74,10 +68,8 @@ class UserDetailsServiceImplTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(userEntity));
 
-        // When
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        // Then
         assertTrue(userDetails.getAuthorities().stream()
                 .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN")));
     }
