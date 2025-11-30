@@ -9,10 +9,10 @@ public interface CommentsService {
     Comments getComments(Integer adId);
     Comment addComment(Integer adId, CreateOrUpdateComment comment, String username);
 
-    @PreAuthorize("hasRole('ADMIN') or @commentsService.isCommentOwner(#commentId, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') or @commentsServiceImpl.isCommentOwner(#commentId, authentication.name)")
     void deleteComment(Integer adId, Integer commentId, String username);
 
-    @PreAuthorize("hasRole('ADMIN') or @commentsService.isCommentOwner(#commentId, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') or @commentsServiceImpl.isCommentOwner(#commentId, authentication.name)")
     Comment updateComment(Integer adId, Integer commentId, CreateOrUpdateComment comment, String username);
 
     boolean isCommentOwner(Integer commentId, String username);
