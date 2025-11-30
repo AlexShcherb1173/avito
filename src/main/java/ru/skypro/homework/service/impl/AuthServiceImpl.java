@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -53,12 +54,39 @@ public class AuthServiceImpl implements AuthService {
                 userEntity.setRole(Role.USER);
             }
 
+            // Нормализуем телефонный номер перед сохранением
+            if (userEntity.getPhone() != null) {
+                userEntity.setPhone(normalizePhoneNumber(userEntity.getPhone()));
+            }
+
             userRepository.save(userEntity);
             log.info("User registered successfully: {}", register.getUsername());
             return true;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation during registration for user: {}", register.getUsername(), e);
+            return false;
         } catch (Exception e) {
             log.error("Registration failed for user: {}", register.getUsername(), e);
             return false;
         }
+    }
+
+    /**
+     * Нормализует номер телефона для сохранения в БД
+     */
+    private String normalizePhoneNumber(String phone) {
+        if (phone == null) {
+            return null;
+        }
+        // Убираем лишние пробелы и приводим к стандартному формату
+        String normalized = phone.replaceAll("\\s+", " ").trim();
+
+        // Если номер слишком длинный, обрезаем до 20 символов
+        if (normalized.length() > 20) {
+            log.warn("Phone number too long, truncating: {}", phone);
+            normalized = normalized.substring(0, 20);
+        }
+
+        return normalized;
     }
 }

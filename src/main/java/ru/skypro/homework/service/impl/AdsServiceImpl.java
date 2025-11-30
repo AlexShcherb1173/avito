@@ -11,15 +11,11 @@ import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
 import javax.persistence.EntityNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -31,6 +27,7 @@ public class AdsServiceImpl implements AdsService {
     private final AdRepository adRepository;
     private final AdMapper adMapper;
     private final UserService userService;
+    private final ImageService imageService; // Добавлен сервис изображений
 
     @Override
     @Transactional(readOnly = true)
@@ -56,7 +53,7 @@ public class AdsServiceImpl implements AdsService {
         adEntity.setAuthor(author);
 
         if (image != null && !image.isEmpty()) {
-            String imagePath = saveImage(image);
+            String imagePath = imageService.saveImage(image);
             adEntity.setImage(imagePath);
         }
 
@@ -85,7 +82,7 @@ public class AdsServiceImpl implements AdsService {
         }
 
         if (adEntity.getImage() != null) {
-            deleteImage(adEntity.getImage());
+            imageService.deleteImage(adEntity.getImage());
         }
 
         adRepository.delete(adEntity);
@@ -136,12 +133,25 @@ public class AdsServiceImpl implements AdsService {
         }
 
         if (adEntity.getImage() != null) {
-            deleteImage(adEntity.getImage());
+            imageService.deleteImage(adEntity.getImage());
         }
 
-        String newImagePath = saveImage(image);
+        String newImagePath = imageService.saveImage(image);
         adEntity.setImage(newImagePath);
         adRepository.save(adEntity);
+    }
+
+    @Override
+    public byte[] getAdImage(Integer id) {
+        log.info("Getting image for ad with id: {}", id);
+        AdEntity adEntity = adRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ad not found with id: " + id));
+
+        if (adEntity.getImage() == null) {
+            throw new EntityNotFoundException("Image not found for ad with id: " + id);
+        }
+
+        return imageService.getImage(adEntity.getImage());
     }
 
     @Override
@@ -165,30 +175,5 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
-    private String saveImage(MultipartFile image) {
-        try {
-            String originalFilename = image.getOriginalFilename();
-            String extension = originalFilename != null ?
-                    originalFilename.substring(originalFilename.lastIndexOf(".")) : ".jpg";
-            String filename = UUID.randomUUID() + extension;
-            Path path = Paths.get("images/" + filename);
 
-            Files.createDirectories(path.getParent());
-            Files.write(path, image.getBytes());
-
-            return filename;
-        } catch (IOException e) {
-            log.error("Failed to save image", e);
-            throw new RuntimeException("Failed to save image", e);
-        }
-    }
-
-    private void deleteImage(String imagePath) {
-        try {
-            Path path = Paths.get("images/" + imagePath);
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            log.warn("Failed to delete image: {}", imagePath, e);
-        }
-    }
 }

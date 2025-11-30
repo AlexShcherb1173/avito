@@ -32,6 +32,8 @@ databaseChangeLog:
               - column:
                   name: phone
                   type: VARCHAR(18)
+                  constraints:
+                    nullable: true
               - column:
                   name: role
                   type: VARCHAR(10)

@@ -6,11 +6,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
 @Slf4j
@@ -22,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ImageService imageService; // Добавлен сервис изображений
 
     @Override
     @Transactional(readOnly = true)
@@ -38,19 +41,52 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        userMapper.updateEntityFromDto(updateUser, userEntity);
-        UserEntity savedEntity = userRepository.save(userEntity);
+        // Обновляем только те поля, которые пришли в UpdateUser
+        if (updateUser.getFirstName() != null) {
+            userEntity.setFirstName(updateUser.getFirstName());
+        }
+        if (updateUser.getLastName() != null) {
+            userEntity.setLastName(updateUser.getLastName());
+        }
+        if (updateUser.getPhone() != null) {
+            // Нормализуем телефонный номер перед сохранением
+            userEntity.setPhone(normalizePhoneNumber(updateUser.getPhone()));
+        }
 
+        UserEntity savedEntity = userRepository.save(userEntity);
         return userMapper.toDto(savedEntity);
     }
 
+    private String normalizePhoneNumber(String phone) {
+        if (phone == null) {
+            return null;
+        }
+        // Убираем лишние пробелы и приводим к стандартному формату
+        String normalized = phone.replaceAll("\\s+", " ").trim();
+
+        // Если номер слишком длинный, обрезаем до 20 символов
+        if (normalized.length() > 20) {
+            log.warn("Phone number too long, truncating: {}", phone);
+            normalized = normalized.substring(0, 20);
+        }
+
+        return normalized;
+    }
+
     @Override
-    public void updateUserImage(String username, String imagePath) {
+    public void updateUserImage(String username, MultipartFile image) {
         log.info("Updating user image: {}", username);
         UserEntity userEntity = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        userEntity.setImage(imagePath);
+        // Удаляем старое изображение если есть
+        if (userEntity.getImage() != null) {
+            imageService.deleteImage(userEntity.getImage());
+        }
+
+        // Сохраняем новое изображение
+        String newImagePath = imageService.saveImage(image);
+        userEntity.setImage(newImagePath);
         userRepository.save(userEntity);
     }
 

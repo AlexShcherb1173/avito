@@ -32,6 +32,10 @@ public interface UserMapper {
     @Mapping(target = "lastName", source = "lastName")
     @Mapping(target = "phone", source = "phone")
     @Mapping(target = "role", source = "role")
-    @Mapping(target = "image", expression = "java(entity.getImage() != null ? \"/images/\" + entity.getImage() : null)")
+    @Mapping(target = "image", expression = "java(getImageUrl(entity.getImage()))")
     User toDto(UserEntity entity);
+
+    default String getImageUrl(String image) {
+        return image != null ? "/images/" + image : null;
+    }
 }

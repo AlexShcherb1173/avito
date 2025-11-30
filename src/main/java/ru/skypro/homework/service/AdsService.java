@@ -19,7 +19,9 @@ public interface AdsService {
     Ads getAdsByUser(String username);
 
     @PreAuthorize("hasRole('ADMIN') or @adsServiceImpl.isAdOwner(#id, authentication.name)")
-    void updateAdImage(Integer id, MultipartFile image, String username);
+    void updateAdImage(Integer id, MultipartFile image, String username); // Изменен параметр
+
+    byte[] getAdImage(Integer id); // Новый метод
 
     AdEntity getAdEntity(Integer id);
 

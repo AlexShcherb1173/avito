@@ -28,7 +28,7 @@ public class UserEntity {
     @Column(name = "last_name", nullable = false, length = 16)
     private String lastName;
 
-    @Column(name = "phone", length = 18)
+    @Column(name = "phone", length = 20)
     private String phone;
 
     @Enumerated(EnumType.STRING)

@@ -3,6 +3,8 @@ package ru.skypro.homework.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import javax.validation.constraints.Size;
+
 @Data
 @Schema(description = "Регистрация пользователя")
 public class Register {
@@ -19,6 +21,7 @@ public class Register {
     @Schema(description = "фамилия пользователя", minLength = 2, maxLength = 16)
     private String lastName;
 
+    @Size(max = 20)
     @Schema(description = "телефон пользователя", pattern = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}")
     private String phone;
 

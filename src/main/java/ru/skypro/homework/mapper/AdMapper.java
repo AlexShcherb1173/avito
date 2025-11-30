@@ -7,7 +7,7 @@ import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.entity.AdEntity;
 
-@Mapper(componentModel = "spring", uses = {UserMapper.class})
+@Mapper(componentModel = "spring")
 public interface AdMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -17,7 +17,7 @@ public interface AdMapper {
     AdEntity toEntity(CreateOrUpdateAd createOrUpdateAd);
 
     @Mapping(target = "author", source = "entity.author.id")
-    @Mapping(target = "image", expression = "java(entity.getImage() != null ? \"/images/\" + entity.getImage() : null)")
+    @Mapping(target = "image", expression = "java(getImageUrl(entity.getImage()))")
     @Mapping(target = "pk", source = "entity.id")
     @Mapping(target = "price", source = "entity.price")
     @Mapping(target = "title", source = "entity.title")
@@ -28,7 +28,7 @@ public interface AdMapper {
     @Mapping(target = "authorLastName", source = "entity.author.lastName")
     @Mapping(target = "description", source = "entity.description")
     @Mapping(target = "email", source = "entity.author.email")
-    @Mapping(target = "image", expression = "java(entity.getImage() != null ? \"/images/\" + entity.getImage() : null)")
+    @Mapping(target = "image", expression = "java(getImageUrl(entity.getImage()))")
     @Mapping(target = "phone", source = "entity.author.phone")
     @Mapping(target = "price", source = "entity.price")
     @Mapping(target = "title", source = "entity.title")
@@ -39,4 +39,8 @@ public interface AdMapper {
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "image", ignore = true)
     void updateEntityFromDto(CreateOrUpdateAd createOrUpdateAd, @org.mapstruct.MappingTarget AdEntity entity);
+
+    default String getImageUrl(String image) {
+        return image != null ? "/images/" + image : null;
+    }
 }
