@@ -12,8 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.service.AdsService;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -21,6 +23,8 @@ import javax.validation.Valid;
 @RequestMapping("/ads")
 @RequiredArgsConstructor
 public class AdsController {
+
+    private final AdsService adsService;
 
     @Operation(
             summary = "Получение всех объявлений",
@@ -36,8 +40,7 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
         log.info("Getting all ads");
-        // TODO: Implement in service layer
-        Ads ads = new Ads();
+        Ads ads = adsService.getAllAds();
         return ResponseEntity.status(HttpStatus.OK).body(ads);
     }
 
@@ -55,10 +58,10 @@ public class AdsController {
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Ad> addAd(@RequestPart("properties") @Valid CreateOrUpdateAd properties,
-                                    @RequestPart("image") MultipartFile image) {
-        log.info("Adding new ad with title: {}", properties.getTitle());
-        // TODO: Implement in service layer
-        Ad ad = new Ad();
+                                    @RequestPart("image") MultipartFile image,
+                                    Principal principal) {
+        log.info("Adding new ad with title: {} by user: {}", properties.getTitle(), principal.getName());
+        Ad ad = adsService.addAd(properties, image, principal.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(ad);
     }
 
@@ -78,8 +81,7 @@ public class AdsController {
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAd> getAds(@PathVariable("id") Integer id) {
         log.info("Getting ad with id: {}", id);
-        // TODO: Implement in service layer
-        ExtendedAd extendedAd = new ExtendedAd();
+        ExtendedAd extendedAd = adsService.getExtendedAd(id);
         return ResponseEntity.status(HttpStatus.OK).body(extendedAd);
     }
 
@@ -93,9 +95,9 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeAd(@PathVariable("id") Integer id) {
-        log.info("Removing ad with id: {}", id);
-        // TODO: Implement in service layer
+    public ResponseEntity<Void> removeAd(@PathVariable("id") Integer id, Principal principal) {
+        log.info("Removing ad with id: {} by user: {}", id, principal.getName());
+        adsService.removeAd(id, principal.getName());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -115,10 +117,10 @@ public class AdsController {
     )
     @PatchMapping("/{id}")
     public ResponseEntity<Ad> updateAds(@PathVariable("id") Integer id,
-                                        @Valid @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        log.info("Updating ad with id: {}", id);
-        // TODO: Implement in service layer
-        Ad ad = new Ad();
+                                        @Valid @RequestBody CreateOrUpdateAd createOrUpdateAd,
+                                        Principal principal) {
+        log.info("Updating ad with id: {} by user: {}", id, principal.getName());
+        Ad ad = adsService.updateAd(id, createOrUpdateAd, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).body(ad);
     }
 
@@ -135,10 +137,9 @@ public class AdsController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<Ads> getAdsMe() {
-        log.info("Getting current user's ads");
-        // TODO: Implement in service layer
-        Ads ads = new Ads();
+    public ResponseEntity<Ads> getAdsMe(Principal principal) {
+        log.info("Getting current user's ads for: {}", principal.getName());
+        Ads ads = adsService.getAdsByUser(principal.getName());
         return ResponseEntity.status(HttpStatus.OK).body(ads);
     }
 
@@ -157,8 +158,10 @@ public class AdsController {
     )
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateImage(@PathVariable("id") Integer id,
-                                            @RequestParam("image") MultipartFile image) {
-        // Логика загрузки изображения
+                                            @RequestParam("image") MultipartFile image,
+                                            Principal principal) {
+        log.info("Updating image for ad with id: {} by user: {}", id, principal.getName());
+        adsService.updateAdImage(id, image, principal.getName());
         return ResponseEntity.ok().build();
     }
 }

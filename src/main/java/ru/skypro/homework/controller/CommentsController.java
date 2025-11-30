@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
 import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.service.CommentsService;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -22,6 +24,8 @@ import javax.validation.Valid;
 @RequestMapping("/ads")
 @RequiredArgsConstructor
 public class CommentsController {
+
+    private final CommentsService commentsService;
 
     @Operation(
             summary = "Получение комментариев объявления",
@@ -39,8 +43,7 @@ public class CommentsController {
     @GetMapping("/{id}/comments")
     public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id) {
         log.info("Getting comments for ad with id: {}", id);
-        // TODO: Implement in service layer
-        Comments comments = new Comments();
+        Comments comments = commentsService.getComments(id);
         return ResponseEntity.status(HttpStatus.OK).body(comments);
     }
 
@@ -59,10 +62,10 @@ public class CommentsController {
     )
     @PostMapping("/{id}/comments")
     public ResponseEntity<Comment> addComment(@PathVariable("id") Integer id,
-                                              @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        log.info("Adding comment to ad with id: {}", id);
-        // TODO: Implement in service layer
-        Comment comment = new Comment();
+                                              @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment,
+                                              Principal principal) {
+        log.info("Adding comment to ad with id: {} by user: {}", id, principal.getName());
+        Comment comment = commentsService.addComment(id, createOrUpdateComment, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).body(comment);
     }
 
@@ -77,9 +80,10 @@ public class CommentsController {
     )
     @DeleteMapping("/{adId}/comments/{commentId}")
     public ResponseEntity<Void> deleteComment(@PathVariable("adId") Integer adId,
-                                              @PathVariable("commentId") Integer commentId) {
-        log.info("Deleting comment with id: {} from ad with id: {}", commentId, adId);
-        // TODO: Implement in service layer
+                                              @PathVariable("commentId") Integer commentId,
+                                              Principal principal) {
+        log.info("Deleting comment with id: {} from ad with id: {} by user: {}", commentId, adId, principal.getName());
+        commentsService.deleteComment(adId, commentId, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -100,10 +104,10 @@ public class CommentsController {
     @PatchMapping("/{adId}/comments/{commentId}")
     public ResponseEntity<Comment> updateComment(@PathVariable("adId") Integer adId,
                                                  @PathVariable("commentId") Integer commentId,
-                                                 @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        log.info("Updating comment with id: {} for ad with id: {}", commentId, adId);
-        // TODO: Implement in service layer
-        Comment comment = new Comment();
+                                                 @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment,
+                                                 Principal principal) {
+        log.info("Updating comment with id: {} for ad with id: {} by user: {}", commentId, adId, principal.getName());
+        Comment comment = commentsService.updateComment(adId, commentId, createOrUpdateComment, principal.getName());
         return ResponseEntity.status(HttpStatus.OK).body(comment);
     }
 }
