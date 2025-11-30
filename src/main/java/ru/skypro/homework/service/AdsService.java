@@ -10,15 +10,15 @@ public interface AdsService {
     Ad addAd(CreateOrUpdateAd properties, MultipartFile image, String username);
     ExtendedAd getExtendedAd(Integer id);
 
-    @PreAuthorize("hasRole('ADMIN') or @adsService.isAdOwner(#id, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') or @adsServiceImpl.isAdOwner(#id, authentication.name)")
     void removeAd(Integer id, String username);
 
-    @PreAuthorize("hasRole('ADMIN') or @adsService.isAdOwner(#id, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') or @adsServiceImpl.isAdOwner(#id, authentication.name)")
     Ad updateAd(Integer id, CreateOrUpdateAd updateAd, String username);
 
     Ads getAdsByUser(String username);
 
-    @PreAuthorize("hasRole('ADMIN') or @adsService.isAdOwner(#id, authentication.name)")
+    @PreAuthorize("hasRole('ADMIN') or @adsServiceImpl.isAdOwner(#id, authentication.name)")
     void updateAdImage(Integer id, MultipartFile image, String username);
 
     AdEntity getAdEntity(Integer id);
