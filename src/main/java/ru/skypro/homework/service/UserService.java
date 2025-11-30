@@ -16,9 +16,9 @@ public interface UserService {
 
     boolean updateUserImage(MultipartFile image, String username) throws IOException;
 
-    byte[] getUserImage(String username) throws IOException;
+    byte[] getUserImageById(Integer userId) throws IOException;
 
-    String getUserImageContentType(String username) throws IOException;
+    String getUserImageContentTypeById(Integer userId) throws IOException;
 
     boolean deleteUserImage(String username) throws IOException;
 }

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
+import ru.skypro.homework.exception.EntityNotFoundException;
 import ru.skypro.homework.service.UserService;
 
 import javax.validation.Valid;
@@ -94,41 +95,26 @@ public class UserController {
         }
     }
 
-    @Operation(summary = "Просмотр аватара по имени пользователя")
-    @GetMapping("/{username}/image")
-    public ResponseEntity<byte[]> getUserImage(@PathVariable String username) {
+    @Operation(summary = "Просмотр аватара пользователя по ID")
+    @GetMapping("/image/{userId}")
+    public ResponseEntity<byte[]> getUserImage(@PathVariable Integer userId) {
         try {
-            byte[] imageBytes = userService.getUserImage(username);
-            String contentType = userService.getUserImageContentType(username);
+            byte[] imageBytes = userService.getUserImageById(userId);
+            String contentType = userService.getUserImageContentTypeById(userId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.parseMediaType(contentType));
-            headers.setCacheControl("max-age=60");
+            headers.setCacheControl("max-age=300");
 
             return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
         } catch (IOException e) {
-            log.error("Error loading image for user: {}", username, e);
+            log.error("Error loading image for User ID: {}", userId, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (EntityNotFoundException e) {
+            log.error("User not found with ID: {}", userId, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 
-    @Operation(summary = "Просмотр аватара авторизовнного пользователя")
-    @GetMapping("/me/image")
-    public ResponseEntity<byte[]> getMyImage(Authentication authentication) {
-        try{
-            String username = authentication.getName();
-            byte[] imageBytes = userService.getUserImage(authentication.getName());
-            String contentType = userService.getUserImageContentType(username);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.parseMediaType(contentType));
-            headers.setCacheControl("max-age=60");
-
-            return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
-        } catch (IOException e) {
-            log.error("Error loading image for current user", e);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-    }
 }

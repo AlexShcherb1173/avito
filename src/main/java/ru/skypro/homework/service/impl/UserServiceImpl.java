@@ -17,6 +17,7 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.criteria.CriteriaBuilder;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,12 +42,6 @@ public class UserServiceImpl implements UserService {
     // Директория для хранения изображений
     private static final String USERS_IMAGE_DIR = "users";
     private static final String BEGIN = "avatar_";
-
-//    @PostConstruct
-//    public void init() {
-//        this.USERS_IMAGE_DIR = Paths.get(fileStorageConfig.getUploadDir(), "users").toAbsolutePath().normalize();
-//        log.info("Avatar storage location: {}", USERS_IMAGE_DIR);
-//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -107,24 +102,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public byte[] getUserImage(String username) throws IOException {
-        UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
+    public byte[] getUserImageById(Integer userId) throws IOException {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         if (userEntity.getImage() == null || userEntity.getImage().isEmpty()) {
-            throw new IOException("User has no image: " + username);
+            throw new IOException("User has no image: " + userId);
         }
 
         return imageService.getImage(userEntity.getImage(), USERS_IMAGE_DIR);
     }
 
     @Override
-    public String getUserImageContentType(String username) throws IOException {
-        UserEntity userEntity = userRepository.findByEmail(username)
-                .orElseThrow(() -> new EntityNotFoundException("User not found: " + username));
+    public String getUserImageContentTypeById(Integer userId) throws IOException {
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         if (userEntity.getImage() == null || userEntity.getImage().isEmpty()) {
-            throw new IOException("User has no image: " + username);
+            throw new IOException("User has no image: " + userId);
         }
 
         return imageService.getImageContentType(userEntity.getImage());

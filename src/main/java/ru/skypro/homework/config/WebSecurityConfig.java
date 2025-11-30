@@ -39,7 +39,8 @@ public class WebSecurityConfig {
             "/register",
             "/api-docs/**",
             "/ads",
-            "/ads/image/**",
+            "/ads/image/*",
+            "/users/image/*",
             "/logout"
     };
 

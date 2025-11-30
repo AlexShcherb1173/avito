@@ -2,6 +2,7 @@ package ru.skypro.homework.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.skypro.homework.config.FileStorageConfig;
 import ru.skypro.homework.dto.ads.AdDto;
 import ru.skypro.homework.dto.ads.CreateOrUpdateAdDto;
 import ru.skypro.homework.dto.ads.ExtendedAdDto;
@@ -11,6 +12,7 @@ import ru.skypro.homework.model.AdEntity;
 @RequiredArgsConstructor
 public class AdMapper {
     private final UserMapper userMapper;
+    private final FileStorageConfig fileStorageConfig;
 
     public AdDto toDto(AdEntity entity) {
         if (entity == null) {
@@ -19,10 +21,16 @@ public class AdMapper {
 
         AdDto dto = new AdDto();
         dto.setAuthor(entity.getAuthor().getId());
-        dto.setImage(entity.getImage());
         dto.setPk(entity.getId());
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
+
+        // URL формата /ads/image/{id}
+        if (entity.getImage() != null && !entity.getImage().isEmpty()) {
+            dto.setImage(fileStorageConfig.getBaseUrl() + "/ads/image/" + entity.getId());
+        } else {
+            dto.setImage(null);
+        }
 
         return dto;
     }
@@ -35,9 +43,15 @@ public class AdMapper {
         ExtendedAdDto dto = new ExtendedAdDto();
         dto.setPk(entity.getId());
         dto.setDescription(entity.getDescription());
-        dto.setImage(entity.getImage());
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
+
+        // URL формата /ads/image/{id}
+        if (entity.getImage() != null && !entity.getImage().isEmpty()) {
+            dto.setImage(fileStorageConfig.getBaseUrl() + "/ads/image/" + entity.getId());
+        } else {
+            dto.setImage(null);
+        }
 
         // Данные автора
         if (entity.getAuthor() != null) {

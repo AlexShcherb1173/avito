@@ -32,10 +32,10 @@ public class UserMapper {
             dto.setRole(entity.getRole().name());
         }
 
-        // Формируем URL для аватара
+        // Формируем URL для аватара формата /users/image/{id}
         if (entity.getImage() != null && !entity.getImage().isEmpty()) {
             // URL указывает на эндпоинт текущего пользователя
-            dto.setImage(fileStorageConfig.getBaseUrl() + "/users/me/image");
+            dto.setImage(fileStorageConfig.getBaseUrl() + "/users/image/" + entity.getId());
         } else {
             dto.setImage(null);
         }

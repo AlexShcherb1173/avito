@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -93,13 +94,20 @@ public class AdController {
 
     @Operation(summary = "Получить картинку объявления")
     @GetMapping("/image/{id}")
-    public ResponseEntity<byte[]> getAdImage(@PathVariable Integer id) throws IOException {
-        byte[] image = adService.getAdImage(id);
-        String contentType = adService.getAdImageContentType(id);
+    public ResponseEntity<byte[]> getAdImage(@PathVariable Integer id) {
+        try {
+            byte[] image = adService.getAdImage(id);
+            String contentType = adService.getAdImageContentType(id);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(image);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType(contentType));
+            headers.setCacheControl("max-age=300");
+
+            return new ResponseEntity<>(image, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            log.error("Error loading image for ad: {}", id, e);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     //обновление картинки объявления
