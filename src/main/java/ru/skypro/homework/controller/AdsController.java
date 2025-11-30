@@ -41,7 +41,7 @@ public class AdsController {
     public ResponseEntity<Ads> getAllAds() {
         log.info("Getting all ads");
         Ads ads = adsService.getAllAds();
-        return ResponseEntity.status(HttpStatus.OK).body(ads);
+        return ResponseEntity.ok(ads);
     }
 
     @Operation(
@@ -82,7 +82,7 @@ public class AdsController {
     public ResponseEntity<ExtendedAd> getAds(@PathVariable("id") Integer id) {
         log.info("Getting ad with id: {}", id);
         ExtendedAd extendedAd = adsService.getExtendedAd(id);
-        return ResponseEntity.status(HttpStatus.OK).body(extendedAd);
+        return ResponseEntity.ok(extendedAd);
     }
 
     @Operation(
@@ -98,7 +98,7 @@ public class AdsController {
     public ResponseEntity<Void> removeAd(@PathVariable("id") Integer id, Principal principal) {
         log.info("Removing ad with id: {} by user: {}", id, principal.getName());
         adsService.removeAd(id, principal.getName());
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
@@ -121,7 +121,7 @@ public class AdsController {
                                         Principal principal) {
         log.info("Updating ad with id: {} by user: {}", id, principal.getName());
         Ad ad = adsService.updateAd(id, createOrUpdateAd, principal.getName());
-        return ResponseEntity.status(HttpStatus.OK).body(ad);
+        return ResponseEntity.ok(ad);
     }
 
     @Operation(
@@ -140,17 +140,13 @@ public class AdsController {
     public ResponseEntity<Ads> getAdsMe(Principal principal) {
         log.info("Getting current user's ads for: {}", principal.getName());
         Ads ads = adsService.getAdsByUser(principal.getName());
-        return ResponseEntity.status(HttpStatus.OK).body(ads);
+        return ResponseEntity.ok(ads);
     }
 
     @Operation(
             summary = "Обновление картинки объявления",
             responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "OK",
-                            content = @Content(mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-                    ),
+                    @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not found")

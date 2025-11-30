@@ -14,9 +14,11 @@ public class TestSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
+        http
+                .csrf().disable()
                 .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().permitAll()
+                        .antMatchers("/images/**").permitAll() // Разрешаем доступ к изображениям без аутентификации
+                        .anyRequest().authenticated()
                 )
                 .httpBasic(withDefaults());
         return http.build();

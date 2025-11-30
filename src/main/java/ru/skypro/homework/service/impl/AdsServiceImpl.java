@@ -98,7 +98,7 @@ public class AdsServiceImpl implements AdsService {
         AdEntity adEntity = adRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ad not found with id: " + id));
 
-        if (!adEntity.getAuthor().getId().equals(user.getId())) {
+        if (!user.getRole().equals(Role.ADMIN) && !adEntity.getAuthor().getId().equals(user.getId())) {
             throw new SecurityException("No permission to update this ad");
         }
 
@@ -131,7 +131,7 @@ public class AdsServiceImpl implements AdsService {
         AdEntity adEntity = adRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ad not found with id: " + id));
 
-        if (!adEntity.getAuthor().getId().equals(user.getId())) {
+        if (!user.getRole().equals(Role.ADMIN) && !adEntity.getAuthor().getId().equals(user.getId())) {
             throw new SecurityException("No permission to update this ad");
         }
 
@@ -149,6 +149,20 @@ public class AdsServiceImpl implements AdsService {
     public AdEntity getAdEntity(Integer id) {
         return adRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Ad not found with id: " + id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isAdOwner(Integer adId, String username) {
+        try {
+            AdEntity adEntity = adRepository.findById(adId)
+                    .orElseThrow(() -> new EntityNotFoundException("Ad not found"));
+            UserEntity userEntity = userService.getUserEntity(username);
+            return adEntity.getAuthor().getId().equals(userEntity.getId());
+        } catch (Exception e) {
+            log.warn("Error checking ad ownership: {}", e.getMessage());
+            return false;
+        }
     }
 
     private String saveImage(MultipartFile image) {

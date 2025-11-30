@@ -22,4 +22,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Integer>
     void deleteByIdAndAdId(Integer id, Integer adId);
 
     boolean existsByIdAndAdId(Integer id, Integer adId);
+
+    @Query("SELECT c FROM CommentEntity c WHERE c.author.email = :username")
+    List<CommentEntity> findByAuthorEmail(@Param("username") String username);
 }

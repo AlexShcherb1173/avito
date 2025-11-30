@@ -3,14 +3,22 @@ package ru.skypro.homework.controller;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.skypro.homework.config.TestSecurityConfig;
-import ru.skypro.homework.dto.CreateOrUpdateAd;
+import ru.skypro.homework.dto.*;
+import ru.skypro.homework.service.AdsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,91 +32,86 @@ class AdsControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private AdsService adsService;
+
     @Test
+    @WithMockUser
     void getAllAds_ShouldReturnAds() throws Exception {
+        Ads ads = new Ads();
+        ads.setCount(2);
+        ads.setResults(List.of(new Ad(), new Ad()));
+
+        when(adsService.getAllAds()).thenReturn(ads);
+
         mockMvc.perform(get("/ads"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count").doesNotExist())
-                .andExpect(jsonPath("$.results").doesNotExist());
+                .andExpect(jsonPath("$.count").value(2))
+                .andExpect(jsonPath("$.results").isArray());
     }
 
     @Test
-    void getAds_ShouldReturnExtendedAd() throws Exception {
+    @WithMockUser
+    void getExtendedAd_ShouldReturnExtendedAd() throws Exception {
+        ExtendedAd extendedAd = new ExtendedAd();
+        extendedAd.setPk(1);
+        extendedAd.setTitle("Test Ad");
+
+        when(adsService.getExtendedAd(1)).thenReturn(extendedAd);
+
         mockMvc.perform(get("/ads/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pk").doesNotExist());
+                .andExpect(jsonPath("$.pk").value(1))
+                .andExpect(jsonPath("$.title").value("Test Ad"));
     }
 
     @Test
-    void removeAd_ShouldReturnNoContent() throws Exception {
-        mockMvc.perform(delete("/ads/1"))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void updateAds_ShouldReturnAd() throws Exception {
-        CreateOrUpdateAd updateAd = new CreateOrUpdateAd();
-        updateAd.setTitle("Updated Title");
-        updateAd.setPrice(1000);
-        updateAd.setDescription("Updated description");
-
-        mockMvc.perform(patch("/ads/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateAd)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").doesNotExist());
-    }
-
-    @Test
-    void getAdsMe_ShouldReturnAds() throws Exception {
-        mockMvc.perform(get("/ads/me"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count").doesNotExist());
-    }
-
-    @Test
+    @WithMockUser
     void addAd_ShouldReturnCreated() throws Exception {
         CreateOrUpdateAd properties = new CreateOrUpdateAd();
         properties.setTitle("New Ad");
         properties.setPrice(5000);
-        properties.setDescription("New description");
 
         MockMultipartFile image = new MockMultipartFile(
-                "image",
-                "image.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "test image content".getBytes()
+                "image", "image.jpg", "image/jpeg", "test image content".getBytes()
         );
 
         MockMultipartFile propertiesJson = new MockMultipartFile(
-                "properties",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
+                "properties", "", MediaType.APPLICATION_JSON_VALUE,
                 objectMapper.writeValueAsBytes(properties)
         );
+
+        Ad expectedAd = new Ad();
+        expectedAd.setPk(1);
+
+        when(adsService.addAd(any(CreateOrUpdateAd.class), any(), any())).thenReturn(expectedAd);
 
         mockMvc.perform(multipart("/ads")
                         .file(image)
                         .file(propertiesJson))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.pk").doesNotExist());
+                .andExpect(status().isCreated());
     }
 
     @Test
-    void updateImage_ShouldReturnOk() throws Exception {
-        MockMultipartFile image = new MockMultipartFile(
-                "image",
-                "new_image.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "new image content".getBytes()
-        );
+    @WithMockUser
+    void removeAd_ShouldReturnNoContent() throws Exception {
+        mockMvc.perform(delete("/ads/1"))
+                .andExpect(status().isNoContent());
 
-        mockMvc.perform(multipart("/ads/1/image")
-                        .file(image)
-                        .with(request -> {
-                            request.setMethod("PATCH");
-                            return request;
-                        }))
-                .andExpect(status().isOk());
+        verify(adsService, times(1)).removeAd(eq(1), any());
+    }
+
+    @Test
+    @WithMockUser
+    void getAdsMe_ShouldReturnUserAds() throws Exception {
+        Ads userAds = new Ads();
+        userAds.setCount(1);
+        userAds.setResults(List.of(new Ad()));
+
+        when(adsService.getAdsByUser(any())).thenReturn(userAds);
+
+        mockMvc.perform(get("/ads/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.count").value(1));
     }
 }

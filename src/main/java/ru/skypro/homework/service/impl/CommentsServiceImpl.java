@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Comment;
@@ -95,5 +96,19 @@ public class CommentsServiceImpl implements CommentsService {
         commentMapper.updateEntityFromDto(comment, commentEntity);
         CommentEntity updatedComment = commentRepository.save(commentEntity);
         return commentMapper.toDto(updatedComment);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isCommentOwner(Integer commentId, String username) {
+        try {
+            CommentEntity commentEntity = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+            UserEntity userEntity = userService.getUserEntity(username);
+            return commentEntity.getAuthor().getId().equals(userEntity.getId());
+        } catch (Exception e) {
+            log.warn("Error checking comment ownership: {}", e.getMessage());
+            return false;
+        }
     }
 }

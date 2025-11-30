@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
@@ -47,6 +48,11 @@ public class AuthServiceImpl implements AuthService {
         try {
             UserEntity userEntity = userMapper.toEntity(register);
             userEntity.setPassword(passwordEncoder.encode(register.getPassword()));
+
+            if (register.getRole() == null) {
+                userEntity.setRole(Role.USER);
+            }
+
             userRepository.save(userEntity);
             log.info("User registered successfully: {}", register.getUsername());
             return true;
