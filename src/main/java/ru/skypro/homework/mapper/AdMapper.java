@@ -41,6 +41,6 @@ public interface AdMapper {
     void updateEntityFromDto(CreateOrUpdateAd createOrUpdateAd, @org.mapstruct.MappingTarget AdEntity entity);
 
     default String getImageUrl(String image) {
-        return image != null ? "/images/" + image : null;
+        return image;
     }
 }

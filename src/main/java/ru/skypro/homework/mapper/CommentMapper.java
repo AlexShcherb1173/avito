@@ -30,6 +30,6 @@ public interface CommentMapper {
     void updateEntityFromDto(CreateOrUpdateComment createOrUpdateComment, @org.mapstruct.MappingTarget CommentEntity entity);
 
     default String getImageUrl(String image) {
-        return image != null ? "/images/" + image : null;
+        return image;
     }
 }

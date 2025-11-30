@@ -29,6 +29,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid Register register) {
         log.info("Registration attempt for user: {}", register.getUsername());
+
+        // Логируем полученные данные в контроллере
+        log.debug("CONTROLLER RECEIVED - username: {}, firstName: {}, lastName: {}, phone: {}",
+                register.getUsername(), register.getFirstName(), register.getLastName(), register.getPhone());
+
         boolean success = authService.register(register);
         return success ? ResponseEntity.status(HttpStatus.CREATED).build() : ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }

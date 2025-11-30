@@ -36,6 +36,6 @@ public interface UserMapper {
     User toDto(UserEntity entity);
 
     default String getImageUrl(String image) {
-        return image != null ? "/images/" + image : null;
+        return image;
     }
 }

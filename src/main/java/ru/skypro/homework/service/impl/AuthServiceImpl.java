@@ -54,10 +54,8 @@ public class AuthServiceImpl implements AuthService {
                 userEntity.setRole(Role.USER);
             }
 
-            // Нормализуем телефонный номер перед сохранением
-            if (userEntity.getPhone() != null) {
-                userEntity.setPhone(normalizePhoneNumber(userEntity.getPhone()));
-            }
+            // Нормализуем данные перед сохранением
+            normalizeUserData(userEntity);
 
             userRepository.save(userEntity);
             log.info("User registered successfully: {}", register.getUsername());
@@ -72,21 +70,21 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * Нормализует номер телефона для сохранения в БД
+     * Нормализует данные пользователя для сохранения в БД
      */
-    private String normalizePhoneNumber(String phone) {
-        if (phone == null) {
-            return null;
+    private void normalizeUserData(UserEntity userEntity) {
+        // Обрезаем поля до максимальной длины
+        if (userEntity.getFirstName() != null && userEntity.getFirstName().length() > 16) {
+            userEntity.setFirstName(userEntity.getFirstName().substring(0, 16));
         }
-        // Убираем лишние пробелы и приводим к стандартному формату
-        String normalized = phone.replaceAll("\\s+", " ").trim();
-
-        // Если номер слишком длинный, обрезаем до 20 символов
-        if (normalized.length() > 20) {
-            log.warn("Phone number too long, truncating: {}", phone);
-            normalized = normalized.substring(0, 20);
+        if (userEntity.getLastName() != null && userEntity.getLastName().length() > 16) {
+            userEntity.setLastName(userEntity.getLastName().substring(0, 16));
         }
-
-        return normalized;
+        if (userEntity.getEmail() != null && userEntity.getEmail().length() > 32) {
+            userEntity.setEmail(userEntity.getEmail().substring(0, 32));
+        }
+        if (userEntity.getPhone() != null && userEntity.getPhone().length() > 20) {
+            userEntity.setPhone(userEntity.getPhone().substring(0, 20));
+        }
     }
 }
