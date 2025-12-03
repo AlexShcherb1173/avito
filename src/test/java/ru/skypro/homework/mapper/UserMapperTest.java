@@ -3,6 +3,7 @@ package ru.skypro.homework.mapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.skypro.homework.config.FileStorageConfig;
 import ru.skypro.homework.dto.user.Role;
 import ru.skypro.homework.dto.user.UserDto;
 import ru.skypro.homework.model.UserEntity;
@@ -12,8 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 public class UserMapperTest {
 
-    @Autowired
-    private UserMapper userMapper;
+    private UserMapper userMapper = new UserMapper(new FileStorageConfig());
 
     private static final String TEST_EMAIL = "test@example.com";
 
@@ -40,7 +40,7 @@ public class UserMapperTest {
         assertEquals("Ivanov", dto.getLastName());
         assertEquals("89140001122", dto.getPhone());
         assertEquals("USER", dto.getRole());
-        assertTrue(dto.getImage().contains("/users/"));
+        assertTrue(dto.getImage().contains("/users/image/1"));
     }
 
     @Test

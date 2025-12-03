@@ -46,86 +46,196 @@ class UserIntegrationTest {
         userRepository.deleteAll();
 
         // Создаем тестового пользователя перед каждым тестом
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail(TEST_EMAIL);
-        userEntity.setPassword(passwordEncoder.encode(TEST_PASSWORD));
-        userEntity.setFirstName("Иван");
-        userEntity.setLastName("Иванов");
-        userEntity.setPhone("89140001122");
-        userEntity.setRole(Role.USER);
+        UserEntity testUser = new UserEntity();
+        testUser.setEmail(TEST_EMAIL);
+        testUser.setPassword(passwordEncoder.encode(TEST_PASSWORD));
+        testUser.setFirstName("Иван");
+        testUser.setLastName("Иванов");
+        testUser.setPhone("89140001122");
+        testUser.setRole(Role.USER);
 
-        userRepository.save(userEntity);
+        userRepository.save(testUser);
     }
 
-    //Тест полного потока пользователя: обновление профиля, смена пароля и работа с аватаром
     @Test
     @WithMockUser(username = "test@example.com")
-    void completeUserFlow_UpdateProfilePasswordAndAvatar() throws IOException {
-
-        // 1. Получение пользователя
+    void getUser_ShouldReturnUserInfo() {
+        // When
         UserDto userDto = userService.getUser(TEST_EMAIL);
+
+        // Then
         assertNotNull(userDto);
-        assertEquals((TEST_EMAIL), userDto.getEmail());
+        assertEquals(TEST_EMAIL, userDto.getEmail());
         assertEquals("Иван", userDto.getFirstName());
         assertEquals("Иванов", userDto.getLastName());
+        assertEquals("USER", userDto.getRole());
+    }
 
-        // 2. Обновление профиля
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void updateUser_ShouldUpdateProfileFields() {
+        // Given
         UpdateUserDto updateUserDto = new UpdateUserDto();
         updateUserDto.setFirstName("Петр");
         updateUserDto.setLastName("Петров");
         updateUserDto.setPhone("89141113355");
 
-        UpdateUserDto updatedUserDto = userService.updateUser(updateUserDto, TEST_EMAIL);
-        assertEquals("Петр", updatedUserDto.getFirstName());
-        assertEquals("Петров", updatedUserDto.getLastName());
-        assertEquals("89141113355", updatedUserDto.getPhone());
+        // When
+        UpdateUserDto result = userService.updateUser(updateUserDto, TEST_EMAIL);
 
-        // 3. Обновление пароля
+        // Then
+        assertEquals("Петр", result.getFirstName());
+        assertEquals("Петров", result.getLastName());
+        assertEquals("89141113355", result.getPhone());
+
+        UserEntity updatedUser = userRepository.findByEmail(TEST_EMAIL).orElseThrow();
+        assertEquals("Петр", updatedUser.getFirstName());
+        assertEquals("Петров", updatedUser.getLastName());
+        assertEquals("89141113355", updatedUser.getPhone());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void updatePassword_WithCorrectCurrentPassword_ShouldUpdate() {
+        // Given
         NewPasswordDto newPasswordDto = new NewPasswordDto();
         newPasswordDto.setCurrentPassword(TEST_PASSWORD);
         newPasswordDto.setNewPassword(NEW_PASSWORD);
 
-        boolean passwordResult = userService.updatePassword(newPasswordDto, TEST_EMAIL);
-        assertTrue(passwordResult, "Пароль должен быть успешно обновлен");
+        // When
+        boolean result = userService.updatePassword(newPasswordDto, TEST_EMAIL);
 
-        UserEntity userEntity = userRepository.findByEmail(TEST_EMAIL)
+        // Then
+        assertTrue(result, "Пароль должен быть успешно обновлен");
+
+        UserEntity user = userRepository.findByEmail(TEST_EMAIL)
                 .orElseThrow(() -> new RuntimeException("User not found: " + TEST_EMAIL));
-        assertTrue(passwordEncoder.matches(NEW_PASSWORD, userEntity.getPassword()),
+        assertTrue(passwordEncoder.matches(NEW_PASSWORD, user.getPassword()),
                 "Новый пароль должен быть установлен и закодирован правильно");
-
-        // 4. Загрузка аватара
-        MultipartFile mockImage = new MockMultipartFile(
-                "image",
-                "test.jpg",
-                "image/jpeg",
-                "test image content".getBytes()
-        );
-
-        boolean avatarUpdated = userService.updateUserImage(mockImage, TEST_EMAIL);
-        assertTrue(avatarUpdated, "Аватар должен быть успешно обновлен");
-
-        // 5. Проверка, что аватар загружен и доступен
-        byte[] imageBytes = userService.getUserImage(TEST_EMAIL);
-        assertNotNull(imageBytes, "Байты изображения не должны быть пустыми");
-        assertTrue(imageBytes.length > 0, "Изображение должно содержать контент");
-
-        // 6. Проверка типа контента аватара
-        String contentType = userService.getUserImageContentType(TEST_EMAIL);
-        assertNotNull(contentType, "Тип контента не должен быть null");
-        assertEquals("image/jpeg", contentType);
-
-        // 7. Проверяем, что в DTO появилась ссылка на аватар
-        UserDto userWithAvatar = userService.getUser(TEST_EMAIL);
-        assertNotNull(userWithAvatar.getImage(), "UserDto должен иметь URL-адрес изображения");
-        assertTrue(userWithAvatar.getImage().contains("/users/"),
-                "URL аватара должен содержать /users/");
     }
 
     @Test
-    @WithMockUser(username = "test@example.com")
-    void getUserImage_WhenNoImage_ShouldThrowException() {
-        // Пользователь создается без аватара в @BeforeEach
-        assertThrows(IOException.class, () -> userService.getUserImage(TEST_EMAIL),
-                "Должен вызывать исключение IOException, когда у пользователя нет изображения");
+    @WithMockUser(username = TEST_EMAIL)
+    void updatePassword_WithIncorrectCurrentPassword_ShouldReturnFalse() {
+        // Given
+        NewPasswordDto newPasswordDto = new NewPasswordDto();
+        newPasswordDto.setCurrentPassword("wrongPassword");
+        newPasswordDto.setNewPassword(NEW_PASSWORD);
+
+        // When
+        boolean result = userService.updatePassword(newPasswordDto, TEST_EMAIL);
+
+        // Then
+        assertFalse(result);
     }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void updateUserImage_ShouldSaveImage() throws IOException {
+        // Given
+        MultipartFile mockImage = getMockImage();
+
+        // When
+        boolean result = userService.updateUserImage(mockImage, TEST_EMAIL);
+
+        // Then
+        assertTrue(result);
+
+        UserEntity user = userRepository.findByEmail(TEST_EMAIL).orElseThrow();
+        assertNotNull(user.getImage());
+        assertTrue(user.getImage().startsWith("avatar_"));
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void getUserImageById_WhenUserHasImage_ShouldReturnImage() throws IOException {
+        // Given
+        MultipartFile mockImage = getMockImage();
+
+        userService.updateUserImage(mockImage, TEST_EMAIL);
+        UserEntity user = userRepository.findByEmail(TEST_EMAIL).orElseThrow();
+
+        // When
+        byte[] result = userService.getUserImageById(user.getId());
+
+        // Then
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void getUserImageById_WhenUserHasNoImage_ShouldThrowException() {
+        // Given - пользователь без изображения
+        UserEntity user = userRepository.findByEmail(TEST_EMAIL).orElseThrow();
+
+        // When & Then
+        assertThrows(IOException.class, () ->
+                userService.getUserImageById(user.getId())
+        );
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void getUserImageContentTypeById_ShouldReturnCorrectType() throws IOException {
+        // Given
+        MultipartFile mockImage = getMockImage();
+
+        userService.updateUserImage(mockImage, TEST_EMAIL);
+        UserEntity user = userRepository.findByEmail(TEST_EMAIL).orElseThrow();
+
+        // When
+        String contentType = userService.getUserImageContentTypeById(user.getId());
+
+        // Then
+        assertEquals("image/jpeg", contentType);
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void deleteUserImage_ShouldRemoveImage() throws IOException {
+        // Given
+        MultipartFile mockImage = getMockImage();
+
+        userService.updateUserImage(mockImage, TEST_EMAIL);
+
+        UserEntity userBefore = userRepository.findByEmail(TEST_EMAIL).orElseThrow();
+        assertNotNull(userBefore.getImage());
+
+        // When
+        boolean result = userService.deleteUserImage(TEST_EMAIL);
+
+        // Then
+        assertTrue(result);
+
+        UserEntity userAfter = userRepository.findByEmail(TEST_EMAIL).orElseThrow();
+        assertNull(userAfter.getImage());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void getUserDto_AfterImageUpload_ShouldContainImageUrl() throws IOException {
+        // Given
+        MultipartFile mockImage = getMockImage();
+
+        userService.updateUserImage(mockImage, TEST_EMAIL);
+
+        // When
+        UserDto userDto = userService.getUser(TEST_EMAIL);
+
+        // Then
+        assertNotNull(userDto.getImage());
+        assertTrue(userDto.getImage().contains("/users/image/"));
+    }
+
+    private MultipartFile getMockImage(){
+        byte[] imageContent = "test image content".getBytes();
+        return new MockMultipartFile(
+                "image",
+                "test.jpg",
+                "image/jpeg",
+                imageContent
+        );
+    }
+
 }

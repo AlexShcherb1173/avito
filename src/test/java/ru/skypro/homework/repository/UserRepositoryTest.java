@@ -25,8 +25,8 @@ class UserRepositoryTest {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(TEST_EMAIL);
         userEntity.setPassword("password");
-        userEntity.setFirstName("Иван");
-        userEntity.setLastName("Иванов");
+        userEntity.setFirstName("Ivan");
+        userEntity.setLastName("Ivanov");
         userEntity.setPhone("89140001122");
         userEntity.setRole(Role.USER);
 
@@ -38,7 +38,7 @@ class UserRepositoryTest {
         // Then
         assertTrue(foundUser.isPresent());
         assertEquals(foundUser.get().getEmail(), TEST_EMAIL);
-        assertEquals(foundUser.get().getFirstName(), "Иван");
+        assertEquals(foundUser.get().getFirstName(), "Ivan");
     }
 
     @Test
