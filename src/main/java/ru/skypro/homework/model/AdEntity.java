@@ -26,7 +26,7 @@ public class AdEntity {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
+    @Column
     private String image;
 
     @ManyToOne(fetch = FetchType.LAZY)
