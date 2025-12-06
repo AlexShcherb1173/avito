@@ -56,4 +56,20 @@ public class ImageServiceImplTest {
         assertTrue(Files.exists(tempDir.resolve("users").resolve(filename)));
     }
 
+    @Test
+    void getImage_ExistingFile_ShouldReturnBytes() throws IOException {
+        // Given
+        String filename = "test.jpg";
+        byte[] content = "image data".getBytes();
+
+        Path userDir = tempDir.resolve("users");
+        Files.createDirectories(userDir);
+        Files.write(userDir.resolve(filename), content);
+
+        // When
+        byte[] result = imageService.getImage(filename, "users");
+
+        // Then
+        assertArrayEquals(content, result);
+    }
 }

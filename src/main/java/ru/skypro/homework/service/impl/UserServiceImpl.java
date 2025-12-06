@@ -138,37 +138,37 @@ public class UserServiceImpl implements UserService {
         return deleted;
     }
 
-//    private void validateImageFile(MultipartFile file) {
-//        if (file.isEmpty()) {
-//            throw new IllegalArgumentException("Image file is empty");
-//        }
-//
-//        //проверка размера
-//        if (file.getSize() > fileStorageConfig.getAvatarMaxSize()) {
-//            throw new IllegalArgumentException("File size exceeds maximum allowed size: " +
-//                    fileStorageConfig.getAvatarMaxSize() + " bytes");
-//        }
-//
-//        //проверка типа содержимого
-//        String contentType = file.getContentType();
-//        if (contentType == null || !Arrays.asList(fileStorageConfig.getAvatarAllowedTypes())
-//                .contains(contentType)) {
-//            throw new IllegalArgumentException("Invalid file type. Allowed types: " +
-//                    Arrays.toString(fileStorageConfig.getAvatarAllowedTypes()));
-//        }
-//    }
+    private void validateImageFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Image file is empty");
+        }
 
-//    private String generateFileName(String extension){
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
-//        String timestamp = LocalDateTime.now().format(formatter);
-//
-//        return "avatar_" + timestamp + (extension != null ? extension : "");
-//    }
+        //проверка размера
+        if (file.getSize() > fileStorageConfig.getAvatarMaxSize()) {
+            throw new IllegalArgumentException("File size exceeds maximum allowed size: " +
+                    fileStorageConfig.getAvatarMaxSize() + " bytes");
+        }
 
-//    private String getFileExtension(String fileName) {
-//        if (fileName == null || fileName.lastIndexOf(".") == -1) {
-//            return ".jpg";  //расширение по умолчанию
-//        }
-//        return fileName.substring(fileName.lastIndexOf("."));
-//    }
+        //проверка типа содержимого
+        String contentType = file.getContentType();
+        if (contentType == null || !Arrays.asList(fileStorageConfig.getAvatarAllowedTypes())
+                .contains(contentType)) {
+            throw new IllegalArgumentException("Invalid file type. Allowed types: " +
+                    Arrays.toString(fileStorageConfig.getAvatarAllowedTypes()));
+        }
+    }
+
+    private String generateFileName(String extension){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
+        String timestamp = LocalDateTime.now().format(formatter);
+
+        return "avatar_" + timestamp + (extension != null ? extension : "");
+    }
+
+    private String getFileExtension(String fileName) {
+        if (fileName == null || fileName.lastIndexOf(".") == -1) {
+            return ".jpg";  //расширение по умолчанию
+        }
+        return fileName.substring(fileName.lastIndexOf("."));
+    }
 }
