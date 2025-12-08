@@ -8,6 +8,10 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+/**
+ * DTO для создания или обновления объявления.
+ * Содержит основные данные объявления с валидацией полей.
+ */
 @Data
 @Schema(description = "Создание или обновление объявления")
 public class CreateOrUpdateAd {

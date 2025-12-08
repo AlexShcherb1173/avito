@@ -6,6 +6,10 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+/**
+ * DTO для смены пароля пользователя.
+ * Содержит текущий и новый пароль для проверки и обновления.
+ */
 @Data
 @Schema(description = "Обновление пароля")
 public class NewPassword {

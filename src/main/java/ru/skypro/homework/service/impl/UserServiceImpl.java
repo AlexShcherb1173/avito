@@ -15,6 +15,9 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
+/**
+ * Реализация {@link UserService} для управления пользователями.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -24,8 +27,11 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-    private final ImageService imageService; // Добавлен сервис изображений
+    private final ImageService imageService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public User getCurrentUser(String username) {
@@ -35,13 +41,15 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(userEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User updateUser(String username, UpdateUser updateUser) {
         log.info("Updating user: {}", username);
         UserEntity userEntity = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Обновляем только те поля, которые пришли в UpdateUser
         if (updateUser.getFirstName() != null) {
             userEntity.setFirstName(updateUser.getFirstName());
         }
@@ -49,7 +57,6 @@ public class UserServiceImpl implements UserService {
             userEntity.setLastName(updateUser.getLastName());
         }
         if (updateUser.getPhone() != null) {
-            // Нормализуем телефонный номер перед сохранением
             userEntity.setPhone(normalizePhoneNumber(updateUser.getPhone()));
         }
 
@@ -57,14 +64,20 @@ public class UserServiceImpl implements UserService {
         return userMapper.toDto(savedEntity);
     }
 
+    /**
+     * Нормализует номер телефона для хранения в базе данных.
+     * Удаляет лишние пробелы и обрезает до максимальной длины.
+     *
+     * @param phone исходный номер телефона
+     * @return нормализованный номер телефона
+     */
     private String normalizePhoneNumber(String phone) {
         if (phone == null) {
             return null;
         }
-        // Убираем лишние пробелы и приводим к стандартному формату
+
         String normalized = phone.replaceAll("\\s+", " ").trim();
 
-        // Если номер слишком длинный, обрезаем до 20 символов
         if (normalized.length() > 20) {
             log.warn("Phone number too long, truncating: {}", phone);
             normalized = normalized.substring(0, 20);
@@ -73,23 +86,27 @@ public class UserServiceImpl implements UserService {
         return normalized;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateUserImage(String username, MultipartFile image) {
         log.info("Updating user image: {}", username);
         UserEntity userEntity = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Удаляем старое изображение если есть
         if (userEntity.getImage() != null) {
             imageService.deleteImage(userEntity.getImage());
         }
 
-        // Сохраняем новое изображение
         String newImagePath = imageService.saveImage(image);
         userEntity.setImage(newImagePath);
         userRepository.save(userEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updatePassword(String username, String currentPassword, String newPassword) {
         log.info("Updating password for user: {}", username);
@@ -104,6 +121,9 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public UserEntity getUserEntity(String username) {

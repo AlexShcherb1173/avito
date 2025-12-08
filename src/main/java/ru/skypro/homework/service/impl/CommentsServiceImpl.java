@@ -22,6 +22,9 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация {@link CommentsService} для управления комментариями.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -33,6 +36,9 @@ public class CommentsServiceImpl implements CommentsService {
     private final UserService userService;
     private final AdsService adsService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public Comments getComments(Integer adId) {
@@ -49,6 +55,9 @@ public class CommentsServiceImpl implements CommentsService {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Comment addComment(Integer adId, CreateOrUpdateComment comment, String username) {
         log.info("Adding comment to ad with id: {} by user: {}", adId, username);
@@ -65,7 +74,11 @@ public class CommentsServiceImpl implements CommentsService {
         return commentMapper.toDto(savedComment);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @PreAuthorize("hasRole('ADMIN') or @commentsServiceImpl.isCommentOwner(#commentId, authentication.name)")
     public void deleteComment(Integer adId, Integer commentId, String username) {
         log.info("Deleting comment with id: {} from ad with id: {} by user: {}", commentId, adId, username);
 
@@ -81,7 +94,11 @@ public class CommentsServiceImpl implements CommentsService {
         commentRepository.delete(commentEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @PreAuthorize("hasRole('ADMIN') or @commentsServiceImpl.isCommentOwner(#commentId, authentication.name)")
     public Comment updateComment(Integer adId, Integer commentId, CreateOrUpdateComment comment, String username) {
         log.info("Updating comment with id: {} for ad with id: {} by user: {}", commentId, adId, username);
 
@@ -98,6 +115,9 @@ public class CommentsServiceImpl implements CommentsService {
         return commentMapper.toDto(updatedComment);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public boolean isCommentOwner(Integer commentId, String username) {

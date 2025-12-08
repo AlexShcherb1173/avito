@@ -7,6 +7,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+/**
+ * DTO для обновления данных пользователя.
+ * Используется при редактировании профиля пользователя.
+ * Все поля обязательны для заполнения и проходят валидацию.
+ */
 @Data
 @Schema(description = "Обновление данных пользователя")
 public class UpdateUser {

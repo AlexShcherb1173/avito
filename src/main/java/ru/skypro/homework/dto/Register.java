@@ -5,6 +5,10 @@ import lombok.Data;
 
 import javax.validation.constraints.Size;
 
+/**
+ * DTO для регистрации нового пользователя.
+ * Содержит данные, необходимые для создания учетной записи пользователя.
+ */
 @Data
 @Schema(description = "Регистрация пользователя")
 public class Register {

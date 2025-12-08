@@ -8,9 +8,19 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Конфигурация Cross-Origin Resource Sharing (CORS).
+ * Настраивает политику CORS для взаимодействия с фронтенд-приложением.
+ */
 @Configuration
 public class CorsConfig {
 
+    /**
+     * Создает источник конфигурации CORS.
+     * Разрешает запросы с определенных origins и настраивает разрешенные методы и заголовки.
+     *
+     * @return источник конфигурации CORS
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -21,7 +31,7 @@ public class CorsConfig {
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setExposedHeaders(List.of("Authorization", "Content-Type", "Cache-Control", "ETag"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

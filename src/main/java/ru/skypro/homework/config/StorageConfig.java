@@ -8,12 +8,22 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+/**
+ * Конфигурация хранилища для изображений.
+ * Создает необходимые директории для хранения файлов изображений.
+ */
 @Configuration
 public class StorageConfig {
 
     @Value("${app.image.storage-path:images/}")
     private String storagePath;
 
+    /**
+     * Создает директорию для хранения изображений при запуске приложения.
+     * Если директория не существует, она будет создана рекурсивно.
+     *
+     * @throws RuntimeException если не удается создать директорию
+     */
     @Bean
     public void createStorageDirectory() {
         try {

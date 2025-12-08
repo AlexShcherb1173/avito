@@ -6,6 +6,10 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+/**
+ * DTO для аутентификации пользователя.
+ * Содержит учетные данные для входа в систему.
+ */
 @Data
 @Schema(description = "Данные для авторизации")
 public class Login {

@@ -18,6 +18,9 @@ import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Реализация {@link AdsService} для управления объявлениями.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -27,8 +30,11 @@ public class AdsServiceImpl implements AdsService {
     private final AdRepository adRepository;
     private final AdMapper adMapper;
     private final UserService userService;
-    private final ImageService imageService; // Добавлен сервис изображений
+    private final ImageService imageService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public Ads getAllAds() {
@@ -44,6 +50,9 @@ public class AdsServiceImpl implements AdsService {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Ad addAd(CreateOrUpdateAd properties, MultipartFile image, String username) {
         log.info("Adding new ad for user: {}", username);
@@ -61,6 +70,9 @@ public class AdsServiceImpl implements AdsService {
         return adMapper.toDto(savedAd);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public ExtendedAd getExtendedAd(Integer id) {
@@ -70,6 +82,9 @@ public class AdsServiceImpl implements AdsService {
         return adMapper.toExtendedAd(adEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void removeAd(Integer id, String username) {
         log.info("Removing ad with id: {} by user: {}", id, username);
@@ -88,6 +103,9 @@ public class AdsServiceImpl implements AdsService {
         adRepository.delete(adEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Ad updateAd(Integer id, CreateOrUpdateAd updateAd, String username) {
         log.info("Updating ad with id: {} by user: {}", id, username);
@@ -104,6 +122,9 @@ public class AdsServiceImpl implements AdsService {
         return adMapper.toDto(updatedAd);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public Ads getAdsByUser(String username) {
@@ -121,6 +142,9 @@ public class AdsServiceImpl implements AdsService {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void updateAdImage(Integer id, MultipartFile image, String username) {
         log.info("Updating image for ad with id: {} by user: {}", id, username);
@@ -141,6 +165,9 @@ public class AdsServiceImpl implements AdsService {
         adRepository.save(adEntity);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] getAdImage(Integer id) {
         log.info("Getting image for ad with id: {}", id);
@@ -154,6 +181,9 @@ public class AdsServiceImpl implements AdsService {
         return imageService.getImage(adEntity.getImage());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public AdEntity getAdEntity(Integer id) {
@@ -161,6 +191,9 @@ public class AdsServiceImpl implements AdsService {
                 .orElseThrow(() -> new EntityNotFoundException("Ad not found with id: " + id));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @Transactional(readOnly = true)
     public boolean isAdOwner(Integer adId, String username) {
@@ -174,6 +207,4 @@ public class AdsServiceImpl implements AdsService {
             return false;
         }
     }
-
-
 }

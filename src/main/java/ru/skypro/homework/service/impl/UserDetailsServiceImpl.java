@@ -16,6 +16,10 @@ import javax.persistence.EntityNotFoundException;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Реализация {@link UserDetailsService} для Spring Security.
+ * Загружает данные пользователя из базы данных для аутентификации.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -24,6 +28,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    /**
+     * Загружает пользователя по имени пользователя (email).
+     * Преобразует сущность {@link UserEntity} в объект Spring Security {@link UserDetails}.
+     *
+     * @param username email пользователя
+     * @return объект {@link UserDetails} для Spring Security
+     * @throws UsernameNotFoundException если пользователь с указанным email не найден
+     */
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -39,6 +51,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         );
     }
 
+    /**
+     * Преобразует роль пользователя в коллекцию прав доступа Spring Security.
+     *
+     * @param userEntity сущность пользователя
+     * @return коллекция прав доступа
+     */
     private Collection<? extends GrantedAuthority> getAuthorities(UserEntity userEntity) {
         return Collections.singletonList(
                 new SimpleGrantedAuthority("ROLE_" + userEntity.getRole().name())

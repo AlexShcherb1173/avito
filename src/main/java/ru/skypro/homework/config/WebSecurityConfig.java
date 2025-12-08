@@ -13,6 +13,10 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * Конфигурация безопасности приложения.
+ * Настраивает Spring Security для обработки аутентификации и авторизации.
+ */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
@@ -26,9 +30,18 @@ public class WebSecurityConfig {
             "/login",
             "/register",
             "/images/**",
-            "/ads" // Разрешаем доступ к списку объявлений без аутентификации
+            "/ads"
     };
 
+    /**
+     * Настраивает цепочку фильтров безопасности.
+     * Конфигурирует правила доступа, CORS, аутентификацию и управление сессиями.
+     *
+     * @param http объект HttpSecurity для настройки
+     * @param userDetailsService сервис для загрузки пользователей
+     * @return настроенная цепочка фильтров безопасности
+     * @throws Exception при ошибках конфигурации
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, UserDetailsService userDetailsService) throws Exception {
         http
@@ -48,6 +61,12 @@ public class WebSecurityConfig {
         return http.build();
     }
 
+    /**
+     * Создает кодировщик паролей.
+     * Использует алгоритм bcrypt для безопасного хранения паролей.
+     *
+     * @return экземпляр PasswordEncoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

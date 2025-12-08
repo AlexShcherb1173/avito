@@ -4,6 +4,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import java.util.List;
 
+/**
+ * DTO для списка объявлений.
+ * Содержит общее количество объявлений и их список.
+ */
 @Data
 @Schema(description = "Список объявлений")
 public class Ads {

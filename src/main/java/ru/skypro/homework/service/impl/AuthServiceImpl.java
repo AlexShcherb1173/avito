@@ -14,6 +14,9 @@ import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
+/**
+ * Реализация {@link AuthService} для аутентификации и регистрации.
+ */
 @Slf4j
 @Service
 @Transactional
@@ -24,6 +27,9 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean login(String username, String password) {
         log.info("Attempting login for user: {}", username);
@@ -37,6 +43,9 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean register(Register register) {
         log.info("Attempting registration for user: {}", register.getUsername());
@@ -54,7 +63,6 @@ public class AuthServiceImpl implements AuthService {
                 userEntity.setRole(Role.USER);
             }
 
-            // Нормализуем данные перед сохранением
             normalizeUserData(userEntity);
 
             userRepository.save(userEntity);
@@ -70,10 +78,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     /**
-     * Нормализует данные пользователя для сохранения в БД
+     * Нормализует данные пользователя для сохранения в БД.
+     * Обрезает поля до максимальной длины, определенной в схеме базы данных.
+     *
+     * @param userEntity сущность пользователя для нормализации
      */
     private void normalizeUserData(UserEntity userEntity) {
-        // Обрезаем поля до максимальной длины
         if (userEntity.getFirstName() != null && userEntity.getFirstName().length() > 16) {
             userEntity.setFirstName(userEntity.getFirstName().substring(0, 16));
         }

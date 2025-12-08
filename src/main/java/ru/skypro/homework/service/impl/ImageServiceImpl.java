@@ -13,6 +13,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+/**
+ * Реализация {@link ImageService} для работы с файлами изображений.
+ * Сохраняет изображения в локальной файловой системе.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,9 @@ public class ImageServiceImpl implements ImageService {
     @Value("${app.image.storage-path:images/}")
     private String imageStoragePath;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String saveImage(MultipartFile image) {
         try {
@@ -41,6 +48,9 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] getImage(String filename) {
         try {
@@ -49,13 +59,43 @@ public class ImageServiceImpl implements ImageService {
                 log.warn("Image not found: {}", filename);
                 throw new RuntimeException("Image not found: " + filename);
             }
-            return Files.readAllBytes(path);
+
+            // Читаем файл
+            byte[] imageBytes = Files.readAllBytes(path);
+
+            // Определяем Content-Type по расширению файла
+            String contentType = determineContentType(filename);
+            log.debug("Image loaded: {}, size: {} bytes, content-type: {}",
+                    filename, imageBytes.length, contentType);
+
+            return imageBytes;
         } catch (IOException e) {
             log.error("Failed to read image: {}", filename, e);
             throw new RuntimeException("Failed to read image", e);
         }
     }
 
+    /**
+     * Определяет Content-Type по расширению файла.
+     *
+     * @param filename имя файла
+     * @return соответствующий MIME-тип
+     */
+    private String determineContentType(String filename) {
+        if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (filename.endsWith(".png")) {
+            return "image/png";
+        } else if (filename.endsWith(".gif")) {
+            return "image/gif";
+        } else {
+            return "application/octet-stream";
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void deleteImage(String filename) {
         try {
