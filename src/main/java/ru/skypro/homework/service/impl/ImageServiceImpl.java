@@ -47,6 +47,7 @@ public class ImageServiceImpl implements ImageService {
     public byte[] getImage(String filename, String subDirectory) throws IOException {
         Path directory = Paths.get(fileStorageConfig.getUploadDir(), subDirectory).toAbsolutePath().normalize();
         Path filePath = directory.resolve(filename).normalize();
+        log.info("filePath: {}", filePath);
 
         if (!Files.exists(filePath)) {
             throw new FileNotFoundException("Image not found: " + filePath);

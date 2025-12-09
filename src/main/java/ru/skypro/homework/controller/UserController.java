@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.user.Login;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
@@ -29,6 +30,12 @@ import java.io.IOException;
 public class UserController {
 
     private final UserService userService;
+
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody Login login) {
+//        // Spring Security делает аутентификацию
+//        return ResponseEntity.ok().build();
+//    }
 
     @Operation(summary = "Обновление пароля")
     @ApiResponse(responseCode = "200", description = "Пароль успешно изменен")
@@ -106,7 +113,10 @@ public class UserController {
             headers.setContentType(MediaType.parseMediaType(contentType));
             headers.setCacheControl("max-age=300");
 
-            return new ResponseEntity<>(imageBytes, headers, HttpStatus.OK);
+            return ResponseEntity
+                    .ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(imageBytes);
         } catch (IOException e) {
             log.error("Error loading image for User ID: {}", userId, e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

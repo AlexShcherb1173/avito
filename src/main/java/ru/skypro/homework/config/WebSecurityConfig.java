@@ -51,7 +51,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(authorization ->
                         authorization
                         .mvcMatchers(AUTH_WHITELIST).permitAll()                // Белый список
-                        .mvcMatchers("/users/*/image").permitAll()  // Разрешаем доступ к изображениям пользователей без аутентификации
+                        .mvcMatchers("/users/image/*").permitAll()  // Разрешаем доступ к изображениям пользователей без аутентификации
                         .anyRequest().authenticated()                           // Все остальное - под авторизацией
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

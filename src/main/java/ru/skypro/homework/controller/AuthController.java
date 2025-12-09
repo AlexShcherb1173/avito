@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import liquibase.pro.packaged.O;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.dto.user.Login;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.service.AuthService;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RestController
@@ -38,6 +41,20 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request,
+                                   HttpServletRequest httpRequest) {
+        // Spring Security обработает аутентификацию автоматически
+        // Этот endpoint просто для фронтенда
+        return ResponseEntity.ok().build();
+    }
+
+    @Data
+    public static class LoginRequest {
+        private String username;
+        private String password;
     }
 
     @Operation(summary = "Выход из системы")

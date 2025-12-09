@@ -46,17 +46,10 @@ public class AdController {
 
     @Operation(summary = "Добавление объявления")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdDto> addAd(@RequestParam("title") String title,
-                                       @RequestParam("price") Integer price,
-                                       @RequestParam("description") String description,
+    public ResponseEntity<AdDto> addAd(@RequestPart("properties") CreateOrUpdateAdDto properties,
                                        @RequestPart("image") MultipartFile image,
                                        Authentication authentication) throws IOException {
         String username = authentication.getName();
-
-        CreateOrUpdateAdDto properties = new CreateOrUpdateAdDto();
-        properties.setTitle(title);
-        properties.setPrice(price);
-        properties.setDescription(description);
 
         try {
             AdDto adDto = adService.createAd(properties, username, image);
