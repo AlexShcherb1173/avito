@@ -5,13 +5,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.service.ImageService;
 
 import java.util.Optional;
 
@@ -30,6 +33,9 @@ class UserServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private ImageService imageService;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -103,18 +109,31 @@ class UserServiceImplTest {
     @Test
     void updateUserImage_ShouldUpdateUserImage() {
         String username = "test@example.com";
-        String imagePath = "new-avatar.jpg";
 
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(username);
         userEntity.setImage("old-avatar.jpg");
 
+        // Создаем Mock MultipartFile
+        MultipartFile mockImage = new MockMultipartFile(
+                "image",
+                "new-avatar.jpg",
+                "image/jpeg",
+                "test image content".getBytes()
+        );
+
         when(userRepository.findByEmail(username)).thenReturn(Optional.of(userEntity));
+        when(imageService.saveImage(mockImage)).thenReturn("new-avatar.jpg");
         when(userRepository.save(userEntity)).thenReturn(userEntity);
 
-        userService.updateUserImage(username, imagePath);
+        userService.updateUserImage(username, mockImage);
 
-        assertEquals(imagePath, userEntity.getImage());
+        // Проверяем, что deleteImage был вызван для старого изображения
+        verify(imageService, times(1)).deleteImage("old-avatar.jpg");
+        // Проверяем, что saveImage был вызван для нового изображения
+        verify(imageService, times(1)).saveImage(mockImage);
+        // Проверяем, что путь к изображению был обновлен
+        assertEquals("new-avatar.jpg", userEntity.getImage());
         verify(userRepository, times(1)).save(userEntity);
     }
 
