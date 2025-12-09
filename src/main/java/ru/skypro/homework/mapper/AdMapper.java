@@ -35,7 +35,7 @@ public interface AdMapper {
      * @return базовое DTO объявления
      */
     @Mapping(target = "author", source = "entity.author.id")
-    @Mapping(target = "image", expression = "java(getImageUrl(entity.getImage()))")
+    @Mapping(target = "image", source = "image")
     @Mapping(target = "pk", source = "entity.id")
     @Mapping(target = "price", source = "entity.price")
     @Mapping(target = "title", source = "entity.title")
@@ -53,7 +53,7 @@ public interface AdMapper {
     @Mapping(target = "authorLastName", source = "entity.author.lastName")
     @Mapping(target = "description", source = "entity.description")
     @Mapping(target = "email", source = "entity.author.email")
-    @Mapping(target = "image", expression = "java(getImageUrl(entity.getImage()))")
+    @Mapping(target = "image", source = "image")
     @Mapping(target = "phone", source = "entity.author.phone")
     @Mapping(target = "price", source = "entity.price")
     @Mapping(target = "title", source = "entity.title")
@@ -79,12 +79,12 @@ public interface AdMapper {
      * @param image имя файла изображения
      * @return строка с URL изображения
      */
-    default String getImageUrl(String image) {
-        if (image == null || image.isEmpty()) {
-            return null;
-        }
-        // Добавляем временную метку для предотвращения кэширования
-        long timestamp = System.currentTimeMillis();
-        return "/images/" + image + "?v=" + timestamp;
-    }
+//    default String getImageUrl(String image) {
+//        if (image == null || image.isEmpty()) {
+//            return null;
+//        }
+//        // Добавляем временную метку для предотвращения кэширования
+//        long timestamp = System.currentTimeMillis();
+//        return "/images/" + image + "?v=" + timestamp;
+//    }
 }

@@ -57,7 +57,7 @@ public interface UserMapper {
     @Mapping(target = "lastName", source = "lastName")
     @Mapping(target = "phone", source = "phone")
     @Mapping(target = "role", source = "role")
-    @Mapping(target = "image", expression = "java(getImageUrl(entity.getImage()))")
+    @Mapping(target = "image", source = "image")
     User toDto(UserEntity entity);
 
     /**
@@ -67,12 +67,12 @@ public interface UserMapper {
      * @param image имя файла изображения
      * @return строка с URL изображения
      */
-    default String getImageUrl(String image) {
-        if (image == null || image.isEmpty()) {
-            return null;
-        }
-        // Добавляем временную метку для предотвращения кэширования
-        long timestamp = System.currentTimeMillis();
-        return "/images/" + image + "?v=" + timestamp;
-    }
+//    default String getImageUrl(String image) {
+//        if (image == null || image.isEmpty()) {
+//            return null;
+//        }
+//        // Добавляем временную метку для предотвращения кэширования
+//        long timestamp = System.currentTimeMillis();
+//        return "/images/" + image + "?v=" + timestamp;
+//    }
 }
