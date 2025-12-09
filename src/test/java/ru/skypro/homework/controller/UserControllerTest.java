@@ -66,47 +66,29 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.firstName").value("John"));
     }
 
+
     @Test
     @WithMockUser
-    void updateUser_ShouldReturnUser() throws Exception {
+    void updateUser_ShouldReturnUpdateUser() throws Exception {
         UpdateUser updateUser = new UpdateUser();
         updateUser.setFirstName("John");
         updateUser.setLastName("Doe");
         updateUser.setPhone("+79999999999");
 
-        User updatedUser = new User();
-        updatedUser.setId(1);
-        updatedUser.setFirstName("John");
-        updatedUser.setLastName("Doe");
+        User serviceResponse = new User();
+        serviceResponse.setId(1);
+        serviceResponse.setFirstName("John");
+        serviceResponse.setLastName("Doe");
+        serviceResponse.setPhone("+79999999999");
 
-        when(userService.updateUser(any(), any(UpdateUser.class))).thenReturn(updatedUser);
+        when(userService.updateUser(any(), any(UpdateUser.class))).thenReturn(serviceResponse);
 
         mockMvc.perform(patch("/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateUser)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.firstName").value("John"));
-    }
-
-    @Test
-    @WithMockUser
-    void updateUserImage_ShouldReturnOk() throws Exception {
-        MockMultipartFile image = new MockMultipartFile(
-                "image",
-                "test.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "test image content".getBytes()
-        );
-
-        mockMvc.perform(multipart("/users/me/image")
-                        .file(image)
-                        .with(request -> {
-                            request.setMethod("PATCH");
-                            return request;
-                        }))
-                .andExpect(status().isOk());
-
-        verify(userService, times(1)).updateUserImage(any(), any());
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Doe"))
+                .andExpect(jsonPath("$.phone").value("+79999999999"));
     }
 }

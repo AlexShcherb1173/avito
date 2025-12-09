@@ -85,25 +85,39 @@ class UserServiceImplTest {
         existingUser.setFirstName("John");
         existingUser.setLastName("Doe");
 
-        UserEntity updatedUser = new UserEntity();
-        updatedUser.setEmail(username);
-        updatedUser.setFirstName("Jane");
-        updatedUser.setLastName("Smith");
+        UserEntity expectedUpdatedUser = new UserEntity();
+        expectedUpdatedUser.setEmail(username);
+        expectedUpdatedUser.setFirstName("Jane");
+        expectedUpdatedUser.setLastName("Smith");
+        expectedUpdatedUser.setPhone("+78888888888");
 
-        User expectedUser = new User();
-        expectedUser.setEmail(username);
-        expectedUser.setFirstName("Jane");
+        User expectedUserDto = new User();
+        expectedUserDto.setEmail(username);
+        expectedUserDto.setFirstName("Jane");
+        expectedUserDto.setLastName("Smith");
+        expectedUserDto.setPhone("+78888888888");
 
         when(userRepository.findByEmail(username)).thenReturn(Optional.of(existingUser));
-        when(userRepository.save(any(UserEntity.class))).thenReturn(updatedUser);
-        when(userMapper.toDto(updatedUser)).thenReturn(expectedUser);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(expectedUpdatedUser);
+        when(userMapper.toDto(expectedUpdatedUser)).thenReturn(expectedUserDto);
 
         User result = userService.updateUser(username, updateUser);
 
         assertNotNull(result);
         assertEquals("Jane", result.getFirstName());
-        verify(userMapper, times(1)).updateEntityFromDto(updateUser, existingUser);
+        assertEquals("Smith", result.getLastName());
+        assertEquals("+78888888888", result.getPhone());
+
+        // УБРАТЬ эту проверку - маппер не используется для обновления
+        // verify(userMapper, times(1)).updateEntityFromDto(updateUser, existingUser);
+
+        // Вместо этого проверить, что поля были обновлены
         verify(userRepository, times(1)).save(existingUser);
+
+        // Проверить, что поля установлены
+        assertEquals("Jane", existingUser.getFirstName());
+        assertEquals("Smith", existingUser.getLastName());
+        assertEquals("+78888888888", existingUser.getPhone());
     }
 
     @Test
