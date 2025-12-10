@@ -60,10 +60,8 @@ public class ImageServiceImpl implements ImageService {
                 throw new RuntimeException("Image not found: " + filename);
             }
 
-            // Читаем файл
             byte[] imageBytes = Files.readAllBytes(path);
 
-            // Определяем Content-Type по расширению файла
             String contentType = determineContentType(filename);
             log.debug("Image loaded: {}, size: {} bytes, content-type: {}",
                     filename, imageBytes.length, contentType);
