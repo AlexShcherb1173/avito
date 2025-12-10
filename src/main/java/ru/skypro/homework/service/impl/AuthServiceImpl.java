@@ -1,47 +1,100 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
+/**
+ * Реализация {@link AuthService} для аутентификации и регистрации.
+ */
+@Slf4j
 @Service
+@Transactional
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager manager;
-    private final PasswordEncoder encoder;
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserDetailsManager manager,
-                           PasswordEncoder passwordEncoder) {
-        this.manager = manager;
-        this.encoder = passwordEncoder;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
+    public boolean login(String username, String password) {
+        log.info("Attempting login for user: {}", username);
+        try {
+            UserEntity userEntity = userRepository.findByEmail(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            return passwordEncoder.matches(password, userEntity.getPassword());
+        } catch (UsernameNotFoundException e) {
+            log.warn("Login failed for user: {}", username);
             return false;
         }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        return encoder.matches(password, userDetails.getPassword());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean register(Register register) {
-        if (manager.userExists(register.getUsername())) {
+        log.info("Attempting registration for user: {}", register.getUsername());
+
+        if (userRepository.existsByEmail(register.getUsername())) {
+            log.warn("Registration failed - user already exists: {}", register.getUsername());
             return false;
         }
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
-                        .username(register.getUsername())
-                        .roles(register.getRole().name())
-                        .build());
-        return true;
+
+        try {
+            UserEntity userEntity = userMapper.toEntity(register);
+            userEntity.setPassword(passwordEncoder.encode(register.getPassword()));
+
+            if (register.getRole() == null) {
+                userEntity.setRole(Role.USER);
+            }
+
+            normalizeUserData(userEntity);
+
+            userRepository.save(userEntity);
+            log.info("User registered successfully: {}", register.getUsername());
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Data integrity violation during registration for user: {}", register.getUsername(), e);
+            return false;
+        } catch (Exception e) {
+            log.error("Registration failed for user: {}", register.getUsername(), e);
+            return false;
+        }
     }
 
+    /**
+     * Нормализует данные пользователя для сохранения в БД.
+     * Обрезает поля до максимальной длины, определенной в схеме базы данных.
+     *
+     * @param userEntity сущность пользователя для нормализации
+     */
+    private void normalizeUserData(UserEntity userEntity) {
+        if (userEntity.getFirstName() != null && userEntity.getFirstName().length() > 16) {
+            userEntity.setFirstName(userEntity.getFirstName().substring(0, 16));
+        }
+        if (userEntity.getLastName() != null && userEntity.getLastName().length() > 16) {
+            userEntity.setLastName(userEntity.getLastName().substring(0, 16));
+        }
+        if (userEntity.getEmail() != null && userEntity.getEmail().length() > 32) {
+            userEntity.setEmail(userEntity.getEmail().substring(0, 32));
+        }
+        if (userEntity.getPhone() != null && userEntity.getPhone().length() > 20) {
+            userEntity.setPhone(userEntity.getPhone().substring(0, 20));
+        }
+    }
 }
