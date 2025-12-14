@@ -33,25 +33,25 @@ public class WebSecurityConfig {
             "/swagger-ui.html",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/v3/api-docs",
+            "/api-docs/**",
             "/webjars/**",
             "/login",
             "/register",
-            "/api-docs/**",
-            "/ads",
-            "/ads/image/*",
-            "/users/image/*",
-            "/logout"
+            "/logout",
+
+            "/users/image/**",
+            "/ads/image/**",
+            "/ads/**"
     };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.csrf()
+        httpSecurity
+                .csrf()
                 .disable()
                 .authorizeHttpRequests(authorization ->
                         authorization
                         .mvcMatchers(AUTH_WHITELIST).permitAll()                // Белый список
-                        .mvcMatchers("/users/image/*").permitAll()  // Разрешаем доступ к изображениям пользователей без аутентификации
                         .anyRequest().authenticated()                           // Все остальное - под авторизацией
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

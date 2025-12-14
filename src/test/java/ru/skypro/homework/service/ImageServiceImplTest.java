@@ -32,8 +32,6 @@ public class ImageServiceImplTest {
     void setUp() throws IOException {
         tempDir = Files.createTempDirectory("test_uploads");
         when(config.getUploadDir()).thenReturn(tempDir.toString());
-        when(config.getAvatarMaxSize()).thenReturn(1024L); // 1KB
-        when(config.getAvatarAllowedTypes()).thenReturn(new String[]{"image/jpeg"});
 
         imageService = new ImageServiceImpl(config);
     }
@@ -41,6 +39,9 @@ public class ImageServiceImplTest {
     @Test
     void saveImage_ValidFile_ShouldSave() throws IOException {
         // Given
+        when(config.getAvatarMaxSize()).thenReturn(1024L);
+        when(config.getAvatarAllowedTypes()).thenReturn(new String[]{"image/jpeg"});
+
         MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("test.jpg");
         when(file.getContentType()).thenReturn("image/jpeg");
