@@ -25,9 +25,10 @@ public class AdMapper {
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
 
-        // URL формата /ads/image/{id}
+        // Относительный URL формата /ads/image/{id}
         if (entity.getImage() != null && !entity.getImage().isEmpty()) {
-            dto.setImage(fileStorageConfig.getBaseUrl() + "/ads/image/" + entity.getId());
+            // Относительный URL - фронтенд сам добавит base URL
+            dto.setImage("/ads/image/" + entity.getId());
         } else {
             dto.setImage(null);
         }
@@ -46,9 +47,10 @@ public class AdMapper {
         dto.setPrice(entity.getPrice());
         dto.setTitle(entity.getTitle());
 
-        // URL формата /ads/image/{id}
+        // Относительный URL формата /ads/image/{id}
         if (entity.getImage() != null && !entity.getImage().isEmpty()) {
-            dto.setImage(fileStorageConfig.getBaseUrl() + "/ads/image/" + entity.getId());
+            // Относительный URL - фронтенд сам добавит base URL
+            dto.setImage("/ads/image/" + entity.getId());
         } else {
             dto.setImage(null);
         }
