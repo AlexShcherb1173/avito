@@ -16,16 +16,7 @@ import ru.skypro.homework.model.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.UserService;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.criteria.CriteriaBuilder;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 
 @Slf4j
 @Service
@@ -138,37 +129,4 @@ public class UserServiceImpl implements UserService {
         return deleted;
     }
 
-//    private void validateImageFile(MultipartFile file) {
-//        if (file.isEmpty()) {
-//            throw new IllegalArgumentException("Image file is empty");
-//        }
-//
-//        //проверка размера
-//        if (file.getSize() > fileStorageConfig.getAvatarMaxSize()) {
-//            throw new IllegalArgumentException("File size exceeds maximum allowed size: " +
-//                    fileStorageConfig.getAvatarMaxSize() + " bytes");
-//        }
-//
-//        //проверка типа содержимого
-//        String contentType = file.getContentType();
-//        if (contentType == null || !Arrays.asList(fileStorageConfig.getAvatarAllowedTypes())
-//                .contains(contentType)) {
-//            throw new IllegalArgumentException("Invalid file type. Allowed types: " +
-//                    Arrays.toString(fileStorageConfig.getAvatarAllowedTypes()));
-//        }
-//    }
-
-//    private String generateFileName(String extension){
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmssSSS");
-//        String timestamp = LocalDateTime.now().format(formatter);
-//
-//        return "avatar_" + timestamp + (extension != null ? extension : "");
-//    }
-//
-//    private String getFileExtension(String fileName) {
-//        if (fileName == null || fileName.lastIndexOf(".") == -1) {
-//            return ".jpg";  //расширение по умолчанию
-//        }
-//        return fileName.substring(fileName.lastIndexOf("."));
-//    }
 }

@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.user.Login;
 import ru.skypro.homework.dto.user.NewPasswordDto;
 import ru.skypro.homework.dto.user.UpdateUserDto;
 import ru.skypro.homework.dto.user.UserDto;
@@ -30,12 +29,6 @@ import java.io.IOException;
 public class UserController {
 
     private final UserService userService;
-
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody Login login) {
-//        // Spring Security делает аутентификацию
-//        return ResponseEntity.ok().build();
-//    }
 
     @Operation(summary = "Обновление пароля")
     @ApiResponse(responseCode = "200", description = "Пароль успешно изменен")

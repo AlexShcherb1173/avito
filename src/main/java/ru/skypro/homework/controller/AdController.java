@@ -18,7 +18,6 @@ import ru.skypro.homework.dto.ads.CreateOrUpdateAdDto;
 import ru.skypro.homework.dto.ads.ExtendedAdDto;
 import ru.skypro.homework.service.AdService;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.io.IOException;
 
 @Slf4j
