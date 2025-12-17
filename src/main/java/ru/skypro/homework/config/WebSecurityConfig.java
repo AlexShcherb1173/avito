@@ -1,62 +1,84 @@
 package ru.skypro.homework.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import ru.skypro.homework.dto.Role;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ru.skypro.homework.dto.user.Role;
 
-import static org.springframework.security.config.Customizer.withDefaults;
+import java.util.Arrays;
 
 @Configuration
+@EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class WebSecurityConfig {
+
+    private final UserDetailsService userDetailsService;
 
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
-            "/v3/api-docs",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/api-docs/**",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/logout",
+
+            "/users/image/**",
+            "/ads/image/**",
+            "/ads/**"
     };
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        UserDetails user =
-                User.builder()
-                        .username("user@gmail.com")
-                        .password("password")
-                        .passwordEncoder(passwordEncoder::encode)
-                        .roles(Role.USER.name())
-                        .build();
-        return new InMemoryUserDetailsManager(user);
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity
+                .csrf()
+                .disable()
+                .authorizeHttpRequests(authorization ->
+                        authorization
+                        .mvcMatchers(AUTH_WHITELIST).permitAll()                // Белый список
+                        .anyRequest().authenticated()                           // Все остальное - под авторизацией
+                )
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .httpBasic()                                                     // 3. Тип аутентификации
+                .and()                              //(Spring Security ищет заголовок Authorization: Basic base64encoded)
+                .userDetailsService(userDetailsService);        //Если есть → передает логин/пароль в UserDetailsService
+
+        return httpSecurity.build();
     }
 
+//  разрешает фронтенду на localhost:3000 обращаться к нашему API
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf()
-                .disable()
-                .authorizeHttpRequests(
-                        authorization ->
-                                authorization
-                                        .mvcMatchers(AUTH_WHITELIST)
-                                        .permitAll()
-                                        .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated())
-                .cors()
-                .and()
-                .httpBasic(withDefaults());
-        return http.build();
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000")); // разрешает фронтенд
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // разрешает методы
+        configuration.setAllowedHeaders(Arrays.asList("*"));    // разрешает все заголовки
+        configuration.setAllowCredentials(true);    // разрешает куки/авторизацию
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // применяем ко всем путям
+        return source;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(); // безопасное хеширование паролей
     }
 
 }

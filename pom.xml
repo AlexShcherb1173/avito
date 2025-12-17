@@ -20,9 +20,16 @@
 
   <properties>
     <java.version>11</java.version>
+    <springdoc.version>1.7.0   </springdoc.version> <!-- версия для Spring Boot 2.x -->
   </properties>
 
   <dependencies>
+    <!-- SpringDoc OpenAPI для Spring Boot 2.x -->
+    <dependency>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-ui</artifactId>
+      <version>${springdoc.version}</version>
+    </dependency>
     <!--suppress VulnerableLibrariesLocal -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -33,9 +40,17 @@
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.liquibase</groupId>
+      <artifactId>liquibase-core</artifactId>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -61,6 +76,11 @@
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-annotations-jakarta</artifactId>
+      <version>2.2.22</version>
     </dependency>
   </dependencies>
 
