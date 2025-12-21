@@ -41,6 +41,12 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
+      <dependency>
+          <!--  ЗАВИСИМОСТЬ ДЛЯ SWAGGER -->
+          <groupId>org.springdoc</groupId>
+          <artifactId>springdoc-openapi-ui</artifactId>
+          <version>1.6.14</version>
+      </dependency>
     <!--suppress VulnerableLibrariesLocal -->
     <dependency>
       <groupId>com.h2database</groupId>
@@ -62,6 +68,10 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+      </dependency>
   </dependencies>
 
   <build>
