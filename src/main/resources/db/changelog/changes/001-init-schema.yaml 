@@ -1,0 +1,134 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-init-schema
+      author: alla
+      changes:
+
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: varchar(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_name
+                  type: varchar(16)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: phone
+                  type: varchar(25)
+              - column:
+                  name: role
+                  type: varchar(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image
+                  type: varchar(255)
+
+        - createTable:
+            tableName: ads
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: image
+                  type: varchar(255)
+              - column:
+                  name: author_id
+                  type: int
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: ads
+            baseColumnNames: author_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_ads_author
+
+        - createTable:
+            tableName: comments
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: text
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: author_id
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ad_id
+                  type: int
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: comments
+            baseColumnNames: author_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_comments_author
+
+        - addForeignKeyConstraint:
+            baseTableName: comments
+            baseColumnNames: ad_id
+            referencedTableName: ads
+            referencedColumnNames: id
+            constraintName: fk_comments_ad
