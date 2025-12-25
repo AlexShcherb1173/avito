@@ -9,7 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.enums.Role;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -19,10 +19,15 @@ public class WebSecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
-            "/v3/api-docs",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/v3/api-docs.yaml",
+            "/api-docs/**",
+            "/api-docs.yaml",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/error"
     };
 
     @Bean
