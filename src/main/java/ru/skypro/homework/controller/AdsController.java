@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.service.CommentService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -15,90 +17,79 @@ import ru.skypro.homework.dto.*;
 @RequiredArgsConstructor
 public class AdsController {
 
+    private final AdService adService;
+    private final CommentService commentService;
+
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
         // TODO: получить все объявления
-        Ads ads = new Ads();
-        return ResponseEntity.ok(ads);
+        return ResponseEntity.ok(adService.getAllAds());
     }
 
-    @PostMapping(consumes = "multipart/form-data")
-    public ResponseEntity<Ad> addAd(
-            @RequestPart("properties") CreateOrUpdateAd properties,
-            @RequestPart("image") MultipartFile image) {
-        // TODO: добавить объявление
-        Ad ad = new Ad();
-        return ResponseEntity.status(HttpStatus.CREATED).body(ad);
+
+    @PostMapping
+    public ResponseEntity<Ad> addAd(@RequestBody CreateOrUpdateAd createAdDto) {
+        // TODO: Получить email текущего пользователя из SecurityContext
+        String authorEmail = "current.user@example.com";
+        return adService.createAd(createAdDto, authorEmail)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
     }
+
 
     @GetMapping("/{id}")
-    public ResponseEntity<ExtendedAd> getAds(@PathVariable("id") Integer id) {
-        // TODO: получить информацию об объявлении по ID
-        ExtendedAd extendedAd = new ExtendedAd();
-        return ResponseEntity.ok(extendedAd);
+    public ResponseEntity<ExtendedAd> getAd(@PathVariable Integer id) {
+        return adService.getAdById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeAd(@PathVariable("id") Integer id) {
-        // TODO: удалить объявление
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> removeAd(@PathVariable Integer id) {
+        return adService.deleteAd(id) ?
+               ResponseEntity.ok().build() :
+               ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Ad> updateAds(
-            @PathVariable("id") Integer id,
-            @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        // TODO: обновить информацию об объявлении
-        Ad ad = new Ad();
-        return ResponseEntity.ok(ad);
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<Ads> getAdsMe() {
-        // TODO: получить объявления текущего пользователя
-        Ads ads = new Ads();
-        return ResponseEntity.ok(ads);
+    public ResponseEntity<Ad> updateAd(@PathVariable Integer id,
+                                       @RequestBody CreateOrUpdateAd updateAdDto) {
+        return adService.updateAd(id, updateAdDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id) {
-        // TODO: получить комментарии объявления
-        Comments comments = new Comments();
-        return ResponseEntity.ok(comments);
+    public ResponseEntity<Comments> getComments(@PathVariable Integer id) {
+        return commentService.getCommentsByAdId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/comments")
-    public ResponseEntity<Comment> addComment(
-            @PathVariable("id") Integer id,
-            @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        // TODO: добавить комментарий к объявлению
-        Comment comment = new Comment();
-        return ResponseEntity.ok(comment);
+    public ResponseEntity<Comment> addComment(@PathVariable Integer id,
+                                              @RequestBody CreateOrUpdateComment commentDto) {
+        // TODO: Получить email текущего пользователя
+        String authorEmail = "current.user@example.com"; // Заглушка
+        return commentService.addComment(id, commentDto, authorEmail)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping("/{adId}/comments/{commentId}")
-    public ResponseEntity<?> deleteComment(
-            @PathVariable("adId") Integer adId,
-            @PathVariable("commentId") Integer commentId) {
-        // TODO: удалить комментарий
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> deleteComment(@PathVariable Integer adId,
+                                              @PathVariable Integer commentId) {
+        return commentService.deleteComment(adId, commentId) ?
+               ResponseEntity.ok().build() :
+               ResponseEntity.notFound().build();
     }
 
     @PatchMapping("/{adId}/comments/{commentId}")
-    public ResponseEntity<Comment> updateComment(
-            @PathVariable("adId") Integer adId,
-            @PathVariable("commentId") Integer commentId,
-            @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        // TODO: обновить комментарий
-        Comment comment = new Comment();
-        return ResponseEntity.ok(comment);
-    }
-
-    @PatchMapping(value = "/{id}/image", consumes = "multipart/form-data")
-    public ResponseEntity<byte[]> updateImage(
-            @PathVariable("id") Integer id,
-            @RequestParam("image") MultipartFile image) {
-        // TODO: обновить картинку объявления
-        return ResponseEntity.ok(new byte[0]);
+    public ResponseEntity<Comment> updateComment(@PathVariable Integer adId,
+                                                 @PathVariable Integer commentId,
+                                                 @RequestBody CreateOrUpdateComment commentDto) {
+        return commentService.updateComment(adId, commentId, commentDto)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
