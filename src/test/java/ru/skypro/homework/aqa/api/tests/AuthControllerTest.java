@@ -207,6 +207,7 @@ public class AuthControllerTest extends BaseApiTest {
     @DisplayName("Авторизация незарегистрированного пользователя")
     @Description("Тест проверяет попытку авторизации незарегистрированного пользователя")
     void login_unregisteredUser_returnsInternalServerError() {
+
         RegisterUserDto request = createUserTest();
         LoginDto loginDto = createLoginDto(request);
 
