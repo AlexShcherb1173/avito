@@ -1,4 +1,4 @@
-package service;
+package ru.skypro.homework.unit.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

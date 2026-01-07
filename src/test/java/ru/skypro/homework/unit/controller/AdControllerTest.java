@@ -1,4 +1,4 @@
-package controller;
+package ru.skypro.homework.unit.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
