@@ -116,121 +116,94 @@ pipeline {
         }
 
           // Этап 6: Запуск UI тестов (только для основных веток)
-                stage('UI тесты') {
-                          when {
-                              expression {
-                                  return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
-                              }
-                          }
-                          steps {
-                              script {
-                                  echo "=== НАСТРОЙКА UI ТЕСТОВ ==="
+                  stage('UI тесты') {
+                           when {
+                               expression {
+                                   return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
+                               }
+                           }
+                           steps {
+                               script {
+                                   echo "=== НАСТРОЙКА SELENIDE ДЛЯ UI ТЕСТОВ ==="
 
-                                  // 1. Устанавливаем ChromeDriver
-                                  sh '''
-                                      echo "1. Проверяем Chrome..."
-                                      CHROME_PATH="/usr/bin/google-chrome"
-                                      echo "Chrome путь: $CHROME_PATH"
+                                   // Устанавливаем ChromeDriver
+                                   sh '''
+                                       echo "1. Проверяем Chrome..."
+                                       CHROME_PATH="/usr/bin/google-chrome"
+                                       CHROME_VERSION=$("$CHROME_PATH" --version 2>&1 | awk '{print $3}' | cut -d. -f1)
+                                       echo "Chrome версия: $CHROME_VERSION"
 
-                                      # Получаем версию Chrome
-                                      CHROME_VERSION=$("$CHROME_PATH" --version 2>&1 | awk '{print $3}' | cut -d. -f1)
-                                      echo "Версия Chrome: $CHROME_VERSION"
+                                       echo "2. Устанавливаем ChromeDriver..."
+                                       wget -q https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION
+                                       DRIVER_VERSION=$(cat LATEST_RELEASE_$CHROME_VERSION)
+                                       echo "ChromeDriver версия: $DRIVER_VERSION"
 
-                                      echo "2. Устанавливаем ChromeDriver..."
-                                      # Скачиваем последнюю версию ChromeDriver для этой версии Chrome
-                                      wget -q https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION
-                                      DRIVER_VERSION=$(cat LATEST_RELEASE_$CHROME_VERSION)
-                                      echo "Версия ChromeDriver: $DRIVER_VERSION"
+                                       wget -q https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip
+                                       unzip -o chromedriver_linux64.zip
+                                       chmod +x chromedriver
+                                       mv chromedriver /tmp/chromedriver
 
-                                      # Скачиваем и распаковываем ChromeDriver
-                                      wget -q https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip
-                                      unzip -o chromedriver_linux64.zip
-                                      chmod +x chromedriver
+                                       echo "3. Устанавливаем Xvfb..."
+                                       apt-get update
+                                       apt-get install -y xvfb
+                                   '''
 
-                                      # Перемещаем в системную директорию
-                                      sudo mv chromedriver /usr/local/bin/chromedriver || mv chromedriver /tmp/chromedriver
+                                   // Запускаем UI тесты с правильными настройками Selenide
+                                   sh '''
+                                       echo "=== ЗАПУСК UI ТЕСТОВ С SELENIDE ==="
 
-                                      echo "3. Проверяем установку..."
-                                      chromedriver --version || /tmp/chromedriver --version
+                                       # Экспортируем переменные для Selenide
+                                       export SELENIDE_BROWSER="chrome"
+                                       export SELENIDE_REMOTE=""
+                                       export SELENIDE_BROWSER_SIZE="1920x1200"
+                                       export SELENIDE_BASE_URL="http://localhost:3000"
 
-                                      echo "4. Устанавливаем Xvfb для headless режима..."
-                                      sudo apt-get update
-                                      sudo apt-get install -y xvfb
-                                  '''
+                                       # Для headless режима в Chrome
+                                       export SELENIDE_BROWSER_CAPABILITIES='{
+                                           "browserName": "chrome",
+                                           "goog:chromeOptions": {
+                                               "args": [
+                                                   "--headless",
+                                                   "--no-sandbox",
+                                                   "--disable-dev-shm-usage",
+                                                   "--disable-gpu",
+                                                   "--window-size=1920,1200"
+                                               ]
+                                           }
+                                       }'
 
-                                  // 2. Запускаем UI тесты с Xvfb
-                                  sh '''
-                                      echo "=== ЗАПУСК UI ТЕСТОВ ==="
+                                       # Явно указываем путь к ChromeDriver
+                                       export CHROMEDRIVER_PATH="/tmp/chromedriver"
+                                       export CHROMEDRIVER_OPTS="--no-sandbox --disable-dev-shm-usage"
 
-                                      # Определяем путь к chromedriver
-                                      if [ -f /usr/local/bin/chromedriver ]; then
-                                          DRIVER_PATH="/usr/local/bin/chromedriver"
-                                      else
-                                          DRIVER_PATH="/tmp/chromedriver"
-                                      fi
-
-                                      echo "ChromeDriver путь: $DRIVER_PATH"
-                                      echo "Chrome путь: /usr/bin/google-chrome"
-
-                                      # Создаем скрипт запуска тестов с Xvfb
-                                      cat > /tmp/run-ui-tests.sh << 'SCRIPT_EOF'
-              #!/bin/bash
-              set -e
-
-              # Экспортируем переменные
-              export CHROME_BIN="/usr/bin/google-chrome"
-              export CHROMEDRIVER_PATH="$1"
-              export DISPLAY=:99
-
-              echo "Запускаем Xvfb на display $DISPLAY..."
-              Xvfb $DISPLAY -screen 0 1920x1080x24 -ac &
-              XVFB_PID=$!
-
-              # Даем Xvfb время на запуск
-              sleep 3
-
-              echo "Запускаем UI тесты..."
-              mvn test -Dtest=*UiTest* \
-                  -Dwebdriver.chrome.driver="$CHROMEDRIVER_PATH" \
-                  -Dchrome.binary.path="$CHROME_BIN" \
-                  -Dchrome.args="--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920,1080,--headless" \
-                  -Dtest.failure.ignore=false
-
-              # Сохраняем код возврата
-              TEST_EXIT_CODE=$?
-
-              echo "Останавливаем Xvfb..."
-              kill $XVFB_PID 2>/dev/null || true
-
-              exit $TEST_EXIT_CODE
-              SCRIPT_EOF
-
-                                      chmod +x /tmp/run-ui-tests.sh
-
-                                      # Запускаем тесты
-                                      /tmp/run-ui-tests.sh "$DRIVER_PATH"
-                                  '''
-                              }
-                          }
-                          post {
-                              always {
-                                  junit 'target/surefire-reports/**/*.xml'
-
-                                  // Allure отчеты только если есть результаты
-                                  script {
-                                      if (fileExists('target/allure-results')) {
-                                          allure([
-                                              includeProperties: false,
-                                              jdk: '',
-                                              properties: [],
-                                              reportBuildPolicy: 'ALWAYS',
-                                              results: [[path: 'target/allure-results']]
-                                          ])
-                                      }
-                                  }
-                              }
-                          }
-                      }
+                                       # Запускаем тесты с Xvfb
+                                       xvfb-run --server-args="-screen 0 1920x1200x24" \
+                                           mvn test -Dtest=*UiTest* \
+                                           -Dselenide.browser="chrome" \
+                                           -Dselenide.headless=true \
+                                           -Dselenide.remote="" \
+                                           -Dselenide.browserSize="1920x1200" \
+                                           -Dselenide.baseUrl="http://localhost:3000" \
+                                           -Dchromeoptions.args="--headless,--no-sandbox,--disable-dev-shm-usage,--disable-gpu,--window-size=1920,1200"
+                                   '''
+                               }
+                           }
+                           post {
+                               always {
+                                   junit 'target/surefire-reports/**/*.xml'
+                                   script {
+                                       if (fileExists('target/allure-results')) {
+                                           allure([
+                                               includeProperties: false,
+                                               jdk: '',
+                                               properties: [],
+                                               reportBuildPolicy: 'ALWAYS',
+                                               results: [[path: 'target/allure-results']]
+                                           ])
+                                       }
+                                   }
+                               }
+                           }
 
 
         // Этап 7: Остановка приложения после тестов
