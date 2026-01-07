@@ -115,74 +115,97 @@ pipeline {
             }
         }
 
-        // Этап 6: Запуск UI тестов (только для основных веток)
-        stage('UI тесты') {
-            // Условие when определяет, когда этот этап должен выполняться
-            when {
-                expression {
-                    // Выполнять UI тесты только для веток 'main' или 'develop'
-                    // env.BRANCH_NAME - переменная Jenkins с именем текущей ветки
-                    return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
-                }
-            }
-            steps {
-                script {
-                    // Установка Chrome и ChromeDriver для UI тестов
-                    sh '''
-                        # Обновление списка пакетов
-                        apt-get update
+          // Этап 6: Запуск UI тестов (только для основных веток)
+               stage('UI тесты') {
+                   // Условие when определяет, когда этот этап должен выполняться
+                   when {
+                       expression {
+                           // Выполнять UI тесты только для веток 'main' или 'develop'
+                           // env.BRANCH_NAME - переменная Jenkins с именем текущей ветки
+                           return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
+                       }
+                   }
+                   steps {
+                       script {
+                           // Установка Chrome и ChromeDriver для UI тестов
+                           sh '''
+                               # Обновление списка пакетов
+                               apt-get update
 
-                        # Установка необходимых утилит
-                        apt-get install -y wget unzip
+                               # Установка необходимых утилит
+                               apt-get install -y wget unzip
 
-                        # Добавление ключа Google Chrome в систему
-                        wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+                               # Добавление ключа Google Chrome в систему
+                               wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
 
-                        # Добавление репозитория Chrome в sources.list
-                        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+                               # Добавление репозитория Chrome в sources.list
+                               echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
 
-                        # Обновление пакетов и установка Chrome
-                        apt-get update
-                        apt-get install -y google-chrome-stable
+                               # Обновление пакетов и установка Chrome
+                               apt-get update
+                               apt-get install -y google-chrome-stable
 
-                        # Проверка версии Chrome
-                        google-chrome --version
+                               # Проверка версии Chrome
+                               google-chrome --version
 
-                        # Установка ChromeDriver (драйвер для управления Chrome)
-                        # Получаем мажорную версию Chrome
-                        CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1)
+                               # Установка ChromeDriver (драйвер для управления Chrome)
+                               # Получаем мажорную версию Chrome
+                               CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1)
+                               echo "Установка ChromeDriver для Chrome версии: $CHROME_VERSION"
 
-                        # Скачиваем ChromeDriver для этой версии
-                        wget -N https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION.0.0/linux64/chromedriver-linux64.zip
+                               # Скачиваем ChromeDriver для этой версии
+                               # Используем официальное зеркало
+                               wget -q -N https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION
+                               DRIVER_VERSION=$(cat LATEST_RELEASE_$CHROME_VERSION)
+                               echo "Версия ChromeDriver: $DRIVER_VERSION"
 
-                        # Распаковываем архив
-                        unzip chromedriver-linux64.zip -d /usr/local/bin/
+                               wget -q -N https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip
 
-                        # Даем права на выполнение
-                        chmod +x /usr/local/bin/chromedriver-linux64/chromedriver
-                    '''
+                               # Распаковываем архив
+                               unzip -o chromedriver_linux64.zip
 
-                    // Запускаем UI тесты
-                    // *UiTest* - запустить все классы с UiTest в имени
-                    sh 'mvn test -Dtest=*UiTest*'
-                }
-            }
-            post {
-                always {
-                    // Сохраняем отчеты JUnit
-                    junit 'target/surefire-reports/**/*.xml'
+                               # Даем права на выполнение и перемещаем в системную директорию
+                               chmod +x chromedriver
+                               mv chromedriver /usr/local/bin/
 
-                    // Генерируем Allure отчеты
-                    allure([
-                        includeProperties: false,
-                        jdk: '',
-                        properties: [],
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'target/allure-results']]
-                    ])
-                }
-            }
-        }
+                               # Проверяем установку
+                               echo "Проверка ChromeDriver:"
+                               chromedriver --version
+
+                               # Также устанавливаем переменную окружения для WebDriver
+                               export WEBDRIVER_CHROME_DRIVER=/usr/local/bin/chromedriver
+                               echo "WEBDRIVER_CHROME_DRIVER=$WEBDRIVER_CHROME_DRIVER" >> ~/.bashrc
+
+                               # Альтернативный способ: через WebDriverManager (если используется в проекте)
+                               # Устанавливаем WebDriverManager как зависимость если нужно
+                           '''
+
+                           // Запускаем UI тесты
+                           // *UiTest* - запустить все классы с UiTest в имени
+                           // Добавляем системную переменную для ChromeDriver
+                           sh '''
+                               export WEBDRIVER_CHROME_DRIVER=/usr/local/bin/chromedriver
+                               export PATH=/usr/local/bin:$PATH
+                               mvn test -Dtest=*UiTest* -Dwebdriver.chrome.driver=/usr/local/bin/chromedriver
+                           '''
+                       }
+                   }
+                   post {
+                       always {
+                           // Сохраняем отчеты JUnit
+                           junit 'target/surefire-reports/**/*.xml'
+
+                           // Генерируем Allure отчеты
+                           allure([
+                               includeProperties: false,
+                               jdk: '',
+                               properties: [],
+                               reportBuildPolicy: 'ALWAYS',
+                               results: [[path: 'target/allure-results']]
+                           ])
+                       }
+                   }
+               }
 
         // Этап 7: Остановка приложения после тестов
         stage('Остановка приложения') {
@@ -287,7 +310,7 @@ pipeline {
                     С уважением,
                     Jenkins CI/CD
                 """,
-                to: 'team@example.com'  // Замените на реальный email адрес
+                to: 'rzavsky.ev@gmail.com'  // Замените на реальный email адрес
             )
         }
     }
