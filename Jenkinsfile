@@ -21,7 +21,7 @@ pipeline {
             }
         }
 
-        // Этап 3: Запуск модульных тестов (без UI)
+        // Этап 3: Модульные тесты (без UI)
         stage('Модульные тесты') {
             steps {
                 sh 'mvn test -Dtest=!*UiTest*'
@@ -33,27 +33,37 @@ pipeline {
             }
         }
 
-        // Этап 4: Запуск приложения для API тестов
-        stage('Запуск приложения для тестов') {
+        // Этап 4: Запуск бэкенда для API тестов
+        stage('Запуск бэкенда') {
             steps {
                 script {
                     sh '''
-                        # Запускаем Spring Boot приложение в фоновом режиме
-                        mvn spring-boot:run -Dspring-boot.run.profiles=test > app.log 2>&1 &
-                        echo $! > app.pid
+                        echo "=== ЗАПУСК БЭКЕНДА ==="
+
+                        # Собираем приложение
+                        mvn clean package -DskipTests
+
+                        # Запускаем бэкенд (подключаемся к существующей БД на порту 5434)
+                        java -jar target/*.jar \
+                            --spring.datasource.url=jdbc:postgresql://localhost:5434/avito \
+                            --spring.datasource.username=postgres \
+                            --spring.datasource.password=password \
+                            --server.port=8080 > backend.log 2>&1 &
+                        echo $! > backend.pid
 
                         # Ждем запуска
                         sleep 30
 
-                        # Проверяем здоровье приложения
+                        # Проверяем здоровье
+                        echo "Проверка бэкенда..."
                         curl --retry 10 --retry-delay 5 --retry-max-time 60 \
-                             http://localhost:8080/actuator/health || echo "Приложение не запустилось"
+                             http://localhost:8080/actuator/health || echo "Бэкенд не запустился"
                     '''
                 }
             }
         }
 
-        // Этап 5: Запуск API тестов
+        // Этап 5: API тесты
         stage('API тесты') {
             steps {
                 sh 'mvn test -Dtest=*ApiTest*'
@@ -76,8 +86,8 @@ pipeline {
             }
         }
 
-        // Этап 6: UI тесты (с headless Chrome)
-        stage('UI тесты') {
+        // Этап 6: UI тесты через Docker Selenium
+        stage('UI тесты через Docker Selenium') {
             when {
                 expression {
                     return env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
@@ -85,53 +95,99 @@ pipeline {
             }
             steps {
                 script {
-                    echo "=== НАСТРОЙКА ДЛЯ UI ТЕСТОВ ==="
+                    echo "=== ЗАПУСК UI ТЕСТОВ ЧЕРЕЗ DOCKER SELENIUM ==="
 
-                    // Устанавливаем необходимые пакеты
+                    // 1. Проверяем, что фронтенд запущен
                     sh '''
-                        apt-get update
-                        apt-get install -y wget unzip xvfb
-
-                        # Проверяем Chrome
-                        if [ -f /usr/bin/google-chrome ]; then
-                            echo "Chrome найден: /usr/bin/google-chrome"
-                        else
-                            echo "Устанавливаем Chrome..."
-                            wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-                            dpkg -i google-chrome-stable_current_amd64.deb || apt-get install -f -y
+                        echo "Проверка фронтенда..."
+                        if ! docker ps --format "{{.Names}}" | grep -q frontend-avito; then
+                            echo "ВНИМАНИЕ: Фронтенд не запущен!"
+                            echo "Запускаем фронтенд..."
+                            docker run -d --name frontend-avito \
+                                -p 3000:3000 \
+                                ghcr.io/dmitry-bizin/front-react-avito:v1.21
+                            sleep 10
                         fi
 
-                        # Устанавливаем ChromeDriver
-                        CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1)
-                        echo "Chrome версия: $CHROME_VERSION"
-
-                        wget -q https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION
-                        DRIVER_VERSION=$(cat LATEST_RELEASE_$CHROME_VERSION)
-                        wget -q https://chromedriver.storage.googleapis.com/$DRIVER_VERSION/chromedriver_linux64.zip
-                        unzip -o chromedriver_linux64.zip
-                        chmod +x chromedriver
-                        mv chromedriver /usr/local/bin/
+                        echo "Проверка доступности фронтенда..."
+                        curl -s http://localhost:3000 > /dev/null && echo "Фронтенд доступен" || echo "Фронтенд не отвечает"
                     '''
 
-                    // Запускаем UI тесты с Xvfb
+                    // 2. Запускаем Selenium в Docker
                     sh '''
-                        # Экспортируем настройки для Selenide
-                        export SELENIDE_BROWSER="chrome"
-                        export SELENIDE_HEADLESS="true"
-                        export SELENIDE_BROWSER_SIZE="1920x1200"
+                        echo "Запуск Selenium Chrome в Docker..."
+
+                        # Останавливаем старый контейнер если есть
+                        docker stop selenium-chrome 2>/dev/null || true
+                        docker rm selenium-chrome 2>/dev/null || true
+
+                        # Запускаем новый контейнер с Selenium
+                        docker run -d \
+                            --name selenium-chrome \
+                            -p 4444:4444 \
+                            -p 7900:7900 \
+                            --shm-size="2g" \
+                            -e SE_NODE_MAX_SESSIONS=10 \
+                            -e SE_NODE_OVERRIDE_MAX_SESSIONS=true \
+                            -e SE_SCREEN_WIDTH=1920 \
+                            -e SE_SCREEN_HEIGHT=1200 \
+                            -e SE_VNC_NO_PASSWORD=1 \
+                            --network="host" \
+                            selenium/standalone-chrome:latest
+
+                        echo "Ожидание запуска Selenium..."
+                        sleep 15
+
+                        # Проверяем статус Selenium
+                        echo "Проверка статуса Selenium Grid..."
+                        curl -s http://localhost:4444/wd/hub/status | jq .value.ready || \
+                        curl -s http://localhost:4444/status | jq .value.ready || \
+                        echo "Selenium запущен (не смогли получить JSON статус)"
+
+                        echo "Selenium доступен по:"
+                        echo "- WebDriver: http://localhost:4444/wd/hub"
+                        echo "- VNC просмотр: http://localhost:7900 (no password)"
+                    '''
+
+                    // 3. Запускаем UI тесты через Selenium Grid
+                    sh '''
+                        echo "=== ЗАПУСК UI ТЕСТОВ ==="
+
+                        # Экспортируем переменные для отладки
+                        export SELENIDE_REMOTE="http://localhost:4444/wd/hub"
                         export SELENIDE_BASE_URL="http://localhost:3000"
 
-                        # Запускаем тесты в виртуальном framebuffer
-                        xvfb-run --server-args="-screen 0 1920x1200x24" \
-                            mvn test -Dtest=*UiTest* \
-                            -Dselenide.headless=true \
-                            -Dselenide.browser="chrome" \
-                            -Dselenide.browserSize="1920x1200"
+                        echo "Параметры запуска:"
+                        echo "- Remote: $SELENIDE_REMOTE"
+                        echo "- Base URL: $SELENIDE_BASE_URL"
+
+                        # Запускаем тесты
+                        mvn test -Dtest=*UiTest* \
+                            -Dselenide.remote=http://localhost:4444/wd/hub \
+                            -Dselenide.browser=chrome \
+                            -Dselenide.baseUrl=http://localhost:3000 \
+                            -Dselenide.timeout=15000 \
+                            -Dselenide.browserSize=1920x1200 \
+                            -Dselenide.pageLoadStrategy=normal \
+                            -Dselenide.reportsFolder=target/screenshots
                     '''
                 }
             }
             post {
                 always {
+                    // Всегда останавливаем и чистим контейнеры
+                    sh '''
+                        echo "=== ОЧИСТКА КОНТЕЙНЕРОВ ==="
+
+                        # Останавливаем Selenium
+                        docker stop selenium-chrome 2>/dev/null || true
+                        docker rm selenium-chrome 2>/dev/null || true
+
+                        # Останавливаем фронтенд который мы запускали
+                        docker stop frontend-avito 2>/dev/null || true
+                        docker rm frontend-avito 2>/dev/null || true
+                    '''
+
                     junit 'target/surefire-reports/**/*.xml'
                     script {
                         if (fileExists('target/allure-results')) {
@@ -145,21 +201,36 @@ pipeline {
                         }
                     }
                 }
+                success {
+                    echo "✅ UI тесты выполнены успешно!"
+                }
+                failure {
+                    echo "❌ UI тесты упали"
+
+                    // Сохраняем логи Selenium при падении
+                    sh '''
+                        echo "=== СОХРАНЕНИЕ ЛОГОВ SELENIUM ==="
+                        docker logs selenium-chrome > selenium.log 2>&1 || true
+                        echo "Логи Selenium сохранены в selenium.log"
+                    '''
+                    archiveArtifacts artifacts: 'selenium.log', allowEmptyArchive: true
+                }
             }
         }
 
-        // Этап 7: Остановка приложения
-        stage('Остановка приложения') {
+        // Этап 7: Остановка бэкенда
+        stage('Остановка бэкенда') {
             steps {
                 script {
                     sh '''
-                        # Останавливаем приложение если оно было запущено
-                        if [ -f app.pid ]; then
-                            kill $(cat app.pid) 2>/dev/null || true
-                            rm -f app.pid app.log
+                        echo "Остановка бэкенда..."
+                        if [ -f backend.pid ]; then
+                            kill $(cat backend.pid) 2>/dev/null || true
+                            rm -f backend.pid backend.log
                         fi
+
                         # Дополнительная проверка
-                        pkill -f "spring-boot:run" || true
+                        pkill -f "java -jar target/.*.jar" || true
                     '''
                 }
             }
@@ -175,9 +246,25 @@ pipeline {
 
     post {
         always {
+            // Гарантированная очистка
             script {
-                // Гарантированная остановка приложения
-                sh 'pkill -f "spring-boot:run" || true'
+                sh '''
+                    echo "=== ФИНАЛЬНАЯ ОЧИСТКА ==="
+
+                    # Останавливаем бэкенд если еще не остановлен
+                    if [ -f backend.pid ]; then
+                        kill $(cat backend.pid) 2>/dev/null || true
+                        rm -f backend.pid
+                    fi
+
+                    # Останавливаем все связанные контейнеры
+                    docker stop selenium-chrome frontend-avito 2>/dev/null || true
+                    docker rm selenium-chrome frontend-avito 2>/dev/null || true
+
+                    # Останавливаем Java процессы
+                    pkill -f "spring-boot:run" || true
+                    pkill -f "java -jar target/.*.jar" || true
+                '''
             }
             cleanWs()
         }
@@ -188,7 +275,7 @@ pipeline {
             echo "❌ Сборка #${env.BUILD_NUMBER} ПРОВАЛЕНА"
         }
         unstable {
-            echo "⚠️ Сборка #${env.BUILD_NUMBER} НЕУСТОЙЧИВА (сломаные тесты)"
+            echo "⚠️ Сборка #${env.BUILD_NUMBER} НЕУСТОЙЧИВА (сломанные тесты)"
         }
     }
 }
