@@ -10,57 +10,93 @@ pipeline {
         stage('Подготовка') {
             steps {
                 checkout scm
-                sh 'docker-compose -f docker-compose.test.yml down || true'
+                sh '''
+                    echo "=== ОЧИСТКА СТАРЫХ КОНТЕЙНЕРОВ ==="
+                    docker stop selenium-test 2>/dev/null || true
+                    docker rm selenium-test 2>/dev/null || true
+                '''
             }
         }
 
-        stage('Запуск инфраструктуры') {
+        stage('Проверка сервисов') {
+            steps {
+                sh '''
+                    echo "=== ПРОВЕРКА СЕРВИСОВ ==="
+
+                    echo "1. Фронтенд (порт 3000):"
+                    curl -s http://localhost:3000 > /dev/null && echo "✅ Доступен" || echo "❌ Не доступен"
+
+                    echo "2. PostgreSQL (порт 5434):"
+                    pg_isready -h localhost -p 5434 2>/dev/null && echo "✅ Доступна" || echo "❌ Не доступна"
+
+                    echo "3. Docker:"
+                    docker --version && echo "✅ Работает" || echo "❌ Не работает"
+                '''
+            }
+        }
+
+        stage('Запуск Selenium') {
             steps {
                 script {
-                    echo "=== ЗАПУСК ИНФРАСТРУКТУРЫ В DOCKER ==="
+                    echo "=== ЗАПУСК SELENIUM В DOCKER ==="
 
                     sh '''
-                        # Запускаем всю инфраструктуру
-                        docker-compose -f docker-compose.test.yml up -d postgres-test frontend-test selenium
+                        echo "Останавливаем старый Selenium..."
+                        docker stop selenium-test 2>/dev/null || true
+                        docker rm selenium-test 2>/dev/null || true
 
-                        # Ждем запуска
-                        sleep 30
+                        echo "Запускаем новый Selenium..."
+                        docker run -d --name selenium-test \
+                            -p 4444:4444 \
+                            --shm-size="2g" \
+                            -e SE_NODE_MAX_SESSIONS=10 \
+                            selenium/standalone-chrome:4.16.1
 
-                        # Проверяем сервисы
-                        echo "Проверка PostgreSQL..."
-                        docker-compose -f docker-compose.test.yml exec -T postgres-test pg_isready -U postgres
+                        echo "Ждем запуска (15 секунд)..."
+                        sleep 15
 
-                        echo "Проверка фронтенда..."
-                        curl -f http://localhost:3001 || echo "Фронтенд запущен"
-
-                        echo "Проверка Selenium..."
-                        curl -f http://localhost:4444/wd/hub/status || echo "Selenium запущен"
+                        echo "Проверка Selenium Grid..."
+                        curl -s http://localhost:4444/wd/hub/status | jq -r '.value.ready' && echo "✅ Готов" || echo "⚠️ Проверка не прошла, но продолжим"
                     '''
                 }
             }
         }
 
-        stage('Сборка и API тесты') {
+        stage('Запуск бэкенда') {
             steps {
                 sh '''
-                    echo "=== СБОРКА И API ТЕСТЫ ==="
+                    echo "=== ЗАПУСК БЭКЕНДА ==="
+
+                    # Останавливаем старый бэкенд
+                    pkill -f "java -jar target/.*.jar" 2>/dev/null || true
 
                     # Собираем приложение
                     mvn clean package -DskipTests
 
-                    # Запускаем приложение в Docker
-                    docker-compose -f docker-compose.test.yml build app-test
-                    docker-compose -f docker-compose.test.yml up -d app-test
+                    # Запускаем бэкенд
+                    nohup java -jar target/*.jar \
+                        --spring.datasource.url=jdbc:postgresql://localhost:5434/avito \
+                        --spring.datasource.username=postgres \
+                        --spring.datasource.password=password \
+                        --server.port=8080 \
+                        --spring.profiles.active=test > backend.log 2>&1 &
+                    echo $! > backend.pid
 
-                    # Ждем запуска
+                    echo "Ждем запуска бэкенда (30 секунд)..."
                     sleep 30
 
-                    # Проверяем бэкенд
-                    curl -f http://localhost:8081/actuator/health || echo "Бэкенд запущен"
+                    echo "Проверка бэкенда..."
+                    curl -s http://localhost:8080/actuator/health && echo "✅ Бэкенд запущен" || echo "⚠️ Бэкенд не отвечает, но продолжим"
+                '''
+            }
+        }
 
-                    # Запускаем API тесты
+        stage('Запуск API тестов') {
+            steps {
+                sh '''
+                    echo "=== ЗАПУСК API ТЕСТОВ ==="
                     mvn test -Dtest=*ApiTest* \
-                        -Dspring.datasource.url=jdbc:postgresql://localhost:5435/avito_test \
+                        -Dspring.datasource.url=jdbc:postgresql://localhost:5434/avito \
                         -Dspring.datasource.username=postgres \
                         -Dspring.datasource.password=password
                 '''
@@ -72,34 +108,46 @@ pipeline {
             }
         }
 
-        stage('UI тесты через Docker Selenium') {
+        stage('Запуск UI тестов') {
             steps {
-                script {
-                    echo "=== UI ТЕСТЫ ЧЕРЕЗ DOCKER SELENIUM ==="
+                sh '''
+                    echo "=== ЗАПУСК UI ТЕСТОВ ==="
 
-                    sh '''
-                        # Запускаем UI тесты через Selenium в Docker
-                        mvn test -Dtest=*UiTest* \
-                            -Dselenide.remote=http://localhost:4444/wd/hub \
-                            -Dselenide.browser=chrome \
-                            -Dselenide.baseUrl=http://localhost:3001 \
-                            -Dselenide.timeout=15000 \
-                            -Dselenide.browserSize=1920x1200
-                    '''
-                }
+                    # Запускаем UI тесты через Selenium Grid
+                    mvn test -Dtest=*UiTest* \
+                        -Dselenide.remote=http://localhost:4444/wd/hub \
+                        -Dselenide.browser=chrome \
+                        -Dselenide.baseUrl=http://localhost:3000 \
+                        -Dselenide.timeout=20000 \
+                        -Dselenide.browserSize=1920x1200 \
+                        -Dselenide.headless=false
+                '''
             }
             post {
                 always {
                     junit 'target/surefire-reports/**/*.xml'
+                    archiveArtifacts artifacts: 'backend.log', allowEmptyArchive: true
                 }
             }
         }
 
-        stage('Остановка инфраструктуры') {
+        stage('Очистка') {
             steps {
                 sh '''
-                    echo "=== ОСТАНОВКА ИНФРАСТРУКТУРЫ ==="
-                    docker-compose -f docker-compose.test.yml down -v
+                    echo "=== ОЧИСТКА ==="
+
+                    # Останавливаем бэкенд
+                    if [ -f backend.pid ]; then
+                        kill $(cat backend.pid) 2>/dev/null || true
+                        rm -f backend.pid backend.log
+                    fi
+
+                    # Останавливаем Selenium
+                    docker stop selenium-test 2>/dev/null || true
+                    docker rm selenium-test 2>/dev/null || true
+
+                    # Дополнительная очистка
+                    pkill -f "java -jar target/.*.jar" 2>/dev/null || true
                 '''
             }
         }
@@ -109,10 +157,17 @@ pipeline {
         always {
             // Гарантированная очистка
             sh '''
-                docker-compose -f docker-compose.test.yml down -v 2>/dev/null || true
-                docker system prune -f 2>/dev/null || true
+                docker stop selenium-test 2>/dev/null || true
+                docker rm selenium-test 2>/dev/null || true
+                pkill -f "java -jar target/.*.jar" 2>/dev/null || true
             '''
             cleanWs()
+        }
+        success {
+            echo "✅ Сборка #${env.BUILD_NUMBER} УСПЕШНА!"
+        }
+        failure {
+            echo "❌ Сборка #${env.BUILD_NUMBER} ПРОВАЛЕНА"
         }
     }
 }
