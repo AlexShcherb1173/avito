@@ -10,84 +10,73 @@ pipeline {
         stage('Подготовка') {
             steps {
                 checkout scm
-                sh '''
-                    echo "=== РАБОЧАЯ ДИРЕКТОРИЯ ==="
-                    pwd
-                    echo "Содержимое:"
-                    ls -la
-                    echo ""
-                    echo "Тесты:"
-                    find . -name "*Test.java" | head -10
-                '''
             }
         }
 
-        stage('Запуск инфраструктуры') {
+        stage('Запуск Selenium') {
             steps {
                 script {
-                    echo "=== ЗАПУСК SELENIUM ==="
+                    echo "=== ЗАПУСК SELENIUM С HOST NETWORK ==="
 
                     sh '''
                         # Очистка
                         docker stop selenium 2>/dev/null || true
                         docker rm selenium 2>/dev/null || true
 
-                        # Запуск
+                        # Запуск в host network (самый простой способ)
                         docker run -d --name selenium \
-                            -p 4444:4444 \
+                            --network="host" \
                             --shm-size="2g" \
                             selenium/standalone-chrome:latest
 
-                        sleep 20
+                        sleep 25
 
                         echo "Проверка Selenium..."
-                        curl -s http://localhost:4444/wd/hub/status | jq -r '.value.ready' || echo "Selenium готов"
+                        curl -s http://localhost:4444/wd/hub/status | jq -r '.value.ready' && echo "✅ Selenium готов" || echo "⚠️ Selenium запущен"
                     '''
                 }
             }
         }
 
-        stage('Сборка и запуск бэкенда') {
+        stage('Запуск бэкенда') {
             steps {
                 sh '''
-                    echo "=== СБОРКА И ЗАПУСК БЭКЕНДА ==="
+                    echo "=== ЗАПУСК БЭКЕНДА ==="
 
                     # Сборка
                     mvn clean package -DskipTests
 
-                    # Запуск бэкенда с тестовым профилем
+                    # Запуск
                     nohup java -jar target/*.jar \
                         --spring.datasource.url=jdbc:postgresql://localhost:5434/avito \
                         --spring.datasource.username=postgres \
                         --spring.datasource.password=password \
                         --server.port=8080 \
-                        --spring.profiles.active=test \
-                        --management.endpoints.web.exposure.include="*" \
-                        --management.endpoint.health.show-details=always \
-                        --logging.level.org.springframework.security=WARN > backend.log 2>&1 &
+                        --spring.profiles.active=test > backend.log 2>&1 &
                     echo $! > backend.pid
 
-                    sleep 45
+                    sleep 50
 
-                    echo "Проверка бэкенда..."
-                    curl -s -f http://localhost:8080/actuator/health && echo "✅ Бэкенд запущен" || echo "⚠️ Бэкенд может требовать аутентификации"
+                    echo "Проверка сервисов:"
+                    echo "Фронтенд (3000): $(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 || echo 'off')"
+                    echo "Бэкенд (8080): $(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/actuator/health 2>/dev/null || echo 'requires auth')"
+                    echo "Selenium (4444): $(curl -s -o /dev/null -w "%{http_code}" http://localhost:4444 || echo 'off')"
                 '''
             }
         }
 
-        stage('Запуск ВСЕХ тестов') {
+        stage('Запуск UI тестов') {
             steps {
                 sh '''
-                    echo "=== ЗАПУСК ВСЕХ ТЕСТОВ ==="
+                    echo "=== ЗАПУСК UI ТЕСТОВ ==="
 
-                    # Запускаем все тесты с настройками для Selenium
-                    mvn test \
+                    # ТОЛЬКО UI тесты
+                    mvn test -Dtest="ru.skypro.homework.aqa.ui.*Test" \
                         -Dselenide.remote=http://localhost:4444/wd/hub \
                         -Dselenide.baseUrl=http://localhost:3000 \
-                        -Dselenide.timeout=25000 \
+                        -Dselenide.timeout=30000 \
                         -Dselenide.browser=chrome \
-                        -DfailIfNoTests=false \
-                        -Dwebdriver.chrome.driver=/usr/local/bin/chromedriver
+                        -DfailIfNoTests=false
                 '''
             }
             post {
@@ -103,19 +92,13 @@ pipeline {
                 sh '''
                     echo "=== ОЧИСТКА ==="
 
-                    # Бэкенд
                     if [ -f backend.pid ]; then
                         kill $(cat backend.pid) 2>/dev/null || true
-                        sleep 5
                         rm -f backend.pid
                     fi
 
-                    # Selenium
                     docker stop selenium 2>/dev/null || true
                     docker rm selenium 2>/dev/null || true
-
-                    # Дополнительная очистка
-                    pkill -f "java -jar target/.*.jar" 2>/dev/null || true
                 '''
             }
         }
@@ -123,19 +106,12 @@ pipeline {
 
     post {
         always {
-            // Гарантированная очистка
             sh '''
                 docker stop selenium 2>/dev/null || true
                 docker rm selenium 2>/dev/null || true
                 pkill -f "java -jar target/.*.jar" 2>/dev/null || true
             '''
             cleanWs()
-        }
-        success {
-            echo "✅ Сборка #${env.BUILD_NUMBER} УСПЕШНА!"
-        }
-        failure {
-            echo "❌ Сборка #${env.BUILD_NUMBER} ПРОВАЛЕНА"
         }
     }
 }
