@@ -86,6 +86,35 @@ pipeline {
             }
         }
 
+        stage('Диагностика Selenium') {
+            steps {
+                script {
+                    sh '''
+                        echo "=== ДИАГНОСТИКА SELENIUM ==="
+
+                        # Очищаем старые контейнеры
+                        docker rm -f selenium-test 2>/dev/null || true
+
+                        # Запускаем тестовый контейнер
+                        docker run -d --name selenium-test -p 4445:4444 --shm-size="2g" selenium/standalone-chrome:4.16.1
+
+                        # Ждем и собираем логи
+                        sleep 20
+                        echo "=== ЛОГИ SELENIUM ==="
+                        docker logs selenium-test
+
+                        # Проверяем статус
+                        echo "=== СТАТУС SELENIUM ==="
+                        curl -v http://localhost:4445/wd/hub/status || true
+
+                        # Останавливаем тестовый контейнер
+                        docker stop selenium-test
+                        docker rm selenium-test
+                    '''
+                }
+            }
+        }
+
         // Этап 6: UI тесты через Docker Selenium
         stage('UI тесты через Docker Selenium') {
             when {
