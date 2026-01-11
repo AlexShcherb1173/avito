@@ -1,11 +1,14 @@
 package ru.skypro.homework.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.entity.UserRole;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
@@ -34,8 +37,10 @@ public class AdService {
         return ads;
     }
 
-    public Ads getAdsByAuthor(Integer authorId) {
-        List<Ad> results = adRepository.findAllByAuthor_Id(authorId)
+    public Ads getAdsByAuthorEmail(String email) {
+        UserEntity author = getUserByEmailOrThrow(email);
+
+        List<Ad> results = adRepository.findAllByAuthor_Id(author.getId())
                 .stream()
                 .map(adMapper::toAdDto)
                 .collect(Collectors.toList());
@@ -47,13 +52,13 @@ public class AdService {
     }
 
     public ExtendedAd getExtendedAd(Integer adId) {
-        return adRepository.findById(adId)
-                .map(adMapper::toExtendedDto)
-                .orElse(null);
+        AdEntity ad = adRepository.findById(adId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+        return adMapper.toExtendedDto(ad);
     }
 
-    public Ad addAd(Integer authorId, CreateOrUpdateAd createOrUpdateAd, String imagePath) {
-        UserEntity author = userRepository.findById(authorId).orElseThrow();
+    public Ad addAd(String authorEmail, CreateOrUpdateAd createOrUpdateAd, String imagePath) {
+        UserEntity author = getUserByEmailOrThrow(authorEmail);
 
         AdEntity entity = new AdEntity();
         entity.setAuthor(author);
@@ -61,21 +66,59 @@ public class AdService {
 
         adMapper.applyCreateOrUpdate(createOrUpdateAd, entity);
 
+
         AdEntity saved = adRepository.save(entity);
         return adMapper.toAdDto(saved);
     }
 
-    public Ad updateAd(Integer adId, CreateOrUpdateAd createOrUpdateAd) {
-        return adRepository.findById(adId)
-                .map(entity -> {
-                    // ВАЖНО: порядок аргументов для MapStruct
-                    adMapper.applyCreateOrUpdate(createOrUpdateAd, entity);
-                    return adMapper.toAdDto(entity);
-                })
-                .orElse(null);
+    public Ad updateAd(Integer adId, String currentEmail, CreateOrUpdateAd createOrUpdateAd) {
+        UserEntity currentUser = getUserByEmailOrThrow(currentEmail);
+
+        AdEntity ad = adRepository.findById(adId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+
+        checkAdPermission(currentUser, ad);
+
+        adMapper.applyCreateOrUpdate(createOrUpdateAd, ad);
+        AdEntity saved = adRepository.save(ad);
+        return adMapper.toAdDto(saved);
     }
 
-    public void deleteAd(Integer adId) {
-        adRepository.deleteById(adId);
+    public void deleteAd(Integer adId, String currentEmail) {
+        UserEntity currentUser = getUserByEmailOrThrow(currentEmail);
+
+        AdEntity ad = adRepository.findById(adId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+
+        checkAdPermission(currentUser, ad);
+
+        adRepository.delete(ad);
+    }
+
+    public byte[] updateAdImage(Integer adId, String currentEmail, String imagePath) {
+        UserEntity currentUser = getUserByEmailOrThrow(currentEmail);
+
+        AdEntity ad = adRepository.findById(adId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
+
+        checkAdPermission(currentUser, ad);
+
+        adRepository.save(ad);
+        return new byte[0];
+    }
+
+    private UserEntity getUserByEmailOrThrow(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    private void checkAdPermission(UserEntity currentUser, AdEntity ad) {
+        if (currentUser.getRole() == UserRole.ADMIN) {
+            return;
+        }
+        Integer ownerId = ad.getAuthor() != null ? ad.getAuthor().getId() : null;
+        if (ownerId == null || !ownerId.equals(currentUser.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No permission for this ad");
+        }
     }
 }

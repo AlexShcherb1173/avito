@@ -1,47 +1,59 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.entity.UserRole;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
 @Service
+@RequiredArgsConstructor
+@Transactional
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager manager;
-    private final PasswordEncoder encoder;
-
-    public AuthServiceImpl(UserDetailsManager manager,
-                           PasswordEncoder passwordEncoder) {
-        this.manager = manager;
-        this.encoder = passwordEncoder;
-    }
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
-            return false;
-        }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        return encoder.matches(password, userDetails.getPassword());
+        return userRepository.findByEmail(userName)
+                .map(user -> passwordEncoder.matches(password, user.getPassword()))
+                .orElse(false);
     }
 
     @Override
     public boolean register(Register register) {
-        if (manager.userExists(register.getUsername())) {
+        if (register == null) return false;
+
+        String email = register.getUsername();
+        String rawPassword = register.getPassword();
+
+        if (email == null || email.isBlank()) return false;
+        if (rawPassword == null || rawPassword.isBlank()) return false;
+
+        if (register.getFirstName() == null || register.getFirstName().isBlank()) return false;
+        if (register.getLastName() == null || register.getLastName().isBlank()) return false;
+
+        if (userRepository.findByEmail(email).isPresent()) return false;
+
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setFirstName(register.getFirstName().trim());
+        user.setLastName(register.getLastName().trim());
+        user.setPhone(register.getPhone());
+        user.setRole(UserRole.USER);
+
+        try {
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
             return false;
         }
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
-                        .username(register.getUsername())
-                        .roles(register.getRole().name())
-                        .build());
-        return true;
     }
-
 }
+
