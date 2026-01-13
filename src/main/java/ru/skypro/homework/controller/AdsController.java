@@ -1,78 +1,94 @@
 package ru.skypro.homework.controller;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.service.CommentService;
 
-@Slf4j
+import javax.validation.Valid;
+import java.io.IOException;
+
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
-@RequiredArgsConstructor
 public class AdsController {
+
+    private static final Logger log = LoggerFactory.getLogger(AdsController.class);
+    private final AdService adService;
+    private final CommentService commentService;
+
+    public AdsController(AdService adService, CommentService commentService) {
+        this.adService = adService;
+        this.commentService = commentService;
+    }
 
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
-        // TODO: получить все объявления
-        Ads ads = new Ads();
+        log.info("Получение всех объявлений");
+        Ads ads = adService.getAllAds();
         return ResponseEntity.ok(ads);
     }
 
     @PostMapping(consumes = "multipart/form-data")
     public ResponseEntity<Ad> addAd(
-            @RequestPart("properties") CreateOrUpdateAd properties,
-            @RequestPart("image") MultipartFile image) {
-        // TODO: добавить объявление
-        Ad ad = new Ad();
+            @RequestPart("properties") @Valid CreateOrUpdateAd properties,
+            @RequestPart("image") MultipartFile image,
+            Authentication authentication) throws IOException {
+        log.info("Создание нового объявления пользователем: {}", authentication.getName());
+        Ad ad = adService.addAd(properties, image, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(ad);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ExtendedAd> getAds(@PathVariable("id") Integer id) {
-        // TODO: получить информацию об объявлении по ID
-        ExtendedAd extendedAd = new ExtendedAd();
+        log.info("Получение объявления по ID: {}", id);
+        ExtendedAd extendedAd = adService.getExtendedAd(id);
         return ResponseEntity.ok(extendedAd);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeAd(@PathVariable("id") Integer id) {
-        // TODO: удалить объявление
+        log.info("Удаление объявления ID: {}", id);
+        adService.removeAd(id);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<Ad> updateAds(
             @PathVariable("id") Integer id,
-            @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        // TODO: обновить информацию об объявлении
-        Ad ad = new Ad();
+            @Valid @RequestBody CreateOrUpdateAd createOrUpdateAd) {
+        log.info("Обновление объявления ID: {}", id);
+        Ad ad = adService.updateAd(id, createOrUpdateAd);
         return ResponseEntity.ok(ad);
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Ads> getAdsMe() {
-        // TODO: получить объявления текущего пользователя
-        Ads ads = new Ads();
+    public ResponseEntity<Ads> getAdsMe(Authentication authentication) {
+        log.info("Получение объявлений текущего пользователя: {}", authentication.getName());
+        Ads ads = adService.getAdsByUser(authentication.getName());
         return ResponseEntity.ok(ads);
     }
 
     @GetMapping("/{id}/comments")
     public ResponseEntity<Comments> getComments(@PathVariable("id") Integer id) {
-        // TODO: получить комментарии объявления
-        Comments comments = new Comments();
+        log.info("Получение комментариев для объявления ID: {}", id);
+        Comments comments = commentService.getComments(id);
         return ResponseEntity.ok(comments);
     }
 
     @PostMapping("/{id}/comments")
     public ResponseEntity<Comment> addComment(
             @PathVariable("id") Integer id,
-            @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        // TODO: добавить комментарий к объявлению
-        Comment comment = new Comment();
+            @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment,
+            Authentication authentication) {
+        log.info("Добавление комментария к объявлению ID: {} пользователем: {}", id, authentication.getName());
+        Comment comment = commentService.addComment(id, createOrUpdateComment, authentication);
         return ResponseEntity.ok(comment);
     }
 
@@ -80,7 +96,8 @@ public class AdsController {
     public ResponseEntity<?> deleteComment(
             @PathVariable("adId") Integer adId,
             @PathVariable("commentId") Integer commentId) {
-        // TODO: удалить комментарий
+        log.info("Удаление комментария ID: {} из объявления ID: {}", commentId, adId);
+        commentService.deleteComment(adId, commentId);
         return ResponseEntity.ok().build();
     }
 
@@ -88,17 +105,25 @@ public class AdsController {
     public ResponseEntity<Comment> updateComment(
             @PathVariable("adId") Integer adId,
             @PathVariable("commentId") Integer commentId,
-            @RequestBody CreateOrUpdateComment createOrUpdateComment) {
-        // TODO: обновить комментарий
-        Comment comment = new Comment();
+            @Valid @RequestBody CreateOrUpdateComment createOrUpdateComment) {
+        log.info("Обновление комментария ID: {} в объявлении ID: {}", commentId, adId);
+        Comment comment = commentService.updateComment(adId, commentId, createOrUpdateComment);
         return ResponseEntity.ok(comment);
     }
 
     @PatchMapping(value = "/{id}/image", consumes = "multipart/form-data")
     public ResponseEntity<byte[]> updateImage(
             @PathVariable("id") Integer id,
-            @RequestParam("image") MultipartFile image) {
-        // TODO: обновить картинку объявления
-        return ResponseEntity.ok(new byte[0]);
+            @RequestParam("image") MultipartFile image) throws IOException {
+        log.info("Обновление изображения объявления ID: {}", id);
+        byte[] imageBytes = adService.updateAdImage(id, image);
+        return ResponseEntity.ok(imageBytes);
+    }
+
+    @GetMapping("/image/{id}")
+    public ResponseEntity<byte[]> getAdImage(@PathVariable("id") Integer id) throws IOException {
+        log.info("Получение изображения объявления ID: {}", id);
+        byte[] imageBytes = adService.getAdImage(id);
+        return ResponseEntity.ok(imageBytes);
     }
 }
