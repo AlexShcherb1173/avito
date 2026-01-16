@@ -1,13 +1,23 @@
 package ru.skypro.homework.dto;
 
-public class Register {
+public class UserResponseDto {
 
+    private Long id;
     private String username;
-    private String password;
+    private String email;
     private String firstName;
     private String lastName;
     private String phone;
-    private Role role;
+    private String image;
+    private String role;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getUsername() {
         return username;
@@ -17,12 +27,12 @@ public class Register {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
+    public String getEmail() {
+        return email;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getFirstName() {
@@ -49,11 +59,19 @@ public class Register {
         this.phone = phone;
     }
 
-    public Role getRole() {
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
+    public void setRole(String role) {
         this.role = role;
     }
 }

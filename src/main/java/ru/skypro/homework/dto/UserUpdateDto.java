@@ -1,28 +1,19 @@
 package ru.skypro.homework.dto;
 
-public class Register {
+public class UserUpdateDto {
 
-    private String username;
-    private String password;
+    private String email;
     private String firstName;
     private String lastName;
     private String phone;
-    private Role role;
+    private Role role; // dto.Role
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getFirstName() {
