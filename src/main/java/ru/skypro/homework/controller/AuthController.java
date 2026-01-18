@@ -57,7 +57,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/set_password")
+    @PostMapping("/users/set_password")
     public ResponseEntity<?> setPassword(@Valid @RequestBody NewPassword newPassword,
                                          Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
