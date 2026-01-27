@@ -10,35 +10,34 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.skypro.homework.dto.LoginDto;
+import ru.skypro.homework.dto.RegisterDto;
 import ru.skypro.homework.service.AuthService;
+
+import javax.validation.Valid;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
-@Api(tags = "Авторизация", value = "api позволяет авторизоваться пользователю")
-public class AuthController {
+@Api(tags = "Регистрация", value = "api создать нового пользователя")
+public class RegisterController {
 
     private final AuthService authService;
 
-    @ApiOperation(value = "Авторизация по логину и паролю",
-            notes = "Позволяет пользователю войти в систему",
-            response = LoginDto.class)
+    @ApiOperation(value = "Регистрация пользователя",
+            notes = "Позволяет пользователю пройти регистрацию",
+            response = RegisterDto.class)
     @ApiResponses(value = {
             @ApiResponse(
-                    code = 200,
-                    message = "OK"),
+                    code = 201,
+                    message = "Created"),
             @ApiResponse(
-                    code = 404,
-                    message = "Not found"),
-            @ApiResponse(
-                    code = 401,
-                    message = "Unauthorized")
+                    code = 400,
+                    message = "Bad Request")
     })
-    @PostMapping("/login")
-    public boolean login(@RequestBody LoginDto loginDto) {
-        return authService.login(loginDto);
+    @PostMapping("/register")
+    public boolean register(@Valid @RequestBody RegisterDto registerDto) {
+        return authService.register(registerDto);
     }
 
 }
