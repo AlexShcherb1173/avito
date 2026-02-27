@@ -10,6 +10,14 @@ import ru.skypro.homework.entity.UserRole;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
+/**
+ * Сервис аутентификации и регистрации пользователей.
+ * <p>
+ * Регистрация сохраняет пользователя в БД, пароль хранится в виде хеша (BCrypt).
+ * Проверка логина выполняется сравнением введённого пароля с хешем из БД.
+ * </p>
+ */
+
 @Service
 @RequiredArgsConstructor
 @Transactional

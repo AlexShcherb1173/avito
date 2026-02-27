@@ -2,12 +2,17 @@ package ru.skypro.homework.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.service.AdService;
+
+import java.io.IOException;
+import java.util.Base64;
+
 
 @RestController
 @RequestMapping("/ads")
@@ -34,6 +39,8 @@ public class AdsController {
         Ad created = adService.addAd(email, properties, imagePath);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
+
+
 
     @GetMapping("/me")
     public ResponseEntity<Ads> getAdsMe(Authentication authentication) {
@@ -76,4 +83,16 @@ public class AdsController {
         byte[] bytes = adService.updateAdImage(id, email, imagePath);
         return ResponseEntity.ok(bytes);
     }
+
+
+    @GetMapping(value = "/{id}/image", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable("id") Integer id) {
+
+        byte[] imageBytes = adService.getImageBytes(id);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .body(imageBytes);
+    }
+
 }

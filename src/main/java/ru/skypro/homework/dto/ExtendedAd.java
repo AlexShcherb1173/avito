@@ -10,6 +10,7 @@ public class ExtendedAd {
     private String description;
     private String email;
     private String image;
+    private String productImg;
     private String phone;
     private Integer price;
     private String title;

@@ -13,6 +13,7 @@ import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.entity.UserRole;
 import ru.skypro.homework.mapper.CommentMapper;
+import ru.skypro.homework.mapper.CommentMapperManual;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
@@ -21,6 +22,13 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с комментариями к объявлениям.
+ * <p>
+ * Обеспечивает получение/создание/изменение/удаление комментариев, связывает комментарии с объявлениями и авторами,
+ * выполняет проверку прав (автор комментария или ADMIN) и маппинг Entity - DTO.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -29,8 +37,16 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final AdRepository adRepository;
     private final UserRepository userRepository;
-    private final CommentMapper commentMapper;
+    //private final CommentMapper commentMapper;
+    private final CommentMapperManual commentMapper;  // ✅ ручной
 
+    /**
+     * Возвращает список комментариев для указанного объявления.
+     *
+     * @param adId id объявления
+     * @return DTO {@link Comments} со списком комментариев
+     * @throws org.springframework.web.server.ResponseStatusException если объявление не найдено
+     */
     public Comments getComments(Integer adId) {
         ensureAdExists(adId);
 
@@ -45,6 +61,15 @@ public class CommentService {
         return comments;
     }
 
+    /**
+     * Добавляет комментарий к объявлению от имени текущего пользователя.
+     *
+     * @param adId id объявления
+     * @param authorEmail email автора (из аутентификации)
+     * @param dto DTO с текстом комментария
+     * @return DTO {@link Comment} созданного комментария
+     * @throws org.springframework.web.server.ResponseStatusException если объявление/пользователь не найдены
+     */
     public Comment addComment(Integer adId, String authorEmail, CreateOrUpdateComment dto) {
         AdEntity ad = adRepository.findById(adId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Ad not found"));
@@ -56,13 +81,23 @@ public class CommentService {
         entity.setAuthor(author);
         entity.setCreatedAt(Instant.now());
 
-        commentMapper.applyCreateOrUpdate(dto, entity);
+        commentMapper.applyCreateOrUpdate(entity, dto);
 
 
         CommentEntity saved = commentRepository.save(entity);
         return commentMapper.toDto(saved);
     }
 
+    /**
+     * Обновляет комментарий, если пользователь имеет право (автор комментария или ADMIN).
+     *
+     * @param adId id объявления
+     * @param commentId id комментария
+     * @param currentEmail email текущего пользователя
+     * @param dto DTO с обновляемым текстом
+     * @return DTO {@link Comment} после обновления
+     * @throws org.springframework.web.server.ResponseStatusException если комментарий/объявление не найдены или нет прав
+     */
     public Comment updateComment(Integer adId, Integer commentId, String currentEmail, CreateOrUpdateComment dto) {
         ensureAdExists(adId);
 
@@ -74,12 +109,20 @@ public class CommentService {
 
         checkCommentPermission(currentUser, comment);
 
-        commentMapper.applyCreateOrUpdate(dto, comment);
+        commentMapper.applyCreateOrUpdate(comment, dto);
 
 
         return commentMapper.toDto(comment);
     }
 
+    /**
+     * Удаляет комментарий, если пользователь имеет право (автор комментария или ADMIN).
+     *
+     * @param adId id объявления
+     * @param commentId id комментария
+     * @param currentEmail email текущего пользователя
+     * @throws org.springframework.web.server.ResponseStatusException если комментарий/объявление не найдены или нет прав
+     */
     public void deleteComment(Integer adId, Integer commentId, String currentEmail) {
         ensureAdExists(adId);
 

@@ -23,7 +23,13 @@ public class CommentMapperManual {
         if (author != null) {
             dto.setAuthor(author.getId());
             dto.setAuthorFirstName(author.getFirstName());
-            dto.setAuthorImage(author.getImage());
+            //dto.setAuthorImage(author.getImage());
+            // ✅ Добавляем "/" перед именем файла
+            if (author.getImage() != null && !author.getImage().isEmpty()) {
+                dto.setAuthorImage("/" + author.getImage());
+            } else {
+                dto.setAuthorImage("/default-avatar.png");
+            }
         }
 
         return dto;

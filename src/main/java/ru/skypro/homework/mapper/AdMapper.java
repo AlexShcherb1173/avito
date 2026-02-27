@@ -1,3 +1,4 @@
+
 package ru.skypro.homework.mapper;
 
 import org.mapstruct.*;
@@ -11,8 +12,11 @@ public interface AdMapper {
 
     @Mappings({
             @Mapping(target = "pk", source = "id"),
-            @Mapping(target = "author", source = "author.id")
+            @Mapping(target = "author", source = "author.id"),
+            @Mapping(target = "productImg", source = "image")
     })
+
+
     Ad toAdDto(AdEntity entity);
 
     @Mappings({
@@ -20,9 +24,14 @@ public interface AdMapper {
             @Mapping(target = "authorFirstName", source = "author.firstName"),
             @Mapping(target = "authorLastName", source = "author.lastName"),
             @Mapping(target = "email", source = "author.email"),
-            @Mapping(target = "phone", source = "author.phone")
+            @Mapping(target = "phone", source = "author.phone"),
+            @Mapping(target = "productImg", source = "image")
     })
+
+
     ExtendedAd toExtendedDto(AdEntity entity);
+
+
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mappings({
@@ -33,3 +42,4 @@ public interface AdMapper {
     })
     void applyCreateOrUpdate(CreateOrUpdateAd dto, @MappingTarget AdEntity entity);
 }
+

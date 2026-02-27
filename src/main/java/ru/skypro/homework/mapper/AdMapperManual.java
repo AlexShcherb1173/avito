@@ -10,6 +10,7 @@ import ru.skypro.homework.entity.UserEntity;
 @Component
 public class AdMapperManual {
 
+
     public Ad toAdDto(AdEntity entity) {
         if (entity == null) return null;
 
@@ -17,8 +18,14 @@ public class AdMapperManual {
         dto.setPk(entity.getId());
         dto.setTitle(entity.getTitle());
         dto.setPrice(entity.getPrice());
-        dto.setImage(entity.getImage());
         dto.setAuthor(entity.getAuthor() == null ? null : entity.getAuthor().getId());
+
+        if (entity.getImage() != null && !entity.getImage().isEmpty()) {
+            dto.setImage("/" + entity.getImage());
+        } else {
+            dto.setImage("/default.jpg");
+        }
+
         return dto;
     }
 
@@ -30,7 +37,12 @@ public class AdMapperManual {
         dto.setTitle(entity.getTitle());
         dto.setPrice(entity.getPrice());
         dto.setDescription(entity.getDescription());
-        dto.setImage(entity.getImage());
+
+        if (entity.getImage() != null && !entity.getImage().isEmpty()) {
+            dto.setImage("/" + entity.getImage());
+        } else {
+            dto.setImage("/default.jpg");
+        }
 
         UserEntity author = entity.getAuthor();
         if (author != null) {

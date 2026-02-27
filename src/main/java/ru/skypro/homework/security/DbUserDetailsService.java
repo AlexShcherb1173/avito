@@ -9,6 +9,12 @@ import ru.skypro.homework.repository.UserRepository;
 
 import java.util.List;
 
+/**
+ * Реализация {@link org.springframework.security.core.userdetails.UserDetailsService},
+ * которая загружает пользователя из БД по email и передаёт данные в Spring Security.
+ */
+
+
 @Service
 @RequiredArgsConstructor
 public class DbUserDetailsService implements UserDetailsService {

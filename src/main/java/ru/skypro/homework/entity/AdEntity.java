@@ -28,8 +28,6 @@ public class AdEntity {
     @Column(name = "price", nullable = false)
     private Integer price;
 
-    @Column(name = "image")
-    private String image;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
@@ -38,5 +36,9 @@ public class AdEntity {
     @OneToMany(mappedBy = "ad", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<CommentEntity> comments = new ArrayList<>();
+
+    @Column(name = "image", length = 1000000)
+    private String image;
+
 }
 

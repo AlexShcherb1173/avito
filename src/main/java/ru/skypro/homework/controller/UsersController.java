@@ -10,17 +10,65 @@ import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 import ru.skypro.homework.service.UserService;
 
+import java.util.Map;
+
 @RestController
-@RequestMapping("/users")
+@RequestMapping({"/api/users", "/users"})
 @RequiredArgsConstructor
 public class UsersController {
 
     private final UserService userService;
 
+//    @GetMapping("/me")
+//    public ResponseEntity<User> getMe(Authentication authentication) {
+//        String email = authentication.getName();
+//        return ResponseEntity.ok(userService.getUserByEmail(email));
+//    }
+
     @GetMapping("/me")
-    public ResponseEntity<User> getMe(Authentication authentication) {
+    public ResponseEntity<?> getMe(Authentication authentication) {
+        // Проверка на null
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "error", "Not authenticated",
+                    "message", "Пожалуйста, войдите в систему"
+            ));
+        }
+
+        // Получаем email
         String email = authentication.getName();
-        return ResponseEntity.ok(userService.getUserByEmail(email));
+        if (email == null) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "error", "No email in authentication",
+                    "message", "Ошибка авторизации"
+            ));
+        }
+
+        try {
+            // Получаем пользователя
+            User user = userService.getUserByEmail(email);
+
+            // Убедимся что все поля заполнены
+            if (user.getRole() == null) {
+                user.setRole("USER");
+            }
+//            if (user.getAvatar() == null) {
+//                user.setAvatar("/default-avatar.png");
+//            }
+//            // enabled уже должно быть true из маппера
+
+            return ResponseEntity.ok(user);
+
+        } catch (Exception e) {
+            // Логируем ошибку
+            e.printStackTrace();
+
+            return ResponseEntity.status(500).body(Map.of(
+                    "error", e.getMessage(),
+                    "message", "Пользователь не найден",
+                    "type", e.getClass().getSimpleName()
+            ));
+        }
     }
 
     @PatchMapping("/me")
