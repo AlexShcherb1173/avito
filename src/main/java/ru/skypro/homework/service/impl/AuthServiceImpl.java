@@ -1,51 +1,57 @@
 package ru.skypro.homework.service.impl;
 
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Register;
+import ru.skypro.homework.dto.Role;
+import ru.skypro.homework.entity.User;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
-import javax.annotation.Resource;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    @Resource
-    private PasswordEncoder passwordEncoder;
-
-    @Resource
-    private UserDetailsManager userDetailsManager;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public boolean login(String userName, String password) {
 
-        if (!userDetailsManager.userExists(userName)) {
+        Optional<User> userOptional = userRepository.findByEmail(userName);
+
+        if (userOptional.isEmpty()) {
             return false;
         }
 
-        UserDetails userDetails =
-                userDetailsManager.loadUserByUsername(userName);
+        User user = userOptional.get();
 
-        return passwordEncoder.matches(password, userDetails.getPassword());
+        return passwordEncoder.matches(password, user.getPassword());
     }
 
     @Override
     public boolean register(Register register) {
 
-        if (userDetailsManager.userExists(register.getUsername())) {
+        if (userRepository.findByEmail(register.getUsername()).isPresent()) {
             return false;
         }
 
-        UserDetails user =
-                org.springframework.security.core.userdetails.User
-                        .withUsername(register.getUsername())
-                        .password(passwordEncoder.encode(register.getPassword()))
-                        .roles(register.getRole())   // БЕЗ .name()
-                        .build();
+        User user = new User();
+        user.setEmail(register.getUsername());
+        user.setPassword(passwordEncoder.encode(register.getPassword()));
+        user.setFirstName(register.getFirstName());
+        user.setLastName(register.getLastName());
+        user.setPhone(register.getPhone());
 
-        userDetailsManager.createUser(user);
+        // Преобразование String → Enum Role
+        user.setRole(Role.valueOf(register.getRole()));
+
+        user.setImage(null);
+
+        userRepository.save(user);
 
         return true;
     }

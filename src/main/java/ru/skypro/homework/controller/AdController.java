@@ -3,6 +3,7 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,13 +14,10 @@ import ru.skypro.homework.service.AdService;
 @RestController
 @RequestMapping("/ads")
 @Tag(name = "Объявления")
+@RequiredArgsConstructor
 public class AdController {
 
     private final AdService adService;
-
-    public AdController(AdService adService) {
-        this.adService = adService;
-    }
 
     @Operation(summary = "Получение всех объявлений")
     @ApiResponse(responseCode = "200", description = "OK")
@@ -48,14 +46,15 @@ public class AdController {
     @Operation(summary = "Получение информации об объявлении")
     @ApiResponse(responseCode = "200", description = "OK")
     @GetMapping("/{id}")
-    public ResponseEntity<ExtendedAd> getAdById(@PathVariable int id) {
+    public ResponseEntity<ExtendedAd> getAdById(@PathVariable Long id) {
         return ResponseEntity.ok(adService.getAdById(id));
     }
 
     @Operation(summary = "Удаление объявления")
     @ApiResponse(responseCode = "204", description = "No Content")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAd(@PathVariable int id) {
+    public ResponseEntity<Void> deleteAd(@PathVariable Long id) {
+        adService.deleteAd(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -63,7 +62,7 @@ public class AdController {
     @ApiResponse(responseCode = "200", description = "OK")
     @PatchMapping("/{id}")
     public ResponseEntity<Ad> updateAd(
-            @PathVariable int id,
+            @PathVariable Long id,
             @RequestBody CreateOrUpdateAd properties
     ) {
         return ResponseEntity.ok(adService.updateAd(id, properties));
@@ -73,7 +72,7 @@ public class AdController {
     @ApiResponse(responseCode = "200", description = "OK")
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> updateImage(
-            @PathVariable int id,
+            @PathVariable Long id,
             @RequestPart("image") MultipartFile image
     ) {
         return ResponseEntity
