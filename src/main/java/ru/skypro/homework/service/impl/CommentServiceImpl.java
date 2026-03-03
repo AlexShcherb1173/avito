@@ -1,6 +1,8 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.Comment;
 import ru.skypro.homework.dto.Comments;
@@ -50,11 +52,7 @@ public class CommentServiceImpl implements CommentService {
                 adRepository.findById(adId)
                         .orElseThrow(() -> new RuntimeException("Ad not found"));
 
-        // ВРЕМЕННО: берём первого пользователя (пока нет полноценной security)
-        User author = userRepository.findAll()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No users in database"));
+        User author = getCurrentUser();
 
         ru.skypro.homework.entity.Comment comment =
                 commentMapper.toEntity(createComment);
@@ -71,7 +69,18 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long adId, Long commentId) {
-        commentRepository.deleteById(commentId);
+
+        ru.skypro.homework.entity.Comment comment =
+                commentRepository.findById(commentId)
+                        .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+        User currentUser = getCurrentUser();
+
+        if (!isOwnerOrAdmin(comment, currentUser)) {
+            throw new AccessDeniedException("You cannot delete чужой комментарий");
+        }
+
+        commentRepository.delete(comment);
     }
 
     @Override
@@ -81,11 +90,33 @@ public class CommentServiceImpl implements CommentService {
                 commentRepository.findById(commentId)
                         .orElseThrow(() -> new RuntimeException("Comment not found"));
 
+        User currentUser = getCurrentUser();
+
+        if (!isOwnerOrAdmin(comment, currentUser)) {
+            throw new AccessDeniedException("You cannot edit чужой комментарий");
+        }
+
         comment.setText(updateComment.getText());
 
         ru.skypro.homework.entity.Comment updated =
                 commentRepository.save(comment);
 
         return commentMapper.toDto(updated);
+    }
+
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private boolean isOwnerOrAdmin(ru.skypro.homework.entity.Comment comment, User user) {
+        return comment.getAuthor().getId().equals(user.getId())
+                || user.getRole().name().equals("ADMIN");
     }
 }

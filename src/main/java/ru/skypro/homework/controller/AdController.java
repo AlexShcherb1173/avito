@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +19,7 @@ import ru.skypro.homework.service.AdService;
 public class AdController {
 
     private final AdService adService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Operation(summary = "Получение всех объявлений")
     @ApiResponse(responseCode = "200", description = "OK")
@@ -37,10 +39,20 @@ public class AdController {
     @ApiResponse(responseCode = "201", description = "Created")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Ad> addAd(
-            @RequestPart("properties") CreateOrUpdateAd properties,
+            @RequestPart("properties") String properties,
             @RequestPart("image") MultipartFile image
     ) {
-        return ResponseEntity.status(201).body(adService.addAd(properties, image));
+        try {
+            CreateOrUpdateAd createOrUpdateAd =
+                    objectMapper.readValue(properties, CreateOrUpdateAd.class);
+
+            return ResponseEntity
+                    .status(201)
+                    .body(adService.addAd(createOrUpdateAd, image));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @Operation(summary = "Получение информации об объявлении")

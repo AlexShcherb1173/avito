@@ -1,6 +1,8 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -43,10 +45,7 @@ public class AdServiceImpl implements AdService {
     @Override
     public Ads getAdsMe() {
 
-        User currentUser = userRepository.findAll()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No users in database"));
+        User currentUser = getCurrentUser();
 
         List<Ad> ads = adRepository.findByAuthorId(currentUser.getId());
 
@@ -65,10 +64,7 @@ public class AdServiceImpl implements AdService {
     @Override
     public ru.skypro.homework.dto.Ad addAd(CreateOrUpdateAd properties, MultipartFile image) {
 
-        User author = userRepository.findAll()
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No users in database"));
+        User author = getCurrentUser();
 
         Ad ad = adMapper.toEntity(properties);
         ad.setAuthor(author);
@@ -93,7 +89,17 @@ public class AdServiceImpl implements AdService {
 
     @Override
     public void deleteAd(Long id) {
-        adRepository.deleteById(id);
+
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ad not found"));
+
+        User currentUser = getCurrentUser();
+
+        if (!isOwnerOrAdmin(ad, currentUser)) {
+            throw new AccessDeniedException("You cannot delete чужое объявление");
+        }
+
+        adRepository.delete(ad);
     }
 
     @Override
@@ -101,6 +107,12 @@ public class AdServiceImpl implements AdService {
 
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ad not found"));
+
+        User currentUser = getCurrentUser();
+
+        if (!isOwnerOrAdmin(ad, currentUser)) {
+            throw new AccessDeniedException("You cannot edit чужое объявление");
+        }
 
         ad.setTitle(properties.getTitle());
         ad.setPrice(properties.getPrice());
@@ -117,6 +129,12 @@ public class AdServiceImpl implements AdService {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ad not found"));
 
+        User currentUser = getCurrentUser();
+
+        if (!isOwnerOrAdmin(ad, currentUser)) {
+            throw new AccessDeniedException("You cannot update image чужого объявления");
+        }
+
         if (image != null) {
             ad.setImage(image.getOriginalFilename());
             adRepository.save(ad);
@@ -129,5 +147,21 @@ public class AdServiceImpl implements AdService {
         }
 
         return new byte[0];
+    }
+
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private boolean isOwnerOrAdmin(Ad ad, User user) {
+        return ad.getAuthor().getId().equals(user.getId())
+                || user.getRole().name().equals("ADMIN");
     }
 }
