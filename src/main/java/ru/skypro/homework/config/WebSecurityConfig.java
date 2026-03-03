@@ -24,10 +24,9 @@ public class WebSecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
 
     private static final String[] AUTH_WHITELIST = {
-            "/swagger-ui/**",
+            "/swagger-resources/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
-            "/swagger-resources/**",
             "/webjars/**",
             "/login",
             "/register"
@@ -36,9 +35,8 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
-                .csrf().disable()
-                .userDetailsService(customUserDetailsService)
+        http.csrf()
+                .disable()
                 .authorizeHttpRequests(auth -> auth
                         .mvcMatchers(AUTH_WHITELIST).permitAll()
                         .mvcMatchers(HttpMethod.GET, "/ads").permitAll()
@@ -48,6 +46,9 @@ public class WebSecurityConfig {
                         .authenticated()
                         .anyRequest().authenticated()
                 )
+                .cors()
+                .and()
+                .userDetailsService(customUserDetailsService)
                 .httpBasic(withDefaults());
 
         return http.build();

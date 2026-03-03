@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPassword;
@@ -15,6 +13,7 @@ import ru.skypro.homework.dto.User;
 import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.repository.UserRepository;
 
+@CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
 @Tag(name = "Пользователи")
@@ -23,25 +22,16 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
-
-    // ===== ВСПОМОГАТЕЛЬНЫЙ МЕТОД =====
-    private ru.skypro.homework.entity.User getCurrentUser() {
-        String email = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
 
     @Operation(summary = "Получение информации об авторизованном пользователе")
     @ApiResponse(responseCode = "200", description = "OK")
     @GetMapping("/me")
     public ResponseEntity<User> getUser() {
 
-        ru.skypro.homework.entity.User entity = getCurrentUser();
+        ru.skypro.homework.entity.User entity = userRepository.findAll()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No users in database"));
 
         return ResponseEntity.ok(userMapper.toDto(entity));
     }
@@ -51,7 +41,10 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<User> updateUser(@RequestBody UpdateUser updateUser) {
 
-        ru.skypro.homework.entity.User entity = getCurrentUser();
+        ru.skypro.homework.entity.User entity = userRepository.findAll()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No users in database"));
 
         entity.setFirstName(updateUser.getFirstName());
         entity.setLastName(updateUser.getLastName());
@@ -67,7 +60,10 @@ public class UserController {
     @PatchMapping(value = "/me/image", consumes = "multipart/form-data")
     public ResponseEntity<Void> updateUserImage(@RequestPart("image") MultipartFile image) {
 
-        ru.skypro.homework.entity.User entity = getCurrentUser();
+        ru.skypro.homework.entity.User entity = userRepository.findAll()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No users in database"));
 
         entity.setImage(image.getOriginalFilename());
         userRepository.save(entity);
@@ -79,18 +75,6 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "OK")
     @PostMapping("/set_password")
     public ResponseEntity<Void> setPassword(@RequestBody NewPassword newPassword) {
-
-        ru.skypro.homework.entity.User entity = getCurrentUser();
-
-
-        if (!passwordEncoder.matches(newPassword.getCurrentPassword(), entity.getPassword())) {
-            return ResponseEntity.badRequest().build();
-        }
-
-
-        entity.setPassword(passwordEncoder.encode(newPassword.getNewPassword()));
-        userRepository.save(entity);
-
         return ResponseEntity.ok().build();
     }
 }
