@@ -4,24 +4,22 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import ru.skypro.homework.dto.ExtendedAd;
+import ru.skypro.homework.service.AdService;
 
 @RestController
 @RequestMapping("/ads")
+@RequiredArgsConstructor
 @Tag(name = "Объявления", description = "Операции с объявлениями")
 public class AdsController {
 
-    private final List<Ad> adList = new ArrayList<>();
-    private int nextId = 1;
+    private final AdService adService;
 
     @Operation(summary = "Получение всех объявлений")
     @ApiResponses({
@@ -29,27 +27,31 @@ public class AdsController {
     })
     @GetMapping
     public ResponseEntity<Ads> getAllAds() {
-        Ads ads = new Ads();
-        ads.setCount(adList.size());
-        ads.setResults(adList);
-        return ResponseEntity.ok(ads);
+        return ResponseEntity.ok(adService.getAllAds());
+    }
+
+    @Operation(summary = "Получение объявления по ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Not Found")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<ExtendedAd> getAdById(@PathVariable Integer id) {
+        return adService.getAdById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Добавление нового объявления")
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Created")
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "Author not found")
     })
     @PostMapping
     public ResponseEntity<Ad> addAd(@RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        Ad ad = new Ad();
-        ad.setPk(nextId++);
-        ad.setTitle(createOrUpdateAd.getTitle());
-        ad.setPrice(createOrUpdateAd.getPrice());
-        ad.setImage("placeholder.jpg"); // временно
-        ad.setAuthor(1); // пока статично
-
-        adList.add(ad);
-        return new ResponseEntity<>(ad, HttpStatus.CREATED);
+        return adService.addAd(createOrUpdateAd)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Обновление объявления по ID")
@@ -58,16 +60,11 @@ public class AdsController {
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<Ad> updateAd(@PathVariable int id,
+    public ResponseEntity<Ad> updateAd(@PathVariable Integer id,
                                        @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        for (Ad ad : adList) {
-            if (ad.getPk() == id) {
-                ad.setTitle(createOrUpdateAd.getTitle());
-                ad.setPrice(createOrUpdateAd.getPrice());
-                return ResponseEntity.ok(ad);
-            }
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return adService.updateAd(id, createOrUpdateAd)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Удаление объявления по ID")
@@ -76,15 +73,10 @@ public class AdsController {
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAd(@PathVariable int id) {
-        Iterator<Ad> iterator = adList.iterator();
-        while (iterator.hasNext()) {
-            Ad ad = iterator.next();
-            if (ad.getPk() == id) {
-                iterator.remove();
-                return ResponseEntity.noContent().build();
-            }
+    public ResponseEntity<Void> deleteAd(@PathVariable Integer id) {
+        if (adService.deleteAd(id)) {
+            return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.notFound().build();
     }
 }
