@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Ad;
 import ru.skypro.homework.dto.Ads;
@@ -48,8 +49,9 @@ public class AdsController {
             @ApiResponse(responseCode = "404", description = "Author not found")
     })
     @PostMapping
-    public ResponseEntity<Ad> addAd(@RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        return adService.addAd(createOrUpdateAd)
+    public ResponseEntity<Ad> addAd(@RequestBody CreateOrUpdateAd createOrUpdateAd,
+                                    Authentication authentication) {
+        return adService.addAd(createOrUpdateAd, authentication.getName())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -61,8 +63,9 @@ public class AdsController {
     })
     @PatchMapping("/{id}")
     public ResponseEntity<Ad> updateAd(@PathVariable Integer id,
-                                       @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        return adService.updateAd(id, createOrUpdateAd)
+                                       @RequestBody CreateOrUpdateAd createOrUpdateAd,
+                                       Authentication authentication) {
+        return adService.updateAd(id, createOrUpdateAd, authentication.getName())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -73,8 +76,9 @@ public class AdsController {
             @ApiResponse(responseCode = "404", description = "Not Found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAd(@PathVariable Integer id) {
-        if (adService.deleteAd(id)) {
+    public ResponseEntity<Void> deleteAd(@PathVariable Integer id,
+                                         Authentication authentication) {
+        if (adService.deleteAd(id, authentication.getName())) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
