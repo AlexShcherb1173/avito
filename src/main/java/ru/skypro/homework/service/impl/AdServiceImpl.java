@@ -12,6 +12,7 @@ import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.service.ImageService;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +25,7 @@ public class AdServiceImpl implements AdService {
     private final AdRepository adRepository;
     private final UserRepository userRepository;
     private final AdMapper adMapper;
+    private final ImageService imageService;
 
     @Override
     public Ads getAllAds() {
@@ -69,8 +71,13 @@ public class AdServiceImpl implements AdService {
         Ad ad = adMapper.toEntity(properties);
         ad.setAuthor(author);
 
-        if (image != null) {
-            ad.setImage(image.getOriginalFilename());
+        if (image != null && !image.isEmpty()) {
+            try {
+                String fileName = imageService.saveImage(image);
+                ad.setImage("/images/" + fileName);
+            } catch (IOException e) {
+                throw new RuntimeException("Error saving image", e);
+            }
         }
 
         Ad saved = adRepository.save(ad);
@@ -135,14 +142,19 @@ public class AdServiceImpl implements AdService {
             throw new AccessDeniedException("You cannot update image чужого объявления");
         }
 
-        if (image != null) {
-            ad.setImage(image.getOriginalFilename());
-            adRepository.save(ad);
-
+        if (image != null && !image.isEmpty()) {
             try {
-                return image.getBytes();
+
+                String fileName = imageService.saveImage(image);
+
+                ad.setImage("/images/" + fileName);
+
+                adRepository.save(ad);
+
+                return imageService.getImage(fileName);
+
             } catch (IOException e) {
-                throw new RuntimeException("Cannot read image");
+                throw new RuntimeException("Cannot save image", e);
             }
         }
 

@@ -24,9 +24,11 @@ public class WebSecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
 
     private static final String[] AUTH_WHITELIST = {
-            "/swagger-resources/**",
+            "/swagger-ui/**",
             "/swagger-ui.html",
             "/v3/api-docs/**",
+            "/v3/api-docs",
+            "/swagger-resources/**",
             "/webjars/**",
             "/login",
             "/register"
@@ -35,19 +37,16 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf()
-                .disable()
+        http
+                .csrf().disable()
+                .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .mvcMatchers(AUTH_WHITELIST).permitAll()
                         .mvcMatchers(HttpMethod.GET, "/ads").permitAll()
-                        .mvcMatchers("/ads/**", "/comments/**")
-                        .hasAnyRole("USER", "ADMIN")
-                        .mvcMatchers("/users/**")
-                        .authenticated()
+                        .mvcMatchers("/ads/**", "/comments/**").hasAnyRole("USER", "ADMIN")
+                        .mvcMatchers("/users/**").authenticated()
                         .anyRequest().authenticated()
                 )
-                .cors()
-                .and()
                 .userDetailsService(customUserDetailsService)
                 .httpBasic(withDefaults());
 
@@ -55,10 +54,8 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration
-    ) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
     @Bean
