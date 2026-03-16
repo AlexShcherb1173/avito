@@ -17,6 +17,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с объявлениями.
+ *
+ * Содержит бизнес-логику получения, создания,
+ * обновления, удаления объявлений и обновления их изображений.
+ */
 @Service
 @RequiredArgsConstructor
 public class AdService {
@@ -25,6 +31,11 @@ public class AdService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
 
+    /**
+     * Получить список всех объявлений.
+     *
+     * @return объект Ads со списком объявлений
+     */
     public Ads getAllAds() {
         List<Ad> adDtos = adRepository.findAll()
                 .stream()
@@ -37,11 +48,24 @@ public class AdService {
         return ads;
     }
 
+    /**
+     * Получить расширенную информацию об объявлении по идентификатору.
+     *
+     * @param id идентификатор объявления
+     * @return Optional с расширенной информацией об объявлении
+     */
     public Optional<ExtendedAd> getAdById(Integer id) {
         return adRepository.findById(id)
                 .map(adMapper::toExtendedDto);
     }
 
+    /**
+     * Создать новое объявление.
+     *
+     * @param dto данные для создания объявления
+     * @param email email текущего пользователя
+     * @return Optional с созданным объявлением
+     */
     public Optional<Ad> addAd(CreateOrUpdateAd dto, String email) {
         Optional<UserEntity> authorOptional = userRepository.findByEmail(email);
 
@@ -56,6 +80,14 @@ public class AdService {
         return Optional.of(adMapper.toDto(savedAd));
     }
 
+    /**
+     * Обновить объявление.
+     *
+     * @param id идентификатор объявления
+     * @param dto новые данные объявления
+     * @param email email текущего пользователя
+     * @return Optional с обновленным объявлением
+     */
     public Optional<Ad> updateAd(Integer id, CreateOrUpdateAd dto, String email) {
         Optional<AdEntity> adOptional = adRepository.findById(id);
         Optional<UserEntity> userOptional = userRepository.findByEmail(email);
@@ -77,6 +109,13 @@ public class AdService {
         return Optional.of(adMapper.toDto(updatedAd));
     }
 
+    /**
+     * Удалить объявление.
+     *
+     * @param id идентификатор объявления
+     * @param email email текущего пользователя
+     * @return true, если объявление успешно удалено
+     */
     public boolean deleteAd(Integer id, String email) {
         Optional<AdEntity> adOptional = adRepository.findById(id);
         Optional<UserEntity> userOptional = userRepository.findByEmail(email);
@@ -96,8 +135,44 @@ public class AdService {
         return true;
     }
 
+    /**
+     * Проверить, может ли пользователь редактировать объявление.
+     *
+     * @param adEntity объявление
+     * @param currentUser текущий пользователь
+     * @return true, если пользователь является автором объявления или ADMIN
+     */
     private boolean canEditAd(AdEntity adEntity, UserEntity currentUser) {
         return adEntity.getAuthor().getId().equals(currentUser.getId())
                 || "ADMIN".equals(currentUser.getRole());
+    }
+
+    /**
+     * Обновить изображение объявления.
+     *
+     * @param id идентификатор объявления
+     * @param imagePath путь к изображению
+     * @param email email текущего пользователя
+     * @return Optional с обновленным объявлением
+     */
+    public Optional<Ad> updateAdImage(Integer id, String imagePath, String email) {
+        Optional<AdEntity> adOptional = adRepository.findById(id);
+        Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+
+        if (adOptional.isEmpty() || userOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        AdEntity adEntity = adOptional.get();
+        UserEntity currentUser = userOptional.get();
+
+        if (!canEditAd(adEntity, currentUser)) {
+            throw new org.springframework.security.access.AccessDeniedException("You cannot update чужое объявление");
+        }
+
+        adEntity.setImage(imagePath);
+        AdEntity savedAd = adRepository.save(adEntity);
+
+        return Optional.of(adMapper.toDto(savedAd));
     }
 }

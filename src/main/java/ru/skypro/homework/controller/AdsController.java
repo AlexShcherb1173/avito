@@ -13,6 +13,9 @@ import ru.skypro.homework.dto.Ads;
 import ru.skypro.homework.dto.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ExtendedAd;
 import ru.skypro.homework.service.AdService;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.service.ImageService;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/ads")
@@ -21,6 +24,7 @@ import ru.skypro.homework.service.AdService;
 public class AdsController {
 
     private final AdService adService;
+    private final ImageService imageService;
 
     @Operation(summary = "Получение всех объявлений")
     @ApiResponses({
@@ -82,5 +86,17 @@ public class AdsController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PatchMapping("/{id}/image")
+    public ResponseEntity<Ad> updateAdImage(@PathVariable Integer id,
+                                            @RequestParam("image") MultipartFile image,
+                                            Authentication authentication) throws IOException {
+        String fileName = imageService.saveImage(image);
+        String imagePath = "/images/" + fileName;
+
+        return adService.updateAdImage(id, imagePath, authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
