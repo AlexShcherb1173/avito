@@ -10,11 +10,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
+/**
+ * Сервис для работы с изображениями.
+ * Отвечает за сохранение файлов изображений
+ * на сервере и получение изображений по имени файла.
+ */
+
 @Service
 public class ImageServiceImpl implements ImageService {
 
     @Value("${app.images.dir}")
     private String imagesDir;
+
+    /**
+     * Сохраняет изображение на сервере.
+     *
+     * @param file файл изображения
+     * @return имя сохранённого файла
+     */
 
     @Override
     public String saveImage(MultipartFile file) throws IOException {
@@ -29,6 +42,13 @@ public class ImageServiceImpl implements ImageService {
 
         return fileName;
     }
+
+    /**
+     * Возвращает изображение по имени файла.
+     *
+     * @param fileName имя файла изображения
+     * @return массив байтов изображения
+     */
 
     @Override
     public byte[] getImage(String fileName) throws IOException {

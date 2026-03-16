@@ -18,6 +18,12 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с объявлениями.
+ * Реализует бизнес-логику создания, получения,
+ * обновления и удаления объявлений.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class AdServiceImpl implements AdService {
@@ -26,6 +32,12 @@ public class AdServiceImpl implements AdService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
     private final ImageService imageService;
+
+    /**
+     * Возвращает список всех объявлений.
+     *
+     * @return объект Ads со списком объявлений
+     */
 
     @Override
     public Ads getAllAds() {
@@ -43,6 +55,12 @@ public class AdServiceImpl implements AdService {
 
         return result;
     }
+
+    /**
+     * Возвращает объявления текущего пользователя.
+     *
+     * @return объект Ads со списком объявлений пользователя
+     */
 
     @Override
     public Ads getAdsMe() {
@@ -62,6 +80,14 @@ public class AdServiceImpl implements AdService {
 
         return result;
     }
+
+    /**
+     * Создает новое объявление.
+     *
+     * @param properties данные объявления
+     * @param image изображение объявления
+     * @return созданное объявление
+     */
 
     @Override
     public ru.skypro.homework.dto.Ad addAd(CreateOrUpdateAd properties, MultipartFile image) {
@@ -85,6 +111,13 @@ public class AdServiceImpl implements AdService {
         return adMapper.toDto(saved);
     }
 
+    /**
+     * Возвращает объявление по его идентификатору.
+     *
+     * @param id идентификатор объявления
+     * @return расширенная информация об объявлении
+     */
+
     @Override
     public ExtendedAd getAdById(Long id) {
 
@@ -93,6 +126,12 @@ public class AdServiceImpl implements AdService {
 
         return adMapper.toExtendedDto(ad);
     }
+
+    /**
+     * Удаляет объявление по идентификатору.
+     *
+     * @param id идентификатор объявления
+     */
 
     @Override
     public void deleteAd(Long id) {
@@ -108,6 +147,14 @@ public class AdServiceImpl implements AdService {
 
         adRepository.delete(ad);
     }
+
+    /**
+     * Обновляет информацию объявления.
+     *
+     * @param id идентификатор объявления
+     * @param properties новые данные объявления
+     * @return обновленное объявление
+     */
 
     @Override
     public ru.skypro.homework.dto.Ad updateAd(Long id, CreateOrUpdateAd properties) {
@@ -129,6 +176,14 @@ public class AdServiceImpl implements AdService {
 
         return adMapper.toDto(updated);
     }
+
+    /**
+     * Обновляет изображение объявления.
+     *
+     * @param id идентификатор объявления
+     * @param image новый файл изображения
+     * @return байты изображения
+     */
 
     @Override
     public byte[] updateImage(Long id, MultipartFile image) {

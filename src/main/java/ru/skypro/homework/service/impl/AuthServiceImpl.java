@@ -11,12 +11,26 @@ import ru.skypro.homework.service.AuthService;
 
 import java.util.Optional;
 
+/**
+ * Сервис для работы с авторизацией и регистрацией пользователей.
+ * Отвечает за создание пользователей, проверку данных
+ * и изменение пароля.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    /**
+     * Выполняет проверку учетных данных пользователя.
+     *
+     * @param userName email пользователя
+     * @param password пароль пользователя
+     * @return true если авторизация успешна, иначе false
+     */
 
     @Override
     public boolean login(String userName, String password) {
@@ -31,6 +45,13 @@ public class AuthServiceImpl implements AuthService {
 
         return passwordEncoder.matches(password, user.getPassword());
     }
+
+    /**
+     * Регистрирует нового пользователя в системе.
+     *
+     * @param register данные пользователя для регистрации
+     * @return true если регистрация успешна, иначе false
+     */
 
     @Override
     public boolean register(Register register) {

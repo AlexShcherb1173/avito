@@ -18,6 +18,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с комментариями.
+ * Реализует операции создания, получения,
+ * обновления и удаления комментариев.
+ */
+
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
@@ -26,6 +32,13 @@ public class CommentServiceImpl implements CommentService {
     private final AdRepository adRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
+
+    /**
+     * Возвращает список комментариев для объявления.
+     *
+     * @param adId идентификатор объявления
+     * @return список комментариев
+     */
 
     @Override
     public Comments getComments(Long adId) {
@@ -44,6 +57,14 @@ public class CommentServiceImpl implements CommentService {
 
         return result;
     }
+
+    /**
+     * Добавляет новый комментарий к объявлению.
+     *
+     * @param adId идентификатор объявления
+     * @param createComment данные комментария
+     * @return созданный комментарий
+     */
 
     @Override
     public Comment addComment(Long adId, CreateOrUpdateComment createComment) {
@@ -66,6 +87,13 @@ public class CommentServiceImpl implements CommentService {
 
         return commentMapper.toDto(saved);
     }
+
+    /**
+     * Удаляет комментарий.
+     *
+     * @param adId идентификатор объявления
+     * @param commentId идентификатор комментария
+     */
 
     @Override
     public void deleteComment(Long adId, Long commentId) {
