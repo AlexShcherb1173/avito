@@ -31,7 +31,8 @@ public class WebSecurityConfig {
             "/swagger-resources/**",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/images/*" // ✅ добавили доступ к картинкам без авторизации
     };
 
     @Bean
