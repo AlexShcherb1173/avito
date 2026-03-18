@@ -18,7 +18,7 @@ public class AdMapper {
         Ad ad = new Ad();
         ad.setPk(entity.getId());
         ad.setAuthor(entity.getAuthor().getId());
-        ad.setImage(entity.getImage());
+        ad.setImage(buildImagePath(entity.getImage()));
         ad.setPrice(entity.getPrice());
         ad.setTitle(entity.getTitle());
         return ad;
@@ -35,7 +35,7 @@ public class AdMapper {
         extendedAd.setAuthorLastName(entity.getAuthor().getLastName());
         extendedAd.setDescription(entity.getDescription());
         extendedAd.setEmail(entity.getAuthor().getEmail());
-        extendedAd.setImage(entity.getImage());
+        extendedAd.setImage(buildImagePath(entity.getImage()));
         extendedAd.setPhone(entity.getAuthor().getPhone());
         extendedAd.setPrice(entity.getPrice());
         extendedAd.setTitle(entity.getTitle());
@@ -63,5 +63,21 @@ public class AdMapper {
         entity.setTitle(dto.getTitle());
         entity.setPrice(dto.getPrice());
         entity.setDescription(dto.getDescription());
+    }
+
+    private String buildImagePath(String image) {
+        if (image == null || image.isBlank()) {
+            return null;
+        }
+
+        if (image.startsWith("/images/")) {
+            return image;
+        }
+
+        if (image.startsWith("images/")) {
+            return "/" + image;
+        }
+
+        return "/images/" + image;
     }
 }

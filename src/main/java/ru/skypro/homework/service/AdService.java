@@ -12,6 +12,7 @@ import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.repository.CommentRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,8 @@ public class AdService {
     private final AdRepository adRepository;
     private final UserRepository userRepository;
     private final AdMapper adMapper;
+    private final ImageService imageService;
+    private final CommentRepository commentRepository;
 
     /**
      * Получить список всех объявлений.
@@ -66,7 +69,7 @@ public class AdService {
      * @param email email текущего пользователя
      * @return Optional с созданным объявлением
      */
-    public Optional<Ad> addAd(CreateOrUpdateAd dto, String email) {
+    public Optional<Ad> addAd(CreateOrUpdateAd dto, org.springframework.web.multipart.MultipartFile file, String email) throws java.io.IOException {
         Optional<UserEntity> authorOptional = userRepository.findByEmail(email);
 
         if (authorOptional.isEmpty()) {
@@ -74,12 +77,17 @@ public class AdService {
         }
 
         AdEntity adEntity = adMapper.fromDto(dto, authorOptional.get());
-        adEntity.setImage("placeholder.jpg");
+
+        String fileName = "placeholder.jpg";
+        if (file != null && !file.isEmpty()) {
+            fileName = imageService.saveImage(file);
+        }
+
+        adEntity.setImage(fileName);
 
         AdEntity savedAd = adRepository.save(adEntity);
         return Optional.of(adMapper.toDto(savedAd));
     }
-
     /**
      * Обновить объявление.
      *
@@ -131,6 +139,7 @@ public class AdService {
             throw new AccessDeniedException("You cannot delete чужое объявление");
         }
 
+        commentRepository.deleteAll(commentRepository.findByAdId(id));
         adRepository.delete(adEntity);
         return true;
     }
@@ -174,5 +183,33 @@ public class AdService {
         AdEntity savedAd = adRepository.save(adEntity);
 
         return Optional.of(adMapper.toDto(savedAd));
+    }
+
+
+    /**
+     * Получить объявления текущего авторизованного пользователя.
+     *
+     * @param email email текущего пользователя
+     * @return объект Ads со списком объявлений пользователя
+     */
+    public Ads getAdsMe(String email) {
+        Optional<UserEntity> userOptional = userRepository.findByEmail(email);
+
+        if (userOptional.isEmpty()) {
+            Ads ads = new Ads();
+            ads.setCount(0);
+            ads.setResults(List.of());
+            return ads;
+        }
+
+        List<Ad> adDtos = adRepository.findByAuthor_Id(userOptional.get().getId())
+                .stream()
+                .map(adMapper::toDto)
+                .collect(Collectors.toList());
+
+        Ads ads = new Ads();
+        ads.setCount(adDtos.size());
+        ads.setResults(adDtos);
+        return ads;
     }
 }
