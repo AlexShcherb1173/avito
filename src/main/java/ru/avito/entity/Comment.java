@@ -1,7 +1,15 @@
 package ru.avito.entity;
 
+import lombok.*;
+import javax.persistence.*;
+
 @Entity
 @Table(name = "comments")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Comment {
 
     @Id
@@ -10,9 +18,6 @@ public class Comment {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String text;
-
-    @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id")

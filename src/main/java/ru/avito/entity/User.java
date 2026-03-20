@@ -1,17 +1,26 @@
 package ru.avito.entity;
 
+import lombok.*;
+import javax.persistence.*;
+
+@Data
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "first_name", nullable = false)
@@ -20,19 +29,13 @@ public class User {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(nullable = false)
+    @Column(name = "phone", nullable = false)
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "role", nullable = false)
     private Role role;
 
-    @Column(name = "image_path")
+    @Column(name = "image")
     private String image;
-
-    @OneToMany(mappedBy = "author")
-    private List<Ad> ads = new ArrayList<>();
-
-    @OneToMany(mappedBy = "author")
-    private List<Comment> comments = new ArrayList<>();
 }

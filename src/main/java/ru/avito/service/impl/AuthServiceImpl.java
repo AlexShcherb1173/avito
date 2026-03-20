@@ -1,47 +1,46 @@
 package ru.avito.service.impl;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import ru.avito.dto.Register;
+import ru.avito.dto.auth.LoginRequest;
+import ru.avito.dto.auth.RegisterRequest;
+import ru.avito.entity.Role;
+import ru.avito.entity.User;
+import ru.avito.exception.BadRequestException;
+import ru.avito.repository.UserRepository;
 import ru.avito.service.AuthService;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserDetailsManager manager;
-    private final PasswordEncoder encoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthServiceImpl(UserDetailsManager manager,
-                           PasswordEncoder passwordEncoder) {
-        this.manager = manager;
-        this.encoder = passwordEncoder;
+    @Override
+    public void register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getUsername())) {
+            throw new BadRequestException("User with this email already exists");
+        }
+
+        User user = User.builder()
+                .email(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .phone(request.getPhone())
+                .role(Role.USER)
+                .image(null)
+                .build();
+
+        userRepository.save(user);
     }
 
     @Override
-    public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
-            return false;
-        }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        return encoder.matches(password, userDetails.getPassword());
+    public boolean login(LoginRequest request) {
+        return userRepository.findByEmail(request.getUsername())
+                .map(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))
+                .orElse(false);
     }
-
-    @Override
-    public boolean register(Register register) {
-        if (manager.userExists(register.getUsername())) {
-            return false;
-        }
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
-                        .username(register.getUsername())
-                        .roles(register.getRole().name())
-                        .build());
-        return true;
-    }
-
 }
