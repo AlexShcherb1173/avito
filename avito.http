@@ -1,0 +1,79 @@
+# Как использовать
+# 1. Открой файл в IntelliJ
+# 2. Рядом с каждым запросом будет кнопка ▶ Run
+# 3. Запускай по порядку:
+# register
+# users/me
+# ads
+# Если хочешь менять пользователя
+# Сгенерируй Base64:
+# email:password
+# через PowerShell:
+# [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("user@gmail.com:12345"))
+
+
+
+### 1. Регистрация пользователя
+POST http://localhost:8081/register
+Content-Type: application/json
+
+{
+  "username": "user@gmail.com",
+  "password": "12345",
+  "firstName": "Alex",
+  "lastName": "Shcherbyna",
+  "phone": "+79991234567",
+  "role": "USER"
+}
+
+###
+
+### 2. Получить текущего пользователя (Basic Auth)
+GET http://localhost:8081/users/me
+Authorization: Basic dXNlckBnbWFpbC5jb206MTIzNDU=
+
+###
+
+### 3. Получить все объявления
+GET http://localhost:8081/ads
+Authorization: Basic dXNlckBnbWFpbC5jb206MTIzNDU=
+
+###
+
+### 4. Создать объявление
+POST http://localhost:8081/ads
+Content-Type: application/json
+Authorization: Basic dXNlckBnbWFpbC5jb206MTIzNDU=
+
+{
+  "title": "iPhone 13",
+  "price": 70000,
+  "description": "Отличное состояние"
+}
+
+###
+
+### 5. Получить объявление по ID (замени 1 на нужный id)
+GET http://localhost:8081/ads/1
+Authorization: Basic dXNlckBnbWFpbC5jb206MTIzNDU=
+
+###
+
+### 6. Удалить объявление
+DELETE http://localhost:8081/ads/1
+Authorization: Basic dXNlckBnbWFpbC5jb206MTIzNDU=
+
+###
+
+### 7. Обновить объявление
+PATCH http://localhost:8081/ads/1
+Content-Type: application/json
+Authorization: Basic dXNlckBnbWFpbC5jb206MTIzNDU=
+
+{
+  "title": "iPhone 13 Pro",
+  "price": 80000,
+  "description": "Как новый"
+}
+
+###
