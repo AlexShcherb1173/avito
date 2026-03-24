@@ -3,6 +3,7 @@ package ru.avito.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,7 +28,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/images/**"
     };
 
     private final CustomUserDetailsService customUserDetailsService;
@@ -43,6 +45,13 @@ public class SecurityConfig {
                 .userDetailsService(customUserDetailsService)
                 .authorizeRequests()
                 .antMatchers(AUTH_WHITELIST).permitAll()
+
+                // Публичное чтение объявлений
+                .antMatchers(HttpMethod.GET, "/ads").permitAll()
+                .antMatchers(HttpMethod.GET, "/ads/*").permitAll()
+                .antMatchers(HttpMethod.GET, "/ads/*/comments").permitAll()
+
+                // Всё остальное требует авторизации
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic(Customizer.withDefaults());
@@ -58,7 +67,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -67,6 +79,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
 }
-

@@ -30,7 +30,7 @@ public class AuthServiceImpl implements AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phone(request.getPhone())
-                .role(Role.USER)
+                .role(request.getRole() != null ? request.getRole() : Role.USER)
                 .image(null)
                 .build();
 

@@ -1,6 +1,6 @@
 import base64 from "base-64";
 
-const API_URL = process.env.REACT_APP_API_URL || "";
+const API_URL = "/api";
 
 class Api {
     constructor(options) {
