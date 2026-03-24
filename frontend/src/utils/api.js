@@ -1,5 +1,7 @@
 import base64 from "base-64";
 
+const API_URL = "/api";
+
 class Api {
     constructor(options) {
         this._url = options.url;
@@ -19,7 +21,7 @@ class Api {
         return Promise.reject(`Error: ${res.status}`);
     }
 
-    //user
+    // user
     getUserInfo = async (username, password) => {
         return await fetch(`${this._url}/users/me`, {
             method: "GET",
@@ -43,7 +45,6 @@ class Api {
     updateUser(userInfo, username, password) {
         return fetch(`${this._url}/users/me`, {
             method: "PATCH",
-            //credentials: 'include',
             body: JSON.stringify(userInfo),
             headers: {
                 "Content-Type": "application/json",
@@ -55,15 +56,16 @@ class Api {
     updateUserPhoto(image, username, password) {
         const formData = new FormData();
         formData.append("image", image);
+
         return fetch(`${this._url}/users/me/image`, {
             body: formData,
             method: "PATCH",
             headers: {
                 Authorization: "Basic " + base64.encode(`${username}:${password}`),
             },
-        }).then(res => {
+        }).then((res) => {
             if (!res.ok) {
-                return Promise.reject(`Error: ${res.status}`)
+                return Promise.reject(`Error: ${res.status}`);
             }
             return this.getUserInfo(username, password);
         });
@@ -71,20 +73,19 @@ class Api {
 
     getUserPhoto(imageId, username, password) {
         return fetch(`${this._url}${imageId}`, {
+            method: "GET",
             headers: {
-                method: 'GET',
                 Authorization: "Basic " + base64.encode(`${username}:${password}`),
             },
-        }).then(res => {
+        }).then((res) => {
             if (!res.ok) {
-                return Promise.reject(`Error: ${res.status}`)
+                return Promise.reject(`Error: ${res.status}`);
             }
-
             return res.blob();
         });
     }
 
-    //comment|comments
+    // comments
     getComments(adId, username, password) {
         return fetch(`${this._url}/ads/${adId}/comments`, {
             method: "GET",
@@ -127,7 +128,7 @@ class Api {
         });
     }
 
-    //ads
+    // ads
     getAds() {
         return fetch(`${this._url}/ads`, {
             method: "GET",
@@ -147,29 +148,32 @@ class Api {
         }).then(this._handleResponse);
     }
 
-    addAd({image, title, price, description}, username, password) {
+    addAd({ image, title, price, description }, username, password) {
         const formData = new FormData();
         formData.append("image", image);
-        formData.append('properties', new Blob([JSON.stringify({
-            "title": `${title}`,
-            "price": `${price}`,
-            "description": `${description}`
-        })], {
-            type: "application/json"
-        }));
+        formData.append(
+            "properties",
+            new Blob(
+                [
+                    JSON.stringify({
+                        title: `${title}`,
+                        price: `${price}`,
+                        description: `${description}`,
+                    }),
+                ],
+                { type: "application/json" }
+            )
+        );
 
         return fetch(`${this._url}/ads`, {
             method: "POST",
             headers: {
-                type: "application/json",
-
                 Authorization: "Basic " + base64.encode(`${username}:${password}`),
             },
             body: formData,
         }).then(this._handleResponse);
     }
 
-    //get Ad
     getAd(id, username, password) {
         return fetch(`${this._url}/ads/${id}`, {
             method: "GET",
@@ -180,7 +184,6 @@ class Api {
         }).then(this._handleResponse);
     }
 
-    //edit ad
     editAdd(id, data, username, password) {
         return fetch(`${this._url}/ads/${id}`, {
             method: "PATCH",
@@ -195,6 +198,7 @@ class Api {
     editAddPhoto(id, image, username, password) {
         const formData = new FormData();
         formData.append("image", image);
+
         return fetch(`${this._url}/ads/${id}/image`, {
             method: "PATCH",
             body: formData,
@@ -204,7 +208,6 @@ class Api {
         }).then(this._handleResponse);
     }
 
-    //delete add
     deleteAdd(id, username, password) {
         return fetch(`${this._url}/ads/${id}`, {
             method: "DELETE",
@@ -215,7 +218,7 @@ class Api {
         });
     }
 
-    updatePassword(username, password, newPassword){
+    updatePassword(username, password, newPassword) {
         return fetch(`${this._url}/users/set_password`, {
             method: "PATCH",
             headers: {
@@ -223,16 +226,15 @@ class Api {
                 Authorization: "Basic " + base64.encode(`${username}:${password}`),
             },
             body: JSON.stringify({
-                "currentPassword": `${password}`,
-                "newPassword": `${newPassword}`,
+                currentPassword: `${password}`,
+                newPassword: `${newPassword}`,
             }),
         }).then(this.handleResponse);
     }
-
 }
 
 const api = new Api({
-    url: "http://localhost:8080",
+    url: API_URL,
 });
 
 export default api;
