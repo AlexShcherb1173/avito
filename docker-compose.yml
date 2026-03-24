@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: avito-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:h2:mem:avito
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_SQL_INIT_MODE: never
+    ports:
+      - "8081:8081"
+    networks:
+      - avito-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: /api
+    container_name: avito-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - avito-net
+
+networks:
+  avito-net:
+    driver: bridge

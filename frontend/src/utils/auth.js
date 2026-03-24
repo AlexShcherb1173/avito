@@ -5,11 +5,15 @@ class Auth {
   }
 
   _handleResponse(res) {
-    if (res.ok) {
-      return res.json();
-    }
+    return res.text().then((text) => {
+      const data = text ? JSON.parse(text) : {};
 
-    return Promise.reject(`Error: ${res.status}`);
+      if (!res.ok) {
+        return Promise.reject(data?.message || `Error: ${res.status}`);
+      }
+
+      return data;
+    });
   }
 
   registration(data) {
@@ -19,7 +23,7 @@ class Auth {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
-    });
+    }).then(this._handleResponse);
   }
 
   authentication(data) {
@@ -27,13 +31,12 @@ class Auth {
       method: "POST",
       headers: this._headers,
       body: JSON.stringify(data),
-    });
+    }).then(this._handleResponse);
   }
 }
 
 const auth = new Auth({
-  url: "http://localhost:8080",
-
+  url: "/api",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
