@@ -2,6 +2,7 @@ package ru.avito.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.avito.dto.ad.AdDto;
 import ru.avito.dto.ad.AdsResponse;
@@ -33,6 +34,7 @@ public class AdServiceImpl implements AdService {
     private final ImageService imageService;
 
     @Override
+    @Transactional(readOnly = true)
     public AdsResponse getAllAds() {
         List<AdDto> ads = adRepository.findAll()
                 .stream()
@@ -43,6 +45,7 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ExtendedAdDto getAdById(Integer id) {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
@@ -51,7 +54,10 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public AdDto createAd(CreateOrUpdateAdRequest request, MultipartFile image) {
+        validateImage(image);
+
         User currentUser = getCurrentUser();
 
         Ad ad = Ad.builder()
@@ -72,6 +78,7 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public AdDto updateAd(Integer id, CreateOrUpdateAdRequest request) {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
@@ -91,6 +98,7 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public void deleteAd(Integer id) {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
@@ -106,6 +114,7 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AdsResponse getMyAds() {
         User currentUser = getCurrentUser();
 
@@ -118,7 +127,10 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public ImageResponse updateAdImage(Integer id, MultipartFile image) {
+        validateImage(image);
+
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
 
@@ -141,6 +153,10 @@ public class AdServiceImpl implements AdService {
     private User getCurrentUser() {
         String email = SecurityUtils.getCurrentUsername();
 
+        if (email == null || email.isBlank()) {
+            throw new ForbiddenException("User is not authenticated");
+        }
+
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Authenticated user not found"));
     }
@@ -148,5 +164,16 @@ public class AdServiceImpl implements AdService {
     private boolean isOwnerOrAdmin(User user, Ad ad) {
         return ad.getAuthor().getId().equals(user.getId())
                 || user.getRole() == Role.ADMIN;
+    }
+
+    private void validateImage(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new IllegalArgumentException("Image is required");
+        }
+
+        String contentType = image.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Only image files are allowed");
+        }
     }
 }

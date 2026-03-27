@@ -1,21 +1,30 @@
 package ru.avito.util;
 
-import lombok.experimental.UtilityClass;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@UtilityClass
+@Component
 public class ImagePathUtils {
 
-    private static final String ROOT_DIR = "images";
+    private final Path rootDir;
+
+    public ImagePathUtils(@Value("${app.images.dir:/images}") String rootDir) {
+        this.rootDir = Paths.get(rootDir).toAbsolutePath().normalize();
+    }
+
+    public Path getRootDir() {
+        return rootDir;
+    }
 
     public Path getAdsDirectory(Integer adId) {
-        return Paths.get(ROOT_DIR, "ads", String.valueOf(adId));
+        return rootDir.resolve(Paths.get("ads", String.valueOf(adId))).normalize();
     }
 
     public Path getUsersDirectory(Integer userId) {
-        return Paths.get(ROOT_DIR, "users", String.valueOf(userId));
+        return rootDir.resolve(Paths.get("users", String.valueOf(userId))).normalize();
     }
 
     public String buildAdImageUrl(Integer adId, String filename) {
@@ -31,7 +40,16 @@ public class ImagePathUtils {
             return null;
         }
 
-        String normalized = imageUrl.startsWith("/") ? imageUrl.substring(1) : imageUrl;
-        return Paths.get(normalized);
+        String normalizedUrl = imageUrl.trim();
+
+        if (normalizedUrl.startsWith("/")) {
+            normalizedUrl = normalizedUrl.substring(1);
+        }
+
+        if (normalizedUrl.startsWith("images/")) {
+            normalizedUrl = normalizedUrl.substring("images/".length());
+        }
+
+        return rootDir.resolve(normalizedUrl).normalize();
     }
 }

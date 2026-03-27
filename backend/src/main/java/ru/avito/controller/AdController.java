@@ -1,6 +1,7 @@
 package ru.avito.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class AdController {
 
     /**
      * Создать объявление с изображением.
-     * Фронт отправляет multipart/form-data:
+     * multipart/form-data:
      * - image
      * - properties
      */
@@ -48,7 +49,8 @@ public class AdController {
             @RequestPart("properties") @Valid CreateOrUpdateAdRequest request,
             @RequestPart("image") MultipartFile image
     ) {
-        return ResponseEntity.ok(adService.createAd(request, image));
+        AdDto createdAd = adService.createAd(request, image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAd);
     }
 
     /**

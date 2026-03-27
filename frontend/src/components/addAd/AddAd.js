@@ -5,162 +5,252 @@ import Preloader from "../preloader/Preloader";
 
 function AddAd({ id, handleAddAd, isLoading }) {
   const [image, setImage] = useState(null);
-  const [title, setTitle] = useState(null);
-  const [price, setPrice] = useState(null);
-  const [description, setDescription] = useState(null);
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
   const [validationErrors, setValidationErrors] = useState({
-    image: null,
-    title: null,
-    price: null,
-    description: null,
+    image: "",
+    title: "",
+    price: "",
+    description: "",
   });
-  let location = useLocation().pathname;
-  let navigate = useNavigate();
+
+  const location = useLocation().pathname;
+  const navigate = useNavigate();
+
+  const validateImage = (file) => {
+    if (!file) {
+      return "Загрузите фотографию";
+    }
+
+    if (!file.type.startsWith("image/")) {
+      return "Можно загружать только изображения";
+    }
+
+    if (file.size > 1000000) {
+      return "Размер изображения должен быть меньше 1 МБ";
+    }
+
+    return "";
+  };
+
+  const validateTitle = (value) => {
+    if (!value.trim()) {
+      return "Это поле не должно быть пустым";
+    }
+
+    if (value.trim().length < 8) {
+      return "Минимальное количество символов - 8";
+    }
+
+    return "";
+  };
+
+  const validatePrice = (value) => {
+    if (value === "" || value === null) {
+      return "Это поле не должно быть пустым";
+    }
+
+    if (Number(value) <= 0) {
+      return "Цена должна быть больше 0";
+    }
+
+    return "";
+  };
+
+  const validateDescription = (value) => {
+    if (!value.trim()) {
+      return "Это поле не должно быть пустым";
+    }
+
+    if (value.trim().length < 8) {
+      return "Минимальное количество символов - 8";
+    }
+
+    return "";
+  };
 
   const handleImageChange = (e) => {
-    if (e.target.files[0].size < 1000000){
-      setImage(e.target.files[0]);
+    const file = e.target.files?.[0] || null;
+    const imageError = validateImage(file);
+
+    setValidationErrors((prev) => ({
+      ...prev,
+      image: imageError,
+    }));
+
+    if (!imageError) {
+      setImage(file);
+    } else {
+      setImage(null);
     }
   };
 
-  function handleTitleChange(e) {
+  const handleTitleChange = (e) => {
     const { value } = e.target;
-    let errors = validationErrors;
     setTitle(value);
 
-    if (value.length < 8) {
-      errors.title = "Минимальное количество символов - 8";
-    } else {
-      errors.title = "" && setValidationErrors(errors);
-    }
-  }
+    setValidationErrors((prev) => ({
+      ...prev,
+      title: validateTitle(value),
+    }));
+  };
 
-  function handlePriceChange(e) {
+  const handlePriceChange = (e) => {
     const { value } = e.target;
-    let errors = validationErrors;
     setPrice(value);
 
-    if (!value.length) {
-      errors.price = "Это поле не дожно быть пустым";
-    } else {
-      errors.price = "" && setValidationErrors(errors);
-    }
-  }
+    setValidationErrors((prev) => ({
+      ...prev,
+      price: validatePrice(value),
+    }));
+  };
 
-  function handleDescriptionChange(e) {
+  const handleDescriptionChange = (e) => {
     const { value } = e.target;
-    let errors = validationErrors;
     setDescription(value);
 
-    if (value.length < 8) {
-      errors.description = "Минимальное количество символов - 8";
-    } else {
-      errors.description = "" && setValidationErrors(errors);
-    }
-  }
+    setValidationErrors((prev) => ({
+      ...prev,
+      description: validateDescription(value),
+    }));
+  };
 
-  function addNewAd(e) {
+  const addNewAd = async (e) => {
     e.preventDefault();
-    handleAddAd({ image, title, price, description });
-    setTimeout(() => window.location.reload(), 500);
-    setTimeout(navigate('/profile'), 500);
-  }
+
+    const nextErrors = {
+      image: validateImage(image),
+      title: validateTitle(title),
+      price: validatePrice(price),
+      description: validateDescription(description),
+    };
+
+    setValidationErrors(nextErrors);
+
+    const hasErrors = Object.values(nextErrors).some(Boolean);
+    if (hasErrors) {
+      return;
+    }
+
+    try {
+      await handleAddAd({
+        image,
+        title: title.trim(),
+        price: Number(price),
+        description: description.trim(),
+      });
+
+      navigate("/profile");
+    } catch (error) {
+      console.log("Ошибка при создании объявления:", error);
+    }
+  };
+
+  const hasFormErrors =
+      !!validationErrors.image ||
+      !!validationErrors.title ||
+      !!validationErrors.price ||
+      !!validationErrors.description ||
+      !image ||
+      !title.trim() ||
+      !price ||
+      !description.trim();
 
   return (
-    <>
-      <UserForm
-        id={`${location === "/newAd" ? "" : id}`}
-        title={`${
-          location === "/newAd" ? "Добавить новый товар" : "Изменить товар"
-        }`}
-        buttonText={`${location === "/newAd" ? "Добавить" : "Изменить"}`}
-        onSubmit={addNewAd}
-        errors={
-          title === null ||
-          image === null ||
-          price === null ||
-          description === null ||
-          validationErrors.title ||
-          validationErrors.price ||
-          validationErrors.description
-        }
-      >
-        <div className="userForm__form-container userForm__form-box">
-          <label className="userForm__label">
-            <h2 className="userForm__subtitle">Название</h2>
-            <input
-              className="userForm__input"
-              name="title"
-              type="text"
-              minLength="4"
-              maxLength="32"
-              onChange={handleTitleChange}
-            />
-            <div
-              className={`input-hidden ${
-                validationErrors.title ? "input-error" : ""
-              }`}
-            >
-              {validationErrors.title}
-            </div>
-          </label>
-          <label className="userForm__label">
-            <h2 className="userForm__subtitle">Изображение</h2>
-            <input
-              name="image"
-              className="userForm__input"
-              type="file"
-              onChange={handleImageChange}
-            />
-            <div
-              className={`input-hidden ${image === null ? "input-error" : ""}`}
-            >
-              {image === null ? "Загрузите фотографию" : ""}
-            </div>
-          </label>
-        </div>
-        <div className="userForm__form-container">
-          <label className="userForm__label">
-            <h2 className="userForm__subtitle">Цена</h2>
-            <input
-              className="userForm__input"
-              type="number"
-              name="price"
-              min="0"
-              max="10000000"
-              maxLength="30"
-              onChange={handlePriceChange}
-            />
-            <div
-              className={`input-hidden ${
-                validationErrors.price ? "input-error" : ""
-              }`}
-            >
-              {validationErrors.price}
-            </div>
-          </label>
-          <label className="userForm__label">
-            <h2 className="userForm__subtitle">Описание</h2>
-            <input
-              className="userForm__input"
-              name="description"
-              type="text"
-              minLength="8"
-              maxLength="64"
-              onChange={handleDescriptionChange}
-            />
-            <div
-              className={`input-hidden ${
-                validationErrors.description ? "input-error" : ""
-              }`}
-            >
-              {validationErrors.description}
-            </div>
-          </label>
-        </div>
-      </UserForm>
-      {isLoading ? <Preloader /> : ""}
-    </>
+      <>
+        <UserForm
+            id={`${location === "/newAd" ? "" : id}`}
+            title={location === "/newAd" ? "Добавить новый товар" : "Изменить товар"}
+            buttonText={location === "/newAd" ? "Добавить" : "Изменить"}
+            onSubmit={addNewAd}
+            errors={hasFormErrors}
+        >
+          <div className="userForm__form-container userForm__form-box">
+            <label className="userForm__label">
+              <h2 className="userForm__subtitle">Название</h2>
+              <input
+                  className="userForm__input"
+                  name="title"
+                  type="text"
+                  minLength="8"
+                  maxLength="32"
+                  value={title}
+                  onChange={handleTitleChange}
+              />
+              <div
+                  className={`input-hidden ${
+                      validationErrors.title ? "input-error" : ""
+                  }`}
+              >
+                {validationErrors.title}
+              </div>
+            </label>
+
+            <label className="userForm__label">
+              <h2 className="userForm__subtitle">Изображение</h2>
+              <input
+                  name="image"
+                  className="userForm__input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+              />
+              <div
+                  className={`input-hidden ${
+                      validationErrors.image ? "input-error" : ""
+                  }`}
+              >
+                {validationErrors.image}
+              </div>
+            </label>
+          </div>
+
+          <div className="userForm__form-container">
+            <label className="userForm__label">
+              <h2 className="userForm__subtitle">Цена</h2>
+              <input
+                  className="userForm__input"
+                  type="number"
+                  name="price"
+                  min="1"
+                  max="10000000"
+                  value={price}
+                  onChange={handlePriceChange}
+              />
+              <div
+                  className={`input-hidden ${
+                      validationErrors.price ? "input-error" : ""
+                  }`}
+              >
+                {validationErrors.price}
+              </div>
+            </label>
+
+            <label className="userForm__label">
+              <h2 className="userForm__subtitle">Описание</h2>
+              <input
+                  className="userForm__input"
+                  name="description"
+                  type="text"
+                  minLength="8"
+                  maxLength="64"
+                  value={description}
+                  onChange={handleDescriptionChange}
+              />
+              <div
+                  className={`input-hidden ${
+                      validationErrors.description ? "input-error" : ""
+                  }`}
+              >
+                {validationErrors.description}
+              </div>
+            </label>
+          </div>
+        </UserForm>
+
+        {isLoading ? <Preloader /> : null}
+      </>
   );
 }
 

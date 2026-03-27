@@ -1,5 +1,6 @@
 package ru.avito.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.avito.exception.FileStorageException;
@@ -8,12 +9,18 @@ import ru.avito.util.FileTypeUtils;
 import ru.avito.util.ImagePathUtils;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
 @Service
+@RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
+
+    private final ImagePathUtils imagePathUtils;
 
     @Override
     public String saveAdImage(Integer adId, MultipartFile file) {
@@ -22,12 +29,12 @@ public class ImageServiceImpl implements ImageService {
         String extension = FileTypeUtils.resolveExtension(file);
         String filename = "image" + extension;
 
-        Path directory = ImagePathUtils.getAdsDirectory(adId);
+        Path directory = imagePathUtils.getAdsDirectory(adId);
         Path targetFile = directory.resolve(filename);
 
         saveFile(directory, targetFile, file);
 
-        return ImagePathUtils.buildAdImageUrl(adId, filename);
+        return imagePathUtils.buildAdImageUrl(adId, filename);
     }
 
     @Override
@@ -37,12 +44,12 @@ public class ImageServiceImpl implements ImageService {
         String extension = FileTypeUtils.resolveExtension(file);
         String filename = "avatar" + extension;
 
-        Path directory = ImagePathUtils.getUsersDirectory(userId);
+        Path directory = imagePathUtils.getUsersDirectory(userId);
         Path targetFile = directory.resolve(filename);
 
         saveFile(directory, targetFile, file);
 
-        return ImagePathUtils.buildUserImageUrl(userId, filename);
+        return imagePathUtils.buildUserImageUrl(userId, filename);
     }
 
     @Override
@@ -52,11 +59,12 @@ public class ImageServiceImpl implements ImageService {
         }
 
         try {
-            Path path = ImagePathUtils.resolvePhysicalPathFromImageUrl(imagePath);
-            if (path != null && Files.exists(path)) {
-                Files.delete(path);
+            Path physicalPath = imagePathUtils.resolvePhysicalPathFromImageUrl(imagePath);
 
-                Path parent = path.getParent();
+            if (physicalPath != null && Files.exists(physicalPath)) {
+                Files.delete(physicalPath);
+
+                Path parent = physicalPath.getParent();
                 if (parent != null && Files.exists(parent) && isDirectoryEmpty(parent)) {
                     Files.delete(parent);
                 }
@@ -88,8 +96,8 @@ public class ImageServiceImpl implements ImageService {
                             }
                         });
             } catch (RuntimeException e) {
-                if (e.getCause() instanceof IOException) {
-                    throw (IOException) e.getCause();
+                if (e.getCause() instanceof IOException ioException) {
+                    throw ioException;
                 }
                 throw e;
             }
