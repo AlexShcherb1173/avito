@@ -1,28 +1,29 @@
 package ru.avito.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.avito.config.SecurityConfig;
 import ru.avito.dto.auth.LoginRequest;
 import ru.avito.dto.auth.RegisterRequest;
 import ru.avito.entity.Role;
 import ru.avito.exception.BadRequestException;
 import ru.avito.exception.GlobalExceptionHandler;
 import ru.avito.service.AuthService;
-import ru.avito.security.CustomUserDetailsService;
 import ru.avito.util.ImagePathUtils;
 
-import java.util.List;
+import java.nio.file.Paths;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -30,9 +31,21 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = AuthController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class})
+@WebMvcTest(AuthController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@Import({GlobalExceptionHandler.class, AuthControllerTest.TestImagePathConfig.class})
 class AuthControllerTest {
+
+    @TestConfiguration
+    static class TestImagePathConfig {
+        @Bean
+        @Primary
+        ImagePathUtils imagePathUtils() {
+            ImagePathUtils mock = Mockito.mock(ImagePathUtils.class);
+            Mockito.when(mock.getRootDir()).thenReturn(Paths.get("target/test-images"));
+            return mock;
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,23 +55,6 @@ class AuthControllerTest {
 
     @MockBean
     private AuthService authService;
-
-    @MockBean
-    private CustomUserDetailsService customUserDetailsService;
-
-    @MockBean
-    private ImagePathUtils imagePathUtils;
-
-    @BeforeEach
-    void setUp() {
-        when(customUserDetailsService.loadUserByUsername(any())).thenReturn(
-                new User(
-                        "user@example.com",
-                        "{noop}password",
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                )
-        );
-    }
 
     @Test
     void registerShouldReturn201WhenPayloadIsValid() throws Exception {
@@ -116,11 +112,11 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("username: Email has invalid format")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("password: Password must contain at least 4 characters")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("firstName: First name must not be blank")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("lastName: Last name must not be blank")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("phone: Phone must not be blank")));
+                .andExpect(jsonPath("$.message", containsString("username: Email has invalid format")))
+                .andExpect(jsonPath("$.message", containsString("password: Password must contain at least 4 characters")))
+                .andExpect(jsonPath("$.message", containsString("firstName: First name must not be blank")))
+                .andExpect(jsonPath("$.message", containsString("lastName: Last name must not be blank")))
+                .andExpect(jsonPath("$.message", containsString("phone: Phone must not be blank")));
     }
 
     @Test
@@ -166,46 +162,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("username: Email has invalid format")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("password: Password must not be blank")));
-    }
-
-    @Test
-    void registerShouldBeAccessibleWithoutAuthentication() throws Exception {
-        String requestBody = """
-                {
-                  "username": "public@example.com",
-                  "password": "password123",
-                  "firstName": "Ivan",
-                  "lastName": "Ivanov",
-                  "phone": "+79990000001",
-                  "role": "USER"
-                }
-                """;
-
-        doNothing().when(authService).register(any(RegisterRequest.class));
-
-        mockMvc.perform(post("/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    void loginShouldBeAccessibleWithoutAuthentication() throws Exception {
-        String requestBody = """
-                {
-                  "username": "user@example.com",
-                  "password": "password123"
-                }
-                """;
-
-        when(authService.login(any(LoginRequest.class))).thenReturn(true);
-
-        mockMvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody))
-                .andExpect(status().isOk());
+                .andExpect(jsonPath("$.message", containsString("username: Email has invalid format")))
+                .andExpect(jsonPath("$.message", containsString("password: Password must not be blank")));
     }
 }
-

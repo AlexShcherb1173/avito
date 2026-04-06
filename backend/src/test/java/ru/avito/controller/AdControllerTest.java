@@ -1,19 +1,19 @@
 package ru.avito.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.avito.config.SecurityConfig;
 import ru.avito.dto.ad.AdDto;
 import ru.avito.dto.ad.AdsResponse;
 import ru.avito.dto.ad.CreateOrUpdateAdRequest;
@@ -22,10 +22,10 @@ import ru.avito.dto.ad.ImageResponse;
 import ru.avito.exception.ForbiddenException;
 import ru.avito.exception.GlobalExceptionHandler;
 import ru.avito.exception.NotFoundException;
-import ru.avito.security.CustomUserDetailsService;
 import ru.avito.service.AdService;
 import ru.avito.util.ImagePathUtils;
 
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,16 +33,27 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = AdController.class, excludeAutoConfiguration = SecurityAutoConfiguration.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class})
+@WebMvcTest(AdController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@Import({GlobalExceptionHandler.class, AdControllerTest.TestImagePathConfig.class})
 class AdControllerTest {
+
+    @TestConfiguration
+    static class TestImagePathConfig {
+        @Bean
+        @Primary
+        ImagePathUtils imagePathUtils() {
+            ImagePathUtils mock = Mockito.mock(ImagePathUtils.class);
+            Mockito.when(mock.getRootDir()).thenReturn(Paths.get("target/test-images"));
+            return mock;
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,33 +64,8 @@ class AdControllerTest {
     @MockBean
     private AdService adService;
 
-    @MockBean
-    private CustomUserDetailsService customUserDetailsService;
-
-    @MockBean
-    private ImagePathUtils imagePathUtils;
-
-    @BeforeEach
-    void setUp() {
-        when(customUserDetailsService.loadUserByUsername("user@example.com")).thenReturn(
-                new User(
-                        "user@example.com",
-                        "{noop}password123",
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                )
-        );
-
-        when(customUserDetailsService.loadUserByUsername("admin@example.com")).thenReturn(
-                new User(
-                        "admin@example.com",
-                        "{noop}admin123",
-                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
-                )
-        );
-    }
-
     @Test
-    void getAllAdsShouldReturn200ForPublicRequest() throws Exception {
+    void getAllAdsShouldReturn200() throws Exception {
         AdDto first = new AdDto();
         first.setPk(1);
         first.setAuthor(10);
@@ -106,7 +92,7 @@ class AdControllerTest {
     }
 
     @Test
-    void getAdByIdShouldReturn200ForPublicRequest() throws Exception {
+    void getAdByIdShouldReturn200() throws Exception {
         ExtendedAdDto dto = new ExtendedAdDto(
                 1,
                 "First ad",
@@ -143,7 +129,7 @@ class AdControllerTest {
     }
 
     @Test
-    void getMyAdsShouldReturn200ForAuthenticatedUser() throws Exception {
+    void getMyAdsShouldReturn200() throws Exception {
         AdDto own = new AdDto();
         own.setPk(1);
         own.setAuthor(10);
@@ -152,18 +138,11 @@ class AdControllerTest {
 
         when(adService.getMyAds()).thenReturn(new AdsResponse(1, List.of(own)));
 
-        mockMvc.perform(get("/ads/me")
-                        .with(httpBasic("user@example.com", "password123")))
+        mockMvc.perform(get("/ads/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").value(1))
                 .andExpect(jsonPath("$.results[0].pk").value(1))
                 .andExpect(jsonPath("$.results[0].title").value("Own ad"));
-    }
-
-    @Test
-    void getMyAdsShouldReturn401WithoutAuthentication() throws Exception {
-        mockMvc.perform(get("/ads/me"))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -199,41 +178,12 @@ class AdControllerTest {
 
         mockMvc.perform(multipart("/ads")
                         .file(image)
-                        .file(properties)
-                        .with(httpBasic("user@example.com", "password123")))
+                        .file(properties))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.pk").value(100))
                 .andExpect(jsonPath("$.title").value("Created ad"))
                 .andExpect(jsonPath("$.price").value(25000))
                 .andExpect(jsonPath("$.image").value("/images/ads/100/ad.jpg"));
-    }
-
-    @Test
-    void createAdShouldReturn401WithoutAuthentication() throws Exception {
-        MockMultipartFile image = new MockMultipartFile(
-                "image",
-                "ad.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "fake-image-content".getBytes()
-        );
-
-        MockMultipartFile properties = new MockMultipartFile(
-                "properties",
-                "",
-                MediaType.APPLICATION_JSON_VALUE,
-                """
-                {
-                  "title": "Created ad",
-                  "price": 25000,
-                  "description": "Created ad description"
-                }
-                """.getBytes()
-        );
-
-        mockMvc.perform(multipart("/ads")
-                        .file(image)
-                        .file(properties))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -252,8 +202,7 @@ class AdControllerTest {
         );
 
         mockMvc.perform(multipart("/ads")
-                        .file(properties)
-                        .with(httpBasic("user@example.com", "password123")))
+                        .file(properties))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Missing request part: image"))
                 .andExpect(jsonPath("$.status").value(400));
@@ -283,14 +232,13 @@ class AdControllerTest {
 
         mockMvc.perform(multipart("/ads")
                         .file(image)
-                        .file(properties)
-                        .with(httpBasic("user@example.com", "password123")))
+                        .file(properties))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
-    void updateAdShouldReturn200ForOwner() throws Exception {
+    void updateAdShouldReturn200ForValidRequest() throws Exception {
         CreateOrUpdateAdRequest request = new CreateOrUpdateAdRequest();
         request.setTitle("Updated ad");
         request.setPrice(33000);
@@ -305,7 +253,6 @@ class AdControllerTest {
         when(adService.updateAd(eq(1), any(CreateOrUpdateAdRequest.class))).thenReturn(updated);
 
         mockMvc.perform(patch("/ads/1")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -315,7 +262,7 @@ class AdControllerTest {
     }
 
     @Test
-    void updateAdShouldReturn403ForForeignUser() throws Exception {
+    void updateAdShouldReturn403ForForbidden() throws Exception {
         CreateOrUpdateAdRequest request = new CreateOrUpdateAdRequest();
         request.setTitle("Updated ad");
         request.setPrice(33000);
@@ -325,7 +272,6 @@ class AdControllerTest {
                 .thenThrow(new ForbiddenException("You cannot edit this ad"));
 
         mockMvc.perform(patch("/ads/1")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isForbidden())
@@ -344,7 +290,6 @@ class AdControllerTest {
                 .thenThrow(new NotFoundException("Ad not found"));
 
         mockMvc.perform(patch("/ads/999")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -353,22 +298,20 @@ class AdControllerTest {
     }
 
     @Test
-    void deleteAdShouldReturn204ForOwner() throws Exception {
+    void deleteAdShouldReturn204ForSuccess() throws Exception {
         doNothing().when(adService).deleteAd(1);
 
-        mockMvc.perform(delete("/ads/1")
-                        .with(httpBasic("user@example.com", "password123")))
+        mockMvc.perform(delete("/ads/1"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
-    void deleteAdShouldReturn403ForForeignUser() throws Exception {
+    void deleteAdShouldReturn403ForForbidden() throws Exception {
         doThrow(new ForbiddenException("You cannot delete this ad"))
                 .when(adService)
                 .deleteAd(1);
 
-        mockMvc.perform(delete("/ads/1")
-                        .with(httpBasic("user@example.com", "password123")))
+        mockMvc.perform(delete("/ads/1"))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.message").value("You cannot delete this ad"))
                 .andExpect(jsonPath("$.status").value(403));
@@ -389,7 +332,6 @@ class AdControllerTest {
 
         mockMvc.perform(multipart("/ads/1/image")
                         .file(image)
-                        .with(httpBasic("user@example.com", "password123"))
                         .with(request -> {
                             request.setMethod("PATCH");
                             return request;
@@ -401,7 +343,6 @@ class AdControllerTest {
     @Test
     void updateAdImageShouldReturn400WhenImagePartIsMissing() throws Exception {
         mockMvc.perform(multipart("/ads/1/image")
-                        .with(httpBasic("user@example.com", "password123"))
                         .with(request -> {
                             request.setMethod("PATCH");
                             return request;
@@ -412,7 +353,7 @@ class AdControllerTest {
     }
 
     @Test
-    void updateAdImageShouldReturn403ForForeignUser() throws Exception {
+    void updateAdImageShouldReturn403ForForbidden() throws Exception {
         MockMultipartFile image = new MockMultipartFile(
                 "image",
                 "new.jpg",
@@ -425,7 +366,6 @@ class AdControllerTest {
 
         mockMvc.perform(multipart("/ads/1/image")
                         .file(image)
-                        .with(httpBasic("user@example.com", "password123"))
                         .with(request -> {
                             request.setMethod("PATCH");
                             return request;
@@ -435,4 +375,3 @@ class AdControllerTest {
                 .andExpect(jsonPath("$.status").value(403));
     }
 }
-

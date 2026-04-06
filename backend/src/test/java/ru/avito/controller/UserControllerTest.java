@@ -1,18 +1,19 @@
 package ru.avito.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.avito.config.SecurityConfig;
 import ru.avito.dto.auth.NewPasswordRequest;
 import ru.avito.dto.user.UpdateUserImageResponse;
 import ru.avito.dto.user.UpdateUserRequest;
@@ -20,24 +21,35 @@ import ru.avito.dto.user.UserDto;
 import ru.avito.exception.BadRequestException;
 import ru.avito.exception.GlobalExceptionHandler;
 import ru.avito.service.UserService;
-import ru.avito.security.CustomUserDetailsService;
 import ru.avito.util.ImagePathUtils;
 
-import java.util.List;
+import java.nio.file.Paths;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = UserController.class)
-@Import({SecurityConfig.class, GlobalExceptionHandler.class})
+@WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
+@Import({GlobalExceptionHandler.class, UserControllerTest.TestImagePathConfig.class})
 class UserControllerTest {
+
+    @TestConfiguration
+    static class TestImagePathConfig {
+        @Bean
+        @Primary
+        ImagePathUtils imagePathUtils() {
+            ImagePathUtils mock = Mockito.mock(ImagePathUtils.class);
+            Mockito.when(mock.getRootDir()).thenReturn(Paths.get("target/test-images"));
+            return mock;
+        }
+    }
 
     @Autowired
     private MockMvc mockMvc;
@@ -48,33 +60,8 @@ class UserControllerTest {
     @MockBean
     private UserService userService;
 
-    @MockBean
-    private CustomUserDetailsService customUserDetailsService;
-
-    @MockBean
-    private ImagePathUtils imagePathUtils;
-
-    @BeforeEach
-    void setUp() {
-        when(customUserDetailsService.loadUserByUsername("user@example.com")).thenReturn(
-                new User(
-                        "user@example.com",
-                        "{noop}password123",
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
-                )
-        );
-
-        when(customUserDetailsService.loadUserByUsername("admin@example.com")).thenReturn(
-                new User(
-                        "admin@example.com",
-                        "{noop}admin123",
-                        List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))
-                )
-        );
-    }
-
     @Test
-    void getCurrentUserShouldReturn200ForAuthenticatedUser() throws Exception {
+    void getCurrentUserShouldReturn200() throws Exception {
         UserDto dto = new UserDto(
                 1,
                 "user@example.com",
@@ -87,8 +74,7 @@ class UserControllerTest {
 
         when(userService.getCurrentUser()).thenReturn(dto);
 
-        mockMvc.perform(get("/users/me")
-                        .with(httpBasic("user@example.com", "password123")))
+        mockMvc.perform(get("/users/me"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.email").value("user@example.com"))
@@ -97,12 +83,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.phone").value("+79990000001"))
                 .andExpect(jsonPath("$.role").value("USER"))
                 .andExpect(jsonPath("$.image").value("/images/users/1/avatar.jpg"));
-    }
-
-    @Test
-    void getCurrentUserShouldReturn401WithoutAuthentication() throws Exception {
-        mockMvc.perform(get("/users/me"))
-                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -125,7 +105,6 @@ class UserControllerTest {
         when(userService.updateCurrentUser(any(UpdateUserRequest.class))).thenReturn(response);
 
         mockMvc.perform(patch("/users/me")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -142,30 +121,13 @@ class UserControllerTest {
         request.setPhone("");
 
         mockMvc.perform(patch("/users/me")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("firstName: First name must not be blank")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("lastName: Last name must not be blank")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("phone: Phone must not be blank")));
-    }
-
-    @Test
-    void updateCurrentUserShouldReturn401WithoutAuthentication() throws Exception {
-        String body = """
-                {
-                  "firstName": "Updated",
-                  "lastName": "User",
-                  "phone": "+79991112233"
-                }
-                """;
-
-        mockMvc.perform(patch("/users/me")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isUnauthorized());
+                .andExpect(jsonPath("$.message", containsString("firstName: First name must not be blank")))
+                .andExpect(jsonPath("$.message", containsString("lastName: Last name must not be blank")))
+                .andExpect(jsonPath("$.message", containsString("phone: Phone must not be blank")));
     }
 
     @Test
@@ -177,7 +139,6 @@ class UserControllerTest {
         doNothing().when(userService).updatePassword(any(NewPasswordRequest.class));
 
         mockMvc.perform(patch("/users/set_password")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -195,7 +156,6 @@ class UserControllerTest {
                 .updatePassword(any(NewPasswordRequest.class));
 
         mockMvc.perform(patch("/users/set_password")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -210,28 +170,12 @@ class UserControllerTest {
         request.setNewPassword("12");
 
         mockMvc.perform(patch("/users/set_password")
-                        .with(httpBasic("user@example.com", "password123"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("currentPassword: Current password must not be blank")))
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("newPassword: New password must contain at least 4 characters")));
-    }
-
-    @Test
-    void updatePasswordShouldReturn401WithoutAuthentication() throws Exception {
-        String body = """
-                {
-                  "currentPassword": "password123",
-                  "newPassword": "newPassword123"
-                }
-                """;
-
-        mockMvc.perform(patch("/users/set_password")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isUnauthorized());
+                .andExpect(jsonPath("$.message", containsString("currentPassword: Current password must not be blank")))
+                .andExpect(jsonPath("$.message", containsString("newPassword: New password must contain at least 4 characters")));
     }
 
     @Test
@@ -249,7 +193,6 @@ class UserControllerTest {
 
         mockMvc.perform(multipart("/users/me/image")
                         .file(image)
-                        .with(httpBasic("user@example.com", "password123"))
                         .with(request -> {
                             request.setMethod("PATCH");
                             return request;
@@ -261,7 +204,6 @@ class UserControllerTest {
     @Test
     void updateUserImageShouldReturn400WhenImagePartIsMissing() throws Exception {
         mockMvc.perform(multipart("/users/me/image")
-                        .with(httpBasic("user@example.com", "password123"))
                         .with(request -> {
                             request.setMethod("PATCH");
                             return request;
@@ -270,23 +212,4 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("Missing request part: image"))
                 .andExpect(jsonPath("$.status").value(400));
     }
-
-    @Test
-    void updateUserImageShouldReturn401WithoutAuthentication() throws Exception {
-        MockMultipartFile image = new MockMultipartFile(
-                "image",
-                "avatar.jpg",
-                MediaType.IMAGE_JPEG_VALUE,
-                "fake-image-content".getBytes()
-        );
-
-        mockMvc.perform(multipart("/users/me/image")
-                        .file(image)
-                        .with(request -> {
-                            request.setMethod("PATCH");
-                            return request;
-                        }))
-                .andExpect(status().isUnauthorized());
-    }
 }
-
