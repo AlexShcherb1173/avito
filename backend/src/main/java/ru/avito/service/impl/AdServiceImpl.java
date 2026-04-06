@@ -10,7 +10,6 @@ import ru.avito.dto.ad.CreateOrUpdateAdRequest;
 import ru.avito.dto.ad.ExtendedAdDto;
 import ru.avito.dto.ad.ImageResponse;
 import ru.avito.entity.Ad;
-import ru.avito.entity.Role;
 import ru.avito.entity.User;
 import ru.avito.exception.ForbiddenException;
 import ru.avito.exception.NotFoundException;
@@ -18,6 +17,7 @@ import ru.avito.mapper.AdMapper;
 import ru.avito.repository.AdRepository;
 import ru.avito.repository.UserRepository;
 import ru.avito.security.SecurityUtils;
+import ru.avito.service.AccessService;
 import ru.avito.service.AdService;
 import ru.avito.service.ImageService;
 
@@ -32,6 +32,7 @@ public class AdServiceImpl implements AdService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
     private final ImageService imageService;
+    private final AccessService accessService;
 
     @Override
     @Transactional(readOnly = true)
@@ -84,10 +85,7 @@ public class AdServiceImpl implements AdService {
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, ad)) {
-            throw new ForbiddenException("You cannot edit this ad");
-        }
+        accessService.checkAdEditAccess(currentUser, ad);
 
         ad.setTitle(request.getTitle());
         ad.setPrice(request.getPrice());
@@ -104,10 +102,7 @@ public class AdServiceImpl implements AdService {
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, ad)) {
-            throw new ForbiddenException("You cannot delete this ad");
-        }
+        accessService.checkAdDeleteAccess(currentUser, ad);
 
         imageService.deleteImageIfExists(ad.getImage());
         adRepository.delete(ad);
@@ -135,10 +130,7 @@ public class AdServiceImpl implements AdService {
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, ad)) {
-            throw new ForbiddenException("You cannot update image for this ad");
-        }
+        accessService.checkAdImageAccess(currentUser, ad);
 
         imageService.deleteImageIfExists(ad.getImage());
 
@@ -159,11 +151,6 @@ public class AdServiceImpl implements AdService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Authenticated user not found"));
-    }
-
-    private boolean isOwnerOrAdmin(User user, Ad ad) {
-        return ad.getAuthor().getId().equals(user.getId())
-                || user.getRole() == Role.ADMIN;
     }
 
     private void validateImage(MultipartFile image) {

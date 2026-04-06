@@ -7,15 +7,14 @@ import ru.avito.dto.comment.CommentsResponse;
 import ru.avito.dto.comment.CreateOrUpdateCommentRequest;
 import ru.avito.entity.Ad;
 import ru.avito.entity.Comment;
-import ru.avito.entity.Role;
 import ru.avito.entity.User;
-import ru.avito.exception.ForbiddenException;
 import ru.avito.exception.NotFoundException;
 import ru.avito.mapper.CommentMapper;
 import ru.avito.repository.AdRepository;
 import ru.avito.repository.CommentRepository;
 import ru.avito.repository.UserRepository;
 import ru.avito.security.SecurityUtils;
+import ru.avito.service.AccessService;
 import ru.avito.service.CommentService;
 
 import java.time.Instant;
@@ -30,6 +29,7 @@ public class CommentServiceImpl implements CommentService {
     private final AdRepository adRepository;
     private final UserRepository userRepository;
     private final CommentMapper commentMapper;
+    private final AccessService accessService;
 
     @Override
     public CommentsResponse getComments(Integer adId) {
@@ -69,10 +69,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new NotFoundException("Comment not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, comment)) {
-            throw new ForbiddenException("You cannot edit this comment");
-        }
+        accessService.checkCommentEditAccess(currentUser, comment);
 
         comment.setText(request.getText());
 
@@ -86,10 +83,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new NotFoundException("Comment not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, comment)) {
-            throw new ForbiddenException("You cannot delete this comment");
-        }
+        accessService.checkCommentDeleteAccess(currentUser, comment);
 
         commentRepository.delete(comment);
     }
@@ -99,10 +93,5 @@ public class CommentServiceImpl implements CommentService {
 
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Authenticated user not found"));
-    }
-
-    private boolean isOwnerOrAdmin(User user, Comment comment) {
-        return comment.getAuthor().getId().equals(user.getId())
-                || user.getRole() == Role.ADMIN;
     }
 }
