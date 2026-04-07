@@ -398,4 +398,110 @@ class AdServiceTest {
             assertThrows(NotFoundException.class, () -> adService.getMyAds());
         }
     }
+
+    @Test
+    void shouldThrowWhenAuthenticatedUserEmailIsNull() {
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUsername).thenReturn(null);
+
+            MockMultipartFile image = new MockMultipartFile(
+                    "image",
+                    "ad.jpg",
+                    "image/jpeg",
+                    "content".getBytes()
+            );
+
+            CreateOrUpdateAdRequest request = new CreateOrUpdateAdRequest();
+            request.setTitle("Created ad title");
+            request.setPrice(25000);
+            request.setDescription("Created ad description");
+
+            assertThrows(ForbiddenException.class, () -> adService.createAd(request, image));
+        }
+    }
+
+    @Test
+    void shouldThrowWhenUpdateAdImageIsEmpty() {
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "empty.jpg",
+                "image/jpeg",
+                new byte[0]
+        );
+
+        assertThrows(IllegalArgumentException.class, () -> adService.updateAdImage(10, image));
+    }
+
+    @Test
+    void shouldThrowWhenUpdateAdImageContentTypeIsNull() {
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "file.bin",
+                null,
+                "content".getBytes()
+        );
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> adService.updateAdImage(10, image));
+
+        assertThat(exception.getMessage()).isEqualTo("Only image files are allowed");
+    }
+
+    @Test
+    void shouldThrowWhenUpdateAdImageContentTypeIsInvalid() {
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "file.txt",
+                "text/plain",
+                "content".getBytes()
+        );
+
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> adService.updateAdImage(10, image));
+
+        assertThat(exception.getMessage()).isEqualTo("Only image files are allowed");
+    }
+
+    @Test
+    void shouldThrowWhenUpdateAdAdNotFound() {
+        CreateOrUpdateAdRequest request = new CreateOrUpdateAdRequest();
+        request.setTitle("Updated ad title");
+        request.setPrice(33000);
+        request.setDescription("Updated ad description");
+
+        when(adRepository.findById(999)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> adService.updateAd(999, request));
+    }
+
+    @Test
+    void shouldThrowWhenDeleteAdAdNotFound() {
+        when(adRepository.findById(999)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> adService.deleteAd(999));
+    }
+
+    @Test
+    void shouldThrowWhenUpdateAdImageAdNotFound() {
+        MockMultipartFile image = new MockMultipartFile(
+                "image",
+                "new.jpg",
+                "image/jpeg",
+                "content".getBytes()
+        );
+
+        when(adRepository.findById(999)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(
+                NotFoundException.class,
+                () -> adService.updateAdImage(999, image)
+        );
+
+        assertThat(exception.getMessage()).isEqualTo("Ad not found");
+
+        verify(adRepository).findById(999);
+        verifyNoInteractions(accessService);
+        verify(imageService, never()).deleteImageIfExists(any());
+        verify(imageService, never()).saveAdImage(anyInt(), any());
+    }
 }

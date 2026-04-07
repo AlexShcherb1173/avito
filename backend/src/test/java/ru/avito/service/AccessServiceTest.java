@@ -172,4 +172,38 @@ class AccessServiceTest {
 
         assertThrows(ForbiddenException.class, () -> accessService.checkUserAccess(user, foreignUser));
     }
+
+    @Test
+    void shouldDenyWhenRequesterIsNull() {
+        User owner = User.builder().id(1).role(Role.USER).build();
+        Ad ad = Ad.builder().id(10).author(owner).build();
+
+        assertThrows(ForbiddenException.class, () -> accessService.checkAdEditAccess(null, ad));
+    }
+
+    @Test
+    void shouldDenyWhenOwnerIsNull() {
+        User requester = User.builder().id(1).role(Role.USER).build();
+        Ad ad = Ad.builder().id(10).author(null).build();
+
+        assertThrows(ForbiddenException.class, () -> accessService.checkAdEditAccess(requester, ad));
+    }
+
+    @Test
+    void shouldDenyWhenRequesterIdIsNull() {
+        User requester = User.builder().id(null).role(Role.USER).build();
+        User owner = User.builder().id(2).role(Role.USER).build();
+        Ad ad = Ad.builder().id(10).author(owner).build();
+
+        assertThrows(ForbiddenException.class, () -> accessService.checkAdEditAccess(requester, ad));
+    }
+
+    @Test
+    void shouldDenyWhenOwnerIdIsNull() {
+        User requester = User.builder().id(1).role(Role.USER).build();
+        User owner = User.builder().id(null).role(Role.USER).build();
+        Ad ad = Ad.builder().id(10).author(owner).build();
+
+        assertThrows(ForbiddenException.class, () -> accessService.checkAdEditAccess(requester, ad));
+    }
 }

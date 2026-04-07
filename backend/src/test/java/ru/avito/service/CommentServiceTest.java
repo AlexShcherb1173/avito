@@ -243,4 +243,62 @@ class CommentServiceTest {
             assertThrows(NotFoundException.class, () -> commentService.addComment(10, request));
         }
     }
+
+    @Test
+    void shouldThrowWhenAuthenticatedUserNotFoundForUpdateComment() {
+        CreateOrUpdateCommentRequest request = new CreateOrUpdateCommentRequest();
+        request.setText("Updated comment text");
+
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUsername).thenReturn("missing@example.com");
+
+            when(commentRepository.findByIdAndAdId(20, 10)).thenReturn(Optional.of(comment));
+            when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundException.class, () -> commentService.updateComment(10, 20, request));
+        }
+    }
+
+    @Test
+    void shouldThrowWhenAuthenticatedUserNotFoundForDeleteComment() {
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUsername).thenReturn("missing@example.com");
+
+            when(commentRepository.findByIdAndAdId(20, 10)).thenReturn(Optional.of(comment));
+            when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+
+            assertThrows(NotFoundException.class, () -> commentService.deleteComment(10, 20));
+        }
+    }
+
+    @Test
+    void shouldNotSaveWhenAccessServiceThrowsOnUpdate() {
+        CreateOrUpdateCommentRequest request = new CreateOrUpdateCommentRequest();
+        request.setText("Updated comment text");
+
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUsername).thenReturn("user@example.com");
+
+            when(commentRepository.findByIdAndAdId(20, 10)).thenReturn(Optional.of(comment));
+            when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+            doThrow(new RuntimeException("forbidden")).when(accessService).checkCommentEditAccess(user, comment);
+
+            assertThrows(RuntimeException.class, () -> commentService.updateComment(10, 20, request));
+            verify(commentRepository, never()).save(any(Comment.class));
+        }
+    }
+
+    @Test
+    void shouldNotDeleteWhenAccessServiceThrowsOnDelete() {
+        try (MockedStatic<SecurityUtils> securityUtils = mockStatic(SecurityUtils.class)) {
+            securityUtils.when(SecurityUtils::getCurrentUsername).thenReturn("user@example.com");
+
+            when(commentRepository.findByIdAndAdId(20, 10)).thenReturn(Optional.of(comment));
+            when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+            doThrow(new RuntimeException("forbidden")).when(accessService).checkCommentDeleteAccess(user, comment);
+
+            assertThrows(RuntimeException.class, () -> commentService.deleteComment(10, 20));
+            verify(commentRepository, never()).delete(any(Comment.class));
+        }
+    }
 }
