@@ -1,6 +1,7 @@
 export const newAd = (state = {}, action) => {
-	let {type, ...ad} = action;
+	const { type, ...ad } = action;
+
 	return {
-		...ad
-	}
-}
+		...ad,
+	};
+};

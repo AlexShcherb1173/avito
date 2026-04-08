@@ -9,29 +9,35 @@ describe("utils/auth", () => {
         jest.clearAllMocks();
     });
 
-    test("should send registration request", async () => {
-        const requestData = {
+    const jsonResponse = (data, ok = true, status = 200) => ({
+        ok,
+        status,
+        headers: {
+            get: jest.fn().mockReturnValue("application/json"),
+        },
+        json: jest.fn().mockResolvedValue(data),
+        text: jest.fn(),
+    });
+
+    const textResponse = (text, ok = true, status = 200) => ({
+        ok,
+        status,
+        headers: {
+            get: jest.fn().mockReturnValue("text/plain"),
+        },
+        json: jest.fn(),
+        text: jest.fn().mockResolvedValue(text),
+    });
+
+    test("registration should send POST request", async () => {
+        fetch.mockResolvedValue(jsonResponse({ id: 1 }));
+
+        const payload = {
             username: "user@example.com",
             password: "password123",
-            role: "USER",
-            firstName: "Ivan",
-            lastName: "Ivanov",
-            phone: "+79990000001",
         };
 
-        fetch.mockResolvedValueOnce({
-            ok: true,
-            status: 200,
-            headers: {
-                get: () => "application/json",
-            },
-            json: async () => ({
-                success: true,
-                message: "User registered successfully",
-            }),
-        });
-
-        const result = await auth.registration(requestData);
+        const result = await auth.registration(payload);
 
         expect(fetch).toHaveBeenCalledWith("/api/register", {
             method: "POST",
@@ -39,34 +45,21 @@ describe("utils/auth", () => {
                 Accept: "application/json",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(requestData),
+            body: JSON.stringify(payload),
         });
 
-        expect(result).toEqual({
-            success: true,
-            message: "User registered successfully",
-        });
+        expect(result).toEqual({ id: 1 });
     });
 
-    test("should send authentication request", async () => {
-        const requestData = {
+    test("authentication should send POST request", async () => {
+        fetch.mockResolvedValue(jsonResponse({ token: "abc" }));
+
+        const payload = {
             username: "user@example.com",
             password: "password123",
         };
 
-        fetch.mockResolvedValueOnce({
-            ok: true,
-            status: 200,
-            headers: {
-                get: () => "application/json",
-            },
-            json: async () => ({
-                success: true,
-                message: "Login successful",
-            }),
-        });
-
-        const result = await auth.authentication(requestData);
+        const result = await auth.authentication(payload);
 
         expect(fetch).toHaveBeenCalledWith("/api/login", {
             method: "POST",
@@ -74,60 +67,69 @@ describe("utils/auth", () => {
                 Accept: "application/json",
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(requestData),
+            body: JSON.stringify(payload),
         });
 
-        expect(result).toEqual({
-            success: true,
-            message: "Login successful",
-        });
+        expect(result).toEqual({ token: "abc" });
     });
 
-    test("should reject with backend message on auth error", async () => {
-        fetch.mockResolvedValueOnce({
-            ok: false,
-            status: 401,
-            headers: {
-                get: () => "application/json",
-            },
-            json: async () => ({
-                message: "Invalid credentials",
-            }),
-        });
+    test("should reject with json message on failed response", async () => {
+        fetch.mockResolvedValue(
+            jsonResponse({ message: "Invalid credentials" }, false, 401)
+        );
 
         await expect(
             auth.authentication({
                 username: "user@example.com",
-                password: "wrong-password",
+                password: "wrongpass",
             })
         ).rejects.toBe("Invalid credentials");
     });
 
-    test("should reject with text body if response is not json", async () => {
-        fetch.mockResolvedValueOnce({
-            ok: false,
-            status: 500,
-            headers: {
-                get: () => "text/plain",
-            },
-            text: async () => "Internal server error",
-        });
+    test("should reject with json error field on failed response", async () => {
+        fetch.mockResolvedValue(
+            jsonResponse({ error: "User exists" }, false, 400)
+        );
 
         await expect(
             auth.registration({
                 username: "user@example.com",
                 password: "password123",
             })
-        ).rejects.toBe("Internal server error");
+        ).rejects.toBe("User exists");
     });
 
-    test("should return empty object for 204 response", async () => {
-        fetch.mockResolvedValueOnce({
+    test("should reject with default status text when no json message exists", async () => {
+        fetch.mockResolvedValue(jsonResponse({}, false, 500));
+
+        await expect(
+            auth.authentication({
+                username: "user@example.com",
+                password: "password123",
+            })
+        ).rejects.toBe("Error: 500");
+    });
+
+    test("should parse text response", async () => {
+        fetch.mockResolvedValue(textResponse("plain text"));
+
+        const result = await auth.authentication({
+            username: "user@example.com",
+            password: "password123",
+        });
+
+        expect(result).toEqual({ message: "plain text" });
+    });
+
+    test("should return empty object on 204", async () => {
+        fetch.mockResolvedValue({
             ok: true,
             status: 204,
             headers: {
-                get: () => "",
+                get: jest.fn().mockReturnValue("application/json"),
             },
+            json: jest.fn(),
+            text: jest.fn(),
         });
 
         const result = await auth.authentication({
@@ -136,5 +138,24 @@ describe("utils/auth", () => {
         });
 
         expect(result).toEqual({});
+    });
+
+    test("should handle broken response parsing", async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            status: 503,
+            headers: {
+                get: jest.fn().mockReturnValue("application/json"),
+            },
+            json: jest.fn().mockRejectedValue(new Error("broken json")),
+            text: jest.fn(),
+        });
+
+        await expect(
+            auth.authentication({
+                username: "user@example.com",
+                password: "password123",
+            })
+        ).rejects.toBe("Error: 503");
     });
 });

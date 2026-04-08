@@ -105,12 +105,11 @@ function App({
         setVisiableAds((prevValue) => prevValue + 2);
     }
 
-    // Проверка сохранённых credentials при старте приложения
+    // Проверка сохранённых credentials при старте приложения.
+    // ВАЖНО: эффект не зависит от storeUserInfo, иначе после onLoadUser()
+    // произойдёт новый ререндер -> новый storeUserInfo -> бесконечный цикл.
     useEffect(() => {
-        const savedUsername = storeUserInfo?.username || "";
-        const savedPassword = storeUserInfo?.password || "";
-
-        if (!savedUsername || !savedPassword) {
+        if (!username || !password) {
             setIsAuthorized(false);
             setIsAuthChecked(true);
             return;
@@ -119,16 +118,14 @@ function App({
         setIsLoading(true);
 
         api
-            .getUserInfo(savedUsername, savedPassword)
+            .getUserInfo(username, password)
             .then((userData) => {
                 const mergedUser = {
                     ...userData,
-                    username: savedUsername,
-                    password: savedPassword,
+                    username,
+                    password,
                 };
 
-                setUsername(savedUsername);
-                setPassword(savedPassword);
                 setUserInfo(mergedUser);
                 setFirstName(userData?.firstName || "");
                 setLastName(userData?.lastName || "");
@@ -145,7 +142,7 @@ function App({
                 setIsLoading(false);
                 setIsAuthChecked(true);
             });
-    }, [storeUserInfo, onLoadUser, handleUnauthorized]);
+    }, [username, password, onLoadUser, handleUnauthorized]);
 
     // Загрузка данных авторизованного пользователя
     useEffect(() => {

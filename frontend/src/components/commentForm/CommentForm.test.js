@@ -6,7 +6,7 @@ describe("components/commentForm/CommentForm", () => {
     test("should render without crashing", () => {
         render(
             <CommentForm
-                onSubmit={jest.fn()}
+                addComment={jest.fn()}
                 isLoading={false}
             />
         );
@@ -17,45 +17,39 @@ describe("components/commentForm/CommentForm", () => {
     test("should render textarea and submit button if present", () => {
         render(
             <CommentForm
-                onSubmit={jest.fn()}
+                addComment={jest.fn()}
                 isLoading={false}
             />
         );
 
-        const textareas = screen.queryAllByRole("textbox");
-        const buttons = screen.queryAllByRole("button");
+        const textarea = screen.queryByRole("textbox");
+        const button = screen.queryByRole("button");
 
-        expect(textareas.length).toBeGreaterThanOrEqual(0);
-        expect(buttons.length).toBeGreaterThanOrEqual(0);
+        expect(textarea).toBeInTheDocument();
+        expect(button).toBeInTheDocument();
     });
 
-    test("should submit entered comment text when form is used", () => {
-        const onSubmit = jest.fn();
+    test("should call addComment on submit", () => {
+        const addComment = jest.fn();
 
         render(
             <CommentForm
-                onSubmit={onSubmit}
+                addComment={addComment}
                 isLoading={false}
             />
         );
 
-        const textarea =
-            document.querySelector("textarea") ||
-            screen.queryByRole("textbox");
-
-        const submitButton = screen.queryByRole("button");
-
-        if (!textarea || !submitButton) {
-            expect(onSubmit).not.toHaveBeenCalled();
-            return;
-        }
+        const textarea = screen.getByRole("textbox");
+        const button = screen.getByRole("button");
 
         fireEvent.change(textarea, {
-            target: { value: "Created comment text" },
+            target: { value: "Test comment" },
         });
 
-        fireEvent.click(submitButton);
+        fireEvent.click(button);
 
-        expect(onSubmit).toHaveBeenCalled();
+        expect(addComment).toHaveBeenCalledWith({
+            text: "Test comment",
+        });
     });
 });

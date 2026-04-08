@@ -12,12 +12,22 @@ describe("components/registration/Registration", () => {
         );
 
         expect(screen.getByText("Добро пожаловать!")).toBeInTheDocument();
-        expect(screen.getByText(/логин/i)).toBeInTheDocument();
-        expect(screen.getByText("Пароль")).toBeInTheDocument();
-        expect(screen.getByText("Роль")).toBeInTheDocument();
-        expect(screen.getByText("Имя")).toBeInTheDocument();
-        expect(screen.getByText("Фамилия")).toBeInTheDocument();
-        expect(screen.getByText("Телефон")).toBeInTheDocument();
+        expect(
+            screen.getByRole("textbox", { name: "Логин (email) пользователя" })
+        ).toBeInTheDocument();
+        expect(screen.getByLabelText("Пароль")).toBeInTheDocument();
+        expect(
+            screen.getByRole("combobox", { name: "Роль" })
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("textbox", { name: "Имя" })
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("textbox", { name: "Фамилия" })
+        ).toBeInTheDocument();
+        expect(
+            screen.getByRole("textbox", { name: "Телефон" })
+        ).toBeInTheDocument();
         expect(
             screen.getByRole("button", { name: /зарегистрироваться/i })
         ).toBeInTheDocument();
@@ -33,35 +43,42 @@ describe("components/registration/Registration", () => {
         );
 
         const emailInput = screen.getByRole("textbox", {
-            name: "",
+            name: "Логин (email) пользователя",
         });
-
-        const passwordInput = document.querySelector('input[name="password"]');
-        const roleSelect = document.querySelector('select[name="role"]');
-        const firstNameInput = document.querySelector('input[name="firstName"]');
-        const lastNameInput = document.querySelector('input[name="lastName"]');
-        const phoneInput = document.querySelector('input[name="phone"]');
+        const passwordInput = screen.getByLabelText("Пароль");
+        const roleSelect = screen.getByRole("combobox", {
+            name: "Роль",
+        });
+        const firstNameInput = screen.getByRole("textbox", {
+            name: "Имя",
+        });
+        const lastNameInput = screen.getByRole("textbox", {
+            name: "Фамилия",
+        });
+        const phoneInput = screen.getByRole("textbox", {
+            name: "Телефон",
+        });
         const submitButton = screen.getByRole("button", {
             name: /зарегистрироваться/i,
         });
 
         fireEvent.change(emailInput, {
-            target: { name: "username", value: "user@example.com" },
+            target: { value: "user@example.com" },
         });
         fireEvent.change(passwordInput, {
-            target: { name: "password", value: "password123" },
+            target: { value: "password123" },
         });
         fireEvent.change(roleSelect, {
-            target: { name: "role", value: "USER" },
+            target: { value: "USER" },
         });
         fireEvent.change(firstNameInput, {
-            target: { name: "firstName", value: "Ivan" },
+            target: { value: "Ivan" },
         });
         fireEvent.change(lastNameInput, {
-            target: { name: "lastName", value: "Ivanov" },
+            target: { value: "Ivanov" },
         });
         fireEvent.change(phoneInput, {
-            target: { name: "phone", value: "+79990000001" },
+            target: { value: "+79990000001" },
         });
 
         fireEvent.click(submitButton);
