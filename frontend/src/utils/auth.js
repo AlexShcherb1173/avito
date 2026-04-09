@@ -53,7 +53,7 @@ class Auth {
 }
 
 const auth = new Auth({
-  url: "/api",
+  url: "http://localhost:8081",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",

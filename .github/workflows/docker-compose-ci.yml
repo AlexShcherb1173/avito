@@ -2,17 +2,31 @@ name: Docker Compose CI
 
 on:
   push:
-    branches: [ main, develop, feature ]
+    branches: [main, develop, feature]
   pull_request:
-    branches: [ main, develop, feature ]
+    branches: [main, develop, feature]
 
 jobs:
   build-and-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Create CI env file
+        run: |
+          cat > .env <<EOF
+          POSTGRES_DB=avito_db
+          POSTGRES_USER=avito_user
+          POSTGRES_PASSWORD=avito_password
+          SPRING_PROFILES_ACTIVE=dev
+          SPRING_DATASOURCE_URL=jdbc:postgresql://avito-db:5432/avito_db?currentSchema=avito
+          SPRING_DATASOURCE_USERNAME=avito_user
+          SPRING_DATASOURCE_PASSWORD=avito_password
+          APP_IMAGES_DIR=/images
+          EOF
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -23,20 +37,41 @@ jobs:
       - name: Start containers
         run: docker compose up -d
 
-      - name: Wait for backend
+      - name: Wait for database
         run: |
           for i in {1..30}; do
-            if curl -f http://localhost:8081/ads; then
+            if docker compose exec -T avito-db pg_isready -U avito_user -d avito_db; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Database did not become ready in time"
+          docker compose logs
+          exit 1
+
+      - name: Wait for backend
+        run: |
+          for i in {1..40}; do
+            if curl -fsS http://localhost:8081/ads > /dev/null; then
               exit 0
             fi
             sleep 5
           done
           echo "Backend did not start in time"
-          docker compose logs
+          docker compose logs avito-backend
           exit 1
 
       - name: Check frontend
-        run: curl -f http://localhost:3000
+        run: |
+          curl -fsS http://localhost:3000 > /dev/null
+
+      - name: Print containers status
+        if: always()
+        run: docker compose ps
+
+      - name: Print logs on failure
+        if: failure()
+        run: docker compose logs
 
       - name: Stop containers
         if: always()

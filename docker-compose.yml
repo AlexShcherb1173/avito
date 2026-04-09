@@ -1,6 +1,7 @@
 services:
   avito-db:
     image: postgres:17
+    container_name: avito-db
     restart: unless-stopped
     env_file:
       - .env
@@ -23,6 +24,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    container_name: avito-backend
     restart: unless-stopped
     env_file:
       - .env
@@ -37,6 +39,8 @@ services:
         condition: service_healthy
     volumes:
       - avito_images_data:/images
+    ports:
+      - "8081:8081"
     networks:
       - avito-net
 
@@ -44,6 +48,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    container_name: avito-frontend
     restart: unless-stopped
     depends_on:
       - avito-backend

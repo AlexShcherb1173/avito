@@ -13,6 +13,24 @@ import { REDUCERS as adsReducers } from "../../redux/reducers/ads/ads";
 import { REDUCERS as userAdsReducers } from "../../redux/reducers/ads/userAds";
 import { REDUCERS as defaultAdsReducers } from "../../redux/reducers/ads/adsDefault";
 
+const BACKEND_URL = "http://localhost:8081";
+
+function normalizeImageUrl(image) {
+    if (!image) {
+        return "";
+    }
+
+    if (typeof image !== "string") {
+        return "";
+    }
+
+    if (image.startsWith("http://") || image.startsWith("https://")) {
+        return image;
+    }
+
+    return `${BACKEND_URL}${image}`;
+}
+
 function SinglePage(props) {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -92,7 +110,11 @@ function SinglePage(props) {
                 setAd(updatedAd);
 
                 props.setAds((ads) =>
-                    ads.map((item) => ((item.pk || item.id) === (updatedAd.pk || updatedAd.id) ? updatedAd : item))
+                    ads.map((item) =>
+                        (item.pk || item.id) === (updatedAd.pk || updatedAd.id)
+                            ? updatedAd
+                            : item
+                    )
                 );
 
                 props.onUpdateAdFromStore(parseInt(id, 10), result);
@@ -111,7 +133,11 @@ function SinglePage(props) {
                 setAd(updatedAd);
 
                 props.setAds((ads) =>
-                    ads.map((item) => ((item.pk || item.id) === (updatedAd.pk || updatedAd.id) ? updatedAd : item))
+                    ads.map((item) =>
+                        (item.pk || item.id) === (updatedAd.pk || updatedAd.id)
+                            ? updatedAd
+                            : item
+                    )
                 );
 
                 props.onUpdateAdFromStore(parseInt(id, 10), { image: updatedImage });
@@ -153,8 +179,8 @@ function SinglePage(props) {
             .catch((error) => console.log("error", error));
     }
 
-    const canEdit =
-        username === ad?.email || role === "ADMIN";
+    const canEdit = username === ad?.email || role === "ADMIN";
+    const adImageUrl = normalizeImageUrl(ad?.image);
 
     return (
         <main className="cardInformation">
@@ -167,7 +193,7 @@ function SinglePage(props) {
                     <div className="cardInformation__container">
                         {ad.image ? (
                             <div
-                                style={{ backgroundImage: `url(${ad.image})` }}
+                                style={{ backgroundImage: `url(${adImageUrl})` }}
                                 className="cardInformation__img"
                             >
                                 {canEdit ? (

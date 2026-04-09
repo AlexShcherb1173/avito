@@ -1,5 +1,7 @@
 import auth from "./auth";
 
+const API_URL = "http://localhost:8081";
+
 describe("utils/auth", () => {
     beforeEach(() => {
         global.fetch = jest.fn();
@@ -39,7 +41,7 @@ describe("utils/auth", () => {
 
         const result = await auth.registration(payload);
 
-        expect(fetch).toHaveBeenCalledWith("/api/register", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/register`, {
             method: "POST",
             headers: {
                 Accept: "application/json",
@@ -61,7 +63,7 @@ describe("utils/auth", () => {
 
         const result = await auth.authentication(payload);
 
-        expect(fetch).toHaveBeenCalledWith("/api/login", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/login`, {
             method: "POST",
             headers: {
                 Accept: "application/json",

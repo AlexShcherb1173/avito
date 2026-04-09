@@ -1,6 +1,6 @@
 import base64 from "base-64";
 
-const API_URL = "/api";
+const API_URL = "http://localhost:8081";
 
 class Api {
     constructor(options) {

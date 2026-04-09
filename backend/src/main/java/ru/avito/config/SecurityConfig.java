@@ -51,7 +51,8 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.GET, "/ads/*/comments").permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                .formLogin().disable();
 
         return http.build();
     }

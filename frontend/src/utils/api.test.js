@@ -1,6 +1,8 @@
 import api from "./api";
 import base64 from "base-64";
 
+const API_URL = "http://localhost:8081";
+
 describe("utils/api", () => {
     beforeEach(() => {
         global.fetch = jest.fn();
@@ -37,7 +39,7 @@ describe("utils/api", () => {
 
         const result = await api.getUserInfo("user@example.com", "password123");
 
-        expect(fetch).toHaveBeenCalledWith("/api/users/me", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/users/me`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -53,7 +55,10 @@ describe("utils/api", () => {
 
         const result = await api.getUsersAds("user@example.com", "password123");
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads/me", expect.any(Object));
+        expect(fetch).toHaveBeenCalledWith(
+            `${API_URL}/ads/me`,
+            expect.any(Object)
+        );
         expect(result).toEqual({ results: [] });
     });
 
@@ -61,9 +66,13 @@ describe("utils/api", () => {
         fetch.mockResolvedValue(jsonResponse({ firstName: "Ivan" }));
 
         const payload = { firstName: "Ivan", lastName: "Ivanov" };
-        const result = await api.updateUser(payload, "user@example.com", "password123");
+        const result = await api.updateUser(
+            payload,
+            "user@example.com",
+            "password123"
+        );
 
-        expect(fetch).toHaveBeenCalledWith("/api/users/me", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/users/me`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -85,7 +94,7 @@ describe("utils/api", () => {
             "password123"
         );
 
-        expect(fetch).toHaveBeenCalledWith("/api/users/me/image", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/users/me/image`, {
             method: "PATCH",
             headers: {
                 Authorization:
@@ -110,7 +119,7 @@ describe("utils/api", () => {
             "password123"
         );
 
-        expect(fetch).toHaveBeenCalledWith("/api/images/1.jpg", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/images/1.jpg`, {
             method: "GET",
             headers: {
                 Authorization:
@@ -137,7 +146,7 @@ describe("utils/api", () => {
 
         await api.updatePassword("user@example.com", "oldPass", "newPass");
 
-        expect(fetch).toHaveBeenCalledWith("/api/users/set_password", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/users/set_password`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -154,9 +163,16 @@ describe("utils/api", () => {
     test("getComments should call comments endpoint", async () => {
         fetch.mockResolvedValue(jsonResponse([{ id: 1 }]));
 
-        const result = await api.getComments(10, "user@example.com", "password123");
+        const result = await api.getComments(
+            10,
+            "user@example.com",
+            "password123"
+        );
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads/10/comments", expect.any(Object));
+        expect(fetch).toHaveBeenCalledWith(
+            `${API_URL}/ads/10/comments`,
+            expect.any(Object)
+        );
         expect(result).toEqual([{ id: 1 }]);
     });
 
@@ -170,7 +186,7 @@ describe("utils/api", () => {
             "password123"
         );
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads/10/comments", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/ads/10/comments`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -194,7 +210,7 @@ describe("utils/api", () => {
         );
 
         expect(fetch).toHaveBeenCalledWith(
-            "/api/ads/10/comments/2",
+            `${API_URL}/ads/10/comments/2`,
             expect.objectContaining({
                 method: "PATCH",
                 body: JSON.stringify({ text: "Updated" }),
@@ -217,7 +233,7 @@ describe("utils/api", () => {
         );
 
         expect(fetch).toHaveBeenCalledWith(
-            "/api/ads/10/comments/2",
+            `${API_URL}/ads/10/comments/2`,
             expect.objectContaining({
                 method: "DELETE",
             })
@@ -241,7 +257,7 @@ describe("utils/api", () => {
 
         const result = await api.getAds();
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/ads`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -255,7 +271,10 @@ describe("utils/api", () => {
 
         const result = await api.getHiddenAds("user@example.com", "password123");
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads", expect.any(Object));
+        expect(fetch).toHaveBeenCalledWith(
+            `${API_URL}/ads`,
+            expect.any(Object)
+        );
         expect(result).toEqual({ results: [{ pk: 1 }] });
     });
 
@@ -264,7 +283,10 @@ describe("utils/api", () => {
 
         const result = await api.getAd(1, "user@example.com", "password123");
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads/1", expect.any(Object));
+        expect(fetch).toHaveBeenCalledWith(
+            `${API_URL}/ads/1`,
+            expect.any(Object)
+        );
         expect(result).toEqual({ pk: 1 });
     });
 
@@ -284,7 +306,7 @@ describe("utils/api", () => {
             "password123"
         );
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/ads`, {
             method: "POST",
             headers: {
                 Authorization:
@@ -306,7 +328,7 @@ describe("utils/api", () => {
         );
 
         expect(fetch).toHaveBeenCalledWith(
-            "/api/ads/1",
+            `${API_URL}/ads/1`,
             expect.objectContaining({
                 method: "PATCH",
                 body: JSON.stringify({ title: "Updated ad" }),
@@ -326,7 +348,7 @@ describe("utils/api", () => {
             "password123"
         );
 
-        expect(fetch).toHaveBeenCalledWith("/api/ads/1/image", {
+        expect(fetch).toHaveBeenCalledWith(`${API_URL}/ads/1/image`, {
             method: "PATCH",
             headers: {
                 Authorization:
@@ -346,7 +368,7 @@ describe("utils/api", () => {
         const result = await api.deleteAdd(1, "user@example.com", "password123");
 
         expect(fetch).toHaveBeenCalledWith(
-            "/api/ads/1",
+            `${API_URL}/ads/1`,
             expect.objectContaining({
                 method: "DELETE",
             })
