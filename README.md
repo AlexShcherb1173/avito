@@ -109,64 +109,64 @@ flowchart LR
 ### Быстрый запуск  
 🐳 Через Docker (рекомендуется)  
 #### 1. Создать .env  
-``` POSTGRES_DB=avito_db ```
-``` POSTGRES_USER=avito_user ``` 
-``` POSTGRES_PASSWORD=avito_password ``` 
+```POSTGRES_DB=avito_db```
+```POSTGRES_USER=avito_user ```
+```POSTGRES_PASSWORD=avito_password```
   
-``` SPRING_DATASOURCE_URL=jdbc:postgresql://avito-db:5432/avito_db ```   
-``` SPRING_DATASOURCE_USERNAME=avito_user ```
-``` SPRING_DATASOURCE_PASSWORD=avito_password  ``` 
+```SPRING_DATASOURCE_URL=jdbc:postgresql://avito-db:5432/avito_db```  
+```SPRING_DATASOURCE_USERNAME=avito_user```
+```SPRING_DATASOURCE_PASSWORD=avito_password```  
   
-``` SPRING_PROFILES_ACTIVE=docker ``` 
-``` APP_IMAGES_DIR=/images ``` 
+```SPRING_PROFILES_ACTIVE=docker```
+```APP_IMAGES_DIR=/images``` 
 #### 2. Запуск  
 docker compose up --build  
 #### 3. Открыть  
 **Backend** → http://localhost:8081  
-```cd backend```
-```mvn clean spring-boot:run``` 
+```cd backend```   
+```vn clean spring-boot:run``` 
 **Frontend** → http://localhost:3001  
-``` cd frontend ```
-``` npm install  ```
-``` npm run dev```
+```cd frontend``` 
+```npm install```   
+```npm run dev```
 ### Деплой (VPS)
 git clone https://github.com/AlexShcherb1173/avito.git
-cd avito
-docker compose up -d --build
-API
-
-Swagger:  
+```cd avito```
+```docker compose up -d --build```
+### API
+#### Swagger:  
 http://localhost:8081/swagger-ui/  
-Тестирование  
-Frontend  
-npm run test  
-npm run test:coverage  
-Backend  
-mvn clean test  
-Docker  
-Backend  
-multi-stage build  
-Maven → JAR → runtime  
-Frontend  
-build через webpack  
-nginx как web server  
-🔥 Что демонстрирует проект  
-fullstack архитектуру  
-REST API  
-работу с файлами  
-безопасность (Spring Security)  
-state management (Redux)  
-тестирование (Jest + JUnit)  
-Docker orchestration  
-👨‍💻 Автор  
+### Тестирование  
+#### Frontend  
+```npm run test```  
+```npm run test:coverage```  
+#### Backend  
+```mvn clean test```  
+### Docker  
+#### Backend  
+* multi-stage build  
+* Maven → JAR → runtime  
+#### Frontend  
+* build через webpack  
+* nginx как web server  
+### 🔥 Что демонстрирует проект  
+* fullstack архитектуру  
+* REST API  
+* работу с файлами  
+* безопасность (Spring Security)  
+* state management (Redux)  
+* тестирование (Jest + JUnit)  
+* Docker orchestration  
+### 👨‍💻 Автор  
   
-Alex Shcherb  
+Alex Shcherbyna  
   
 GitHub: https://github.com/AlexShcherb1173  
-⭐ Итог  
+GitHub: https://github.com/ScherbAlex
+### ⭐ Итог  
 
-Проект уровня:  
+#### Проект уровня:  
 
-👉 Junior+ / Middle Fullstack  
-👉 Готов для портфолио  
-👉 Можно масштабировать до production   
+* 👉 Junior+ / Middle Fullstack  
+* 👉 Готов для портфолио  
+* 👉 Можно масштабировать до production   
