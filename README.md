@@ -1,4 +1,4 @@
-# 🚀 Avito Fullstack Application
+# 🚀 ADS Fullstack Application
 
 <p align="center">
   Fullstack marketplace (React + Spring Boot + PostgreSQL)
@@ -20,7 +20,7 @@
 
 ## 📖 Описание проекта
 
-**Avito** — это fullstack веб-приложение маркетплейса.
+**ADS** — это fullstack веб-приложение маркетплейса.
 
 ### Возможности:
 - 🔐 регистрация и авторизация
@@ -42,131 +42,131 @@ flowchart LR
     B --> DB[(PostgreSQL)]
     B --> FS[/Image Storage]
     B --> Flyway[Flyway Migrations]
-🖥 Frontend
-Стек:
-React 18
-Redux
-React Router
-Webpack
-Sass
-Особенности:
-SPA архитектура
-централизованное состояние (Redux)
-кастомные hooks
-API слой (utils/api.js)
-📊 Покрытие тестами
-Метрика	Значение
-Statements	91%
-Branches	77%
-Functions	89%
-Lines	91%
-⚙️ Backend
-Стек:
-Java 17
-Spring Boot
-Spring Security
-JPA / Hibernate
-PostgreSQL
-Flyway
-Возможности:
-CRUD объявлений
-комментарии
-управление пользователем
-загрузка файлов
-безопасность
-📊 Покрытие тестами
-Слой	Coverage
-Controllers	100%
-Services	100%
-Impl	~92%
-Total	~76%
-📂 Структура проекта
-avito/
-├── backend/
-│   ├── controller/
-│   ├── service/
-│   ├── entity/
-│   ├── dto/
-│   ├── security/
-│   └── config/
-│
-├── frontend/
-│   ├── components/
-│   ├── redux/
-│   ├── utils/
-│   └── hooks/
-│
-├── docker-compose.yml
-└── README.md
-Архитектура backend (детально)
-![](F:\dev docs\java avito3 - Покрытие тестов фронта.html)
-Скриншоты
-![Главная](docs/screens/main.png)
-![Профиль](docs/screens/profile.png)
-![Объявление](docs/screens/ad.png)
-Быстрый запуск
-🐳 Через Docker (рекомендуется)
-1. Создать .env
-POSTGRES_DB=avito_db
-POSTGRES_USER=avito_user
-POSTGRES_PASSWORD=avito_password
 
-SPRING_DATASOURCE_URL=jdbc:postgresql://avito-db:5432/avito_db
-SPRING_DATASOURCE_USERNAME=avito_user
-SPRING_DATASOURCE_PASSWORD=avito_password
+```
+### 🖥 Frontend  
+#### Стек:  
+* _React 18_  
+* _Redux_  
+* _React Router_  
+* _Webpack_  
+* _Sass_  
+* _Особенности:_  
+* _SPA архитектура_  
+* _централизованное состояние (Redux)_  
+* _кастомные hooks_  
+* _API слой (utils/api.js)_
+* 
+#### 📊 Покрытие тестами  
+| Метрика |	Значение |
+----------|----------
+|Statements|	91% |  
+|Branches|77%|  
+|Functions|	89%|  
+|Lines|	91%|
 
-SPRING_PROFILES_ACTIVE=docker
-APP_IMAGES_DIR=/images
-2. Запуск
-docker compose up --build
-3. Открыть
-Frontend → http://localhost:3001
-Backend → http://localhost:8081
-docker compose up --build
-cd backend
-mvn clean spring-boot:run
-Frontend
-cd frontend
-npm install
-npm run dev
-Деплой (VPS)
+### ⚙️ Backend  
+#### Стек:  
+* _Java 17_  
+* _Spring Boot_  
+* _Spring Security_  
+* _JPA / Hibernate_  
+* _PostgreSQL*  
+* _Flyway_ 
+
+#### Возможности:  
+- CRUD объявлений  
+- комментарии  
+- управление пользователем  
+- загрузка файлов  
+- безопасность  
+#### 📊 Покрытие тестами  
+| Слой	       | Coverage |
+-------------|----------
+| Controllers | 	100%    |  
+| Services    | 	100%    |
+|Impl|	~92% | 
+|Total|	~76%|  
+### 📂 Структура проекта  
+**avito/**  
+├── backend/  
+│   ├── controller/  
+│   ├── service/  
+│   ├── entity/  
+│   ├── dto/  
+│   ├── security/  
+│   └── config/  
+│  
+├── frontend/  
+│   ├── components/  
+│   ├── redux/  
+│   ├── utils/  
+│   └── hooks/  
+│  
+├── docker-compose.yml  
+└── README.md  
+
+### Быстрый запуск  
+🐳 Через Docker (рекомендуется)  
+#### 1. Создать .env  
+``` POSTGRES_DB=avito_db ```
+``` POSTGRES_USER=avito_user ``` 
+``` POSTGRES_PASSWORD=avito_password ``` 
+  
+``` SPRING_DATASOURCE_URL=jdbc:postgresql://avito-db:5432/avito_db ```   
+``` SPRING_DATASOURCE_USERNAME=avito_user ```
+``` SPRING_DATASOURCE_PASSWORD=avito_password  ``` 
+  
+``` SPRING_PROFILES_ACTIVE=docker ``` 
+``` APP_IMAGES_DIR=/images ``` 
+#### 2. Запуск  
+docker compose up --build  
+#### 3. Открыть  
+**Backend** → http://localhost:8081  
+```cd backend```
+```mvn clean spring-boot:run``` 
+**Frontend** → http://localhost:3001  
+``` cd frontend ```
+``` npm install  ```
+``` npm run dev```
+### Деплой (VPS)
 git clone https://github.com/AlexShcherb1173/avito.git
 cd avito
 docker compose up -d --build
 API
 
-Swagger:
-http://localhost:8081/swagger-ui/
-Тестирование
-Frontend
-npm run test
-npm run test:coverage
-Backend
-mvn clean test
-Docker
-Backend
-multi-stage build
-Maven → JAR → runtime
-Frontend
-build через webpack
-nginx как web server
-🔥 Что демонстрирует проект
-fullstack архитектуру
-REST API
-работу с файлами
-безопасность (Spring Security)
-state management (Redux)
-тестирование (Jest + JUnit)
-Docker orchestration
-👨‍💻 Автор
+Swagger:  
+http://localhost:8081/swagger-ui/  
+Тестирование  
+Frontend  
+npm run test  
+npm run test:coverage  
+Backend  
+mvn clean test  
+Docker  
+Backend  
+multi-stage build  
+Maven → JAR → runtime  
+Frontend  
+build через webpack  
+nginx как web server  
+🔥 Что демонстрирует проект  
+fullstack архитектуру  
+REST API  
+работу с файлами  
+безопасность (Spring Security)  
+state management (Redux)  
+тестирование (Jest + JUnit)  
+Docker orchestration  
+👨‍💻 Автор  
+  
+Alex Shcherb  
+  
+GitHub: https://github.com/AlexShcherb1173  
+⭐ Итог  
 
-Alex Shcherb
+Проект уровня:  
 
-GitHub: https://github.com/AlexShcherb1173
-⭐ Итог
-
-Проект уровня:
-
-👉 Junior+ / Middle Fullstack
-👉 Готов для портфолио
-👉 Можно масштабировать до production
+👉 Junior+ / Middle Fullstack  
+👉 Готов для портфолио  
+👉 Можно масштабировать до production   
