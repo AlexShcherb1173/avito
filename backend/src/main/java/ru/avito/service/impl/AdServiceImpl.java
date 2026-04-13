@@ -2,6 +2,7 @@ package ru.avito.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.avito.dto.ad.AdDto;
 import ru.avito.dto.ad.AdsResponse;
@@ -9,7 +10,6 @@ import ru.avito.dto.ad.CreateOrUpdateAdRequest;
 import ru.avito.dto.ad.ExtendedAdDto;
 import ru.avito.dto.ad.ImageResponse;
 import ru.avito.entity.Ad;
-import ru.avito.entity.Role;
 import ru.avito.entity.User;
 import ru.avito.exception.ForbiddenException;
 import ru.avito.exception.NotFoundException;
@@ -17,6 +17,7 @@ import ru.avito.mapper.AdMapper;
 import ru.avito.repository.AdRepository;
 import ru.avito.repository.UserRepository;
 import ru.avito.security.SecurityUtils;
+import ru.avito.service.AccessService;
 import ru.avito.service.AdService;
 import ru.avito.service.ImageService;
 
@@ -31,8 +32,10 @@ public class AdServiceImpl implements AdService {
     private final UserRepository userRepository;
     private final AdMapper adMapper;
     private final ImageService imageService;
+    private final AccessService accessService;
 
     @Override
+    @Transactional(readOnly = true)
     public AdsResponse getAllAds() {
         List<AdDto> ads = adRepository.findAll()
                 .stream()
@@ -43,6 +46,7 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ExtendedAdDto getAdById(Integer id) {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
@@ -51,7 +55,10 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public AdDto createAd(CreateOrUpdateAdRequest request, MultipartFile image) {
+        validateImage(image);
+
         User currentUser = getCurrentUser();
 
         Ad ad = Ad.builder()
@@ -72,15 +79,13 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public AdDto updateAd(Integer id, CreateOrUpdateAdRequest request) {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, ad)) {
-            throw new ForbiddenException("You cannot edit this ad");
-        }
+        accessService.checkAdEditAccess(currentUser, ad);
 
         ad.setTitle(request.getTitle());
         ad.setPrice(request.getPrice());
@@ -91,21 +96,20 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public void deleteAd(Integer id) {
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, ad)) {
-            throw new ForbiddenException("You cannot delete this ad");
-        }
+        accessService.checkAdDeleteAccess(currentUser, ad);
 
         imageService.deleteImageIfExists(ad.getImage());
         adRepository.delete(ad);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public AdsResponse getMyAds() {
         User currentUser = getCurrentUser();
 
@@ -118,15 +122,15 @@ public class AdServiceImpl implements AdService {
     }
 
     @Override
+    @Transactional
     public ImageResponse updateAdImage(Integer id, MultipartFile image) {
+        validateImage(image);
+
         Ad ad = adRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ad not found"));
 
         User currentUser = getCurrentUser();
-
-        if (!isOwnerOrAdmin(currentUser, ad)) {
-            throw new ForbiddenException("You cannot update image for this ad");
-        }
+        accessService.checkAdImageAccess(currentUser, ad);
 
         imageService.deleteImageIfExists(ad.getImage());
 
@@ -141,12 +145,22 @@ public class AdServiceImpl implements AdService {
     private User getCurrentUser() {
         String email = SecurityUtils.getCurrentUsername();
 
+        if (email == null || email.isBlank()) {
+            throw new ForbiddenException("User is not authenticated");
+        }
+
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("Authenticated user not found"));
     }
 
-    private boolean isOwnerOrAdmin(User user, Ad ad) {
-        return ad.getAuthor().getId().equals(user.getId())
-                || user.getRole() == Role.ADMIN;
+    private void validateImage(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new IllegalArgumentException("Image is required");
+        }
+
+        String contentType = image.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Only image files are allowed");
+        }
     }
 }

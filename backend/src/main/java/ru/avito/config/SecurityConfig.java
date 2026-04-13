@@ -44,17 +44,15 @@ public class SecurityConfig {
                 .and()
                 .userDetailsService(customUserDetailsService)
                 .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers(AUTH_WHITELIST).permitAll()
-
-                // Публичное чтение объявлений
                 .antMatchers(HttpMethod.GET, "/ads").permitAll()
                 .antMatchers(HttpMethod.GET, "/ads/*").permitAll()
                 .antMatchers(HttpMethod.GET, "/ads/*/comments").permitAll()
-
-                // Всё остальное требует авторизации
                 .anyRequest().authenticated()
                 .and()
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                .formLogin().disable();
 
         return http.build();
     }

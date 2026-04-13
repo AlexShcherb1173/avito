@@ -4,23 +4,38 @@ class Auth {
     this._headers = options.headers;
   }
 
-  _handleResponse(res) {
-    return res.text().then((text) => {
-      const data = text ? JSON.parse(text) : {};
+  _handleResponse = async (res) => {
+    const contentType = res.headers.get("content-type") || "";
 
-      if (!res.ok) {
-        return Promise.reject(data?.message || `Error: ${res.status}`);
+    let data = {};
+
+    try {
+      if (res.status !== 204) {
+        if (contentType.includes("application/json")) {
+          data = await res.json();
+        } else {
+          const text = await res.text();
+          data = text ? { message: text } : {};
+        }
       }
+    } catch {
+      data = {};
+    }
 
-      return data;
-    });
-  }
+    if (!res.ok) {
+      return Promise.reject(
+          data?.message || data?.error || `Error: ${res.status}`
+      );
+    }
+
+    return data;
+  };
 
   registration(data) {
     return fetch(`${this._url}/register`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        ...this._headers,
       },
       body: JSON.stringify(data),
     }).then(this._handleResponse);
@@ -29,14 +44,16 @@ class Auth {
   authentication(data) {
     return fetch(`${this._url}/login`, {
       method: "POST",
-      headers: this._headers,
+      headers: {
+        ...this._headers,
+      },
       body: JSON.stringify(data),
     }).then(this._handleResponse);
   }
 }
 
 const auth = new Auth({
-  url: "/api",
+  url: "http://localhost:8081",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",

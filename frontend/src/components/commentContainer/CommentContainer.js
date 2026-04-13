@@ -1,6 +1,6 @@
 import React from "react";
 import CommentList from "../commentList/CommentList";
-import CommentForm from "../comentForm/CommentForm";
+import CommentForm from "../commentForm/CommentForm";
 
 function CommentContainer({
     comments,
