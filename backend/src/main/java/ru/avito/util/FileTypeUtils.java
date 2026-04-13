@@ -5,6 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.avito.exception.BadRequestException;
 
 import java.util.List;
+import java.util.Locale;
 
 @UtilityClass
 public class FileTypeUtils {
@@ -23,7 +24,13 @@ public class FileTypeUtils {
         }
 
         String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+        if (contentType == null) {
+            throw new BadRequestException("Image content type is missing");
+        }
+
+        String normalizedContentType = contentType.toLowerCase(Locale.ROOT);
+
+        if (!ALLOWED_CONTENT_TYPES.contains(normalizedContentType)) {
             throw new BadRequestException("Unsupported image type");
         }
     }
@@ -31,11 +38,11 @@ public class FileTypeUtils {
     public String resolveExtension(MultipartFile file) {
         String contentType = file.getContentType();
 
-        if (contentType == null) {
+        if (contentType == null || contentType.isBlank()) {
             return ".jpg";
         }
 
-        return switch (contentType.toLowerCase()) {
+        return switch (contentType.toLowerCase(Locale.ROOT)) {
             case "image/png" -> ".png";
             case "image/gif" -> ".gif";
             case "image/webp" -> ".webp";

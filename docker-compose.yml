@@ -1,35 +1,55 @@
 services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: avito-backend
+  avito-db:
+    image: postgres:17
+    restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      SPRING_PROFILES_ACTIVE: dev
-      SERVER_PORT: 8081
-      SPRING_DATASOURCE_URL: jdbc:h2:mem:avito
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
-      SPRING_DATASOURCE_USERNAME: sa
-      SPRING_DATASOURCE_PASSWORD:
-      SPRING_SQL_INIT_MODE: never
-    ports:
-      - "8081:8081"
+      POSTGRES_DB: avito_db
+      POSTGRES_USER: avito_user
+      POSTGRES_PASSWORD: avito_password
+    volumes:
+      - avito_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avito_user -d avito_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks:
       - avito-net
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        REACT_APP_API_URL: /api
-    container_name: avito-frontend
+  avito-backend:
+    build: ./backend
+    restart: unless-stopped
     depends_on:
-      - backend
+      avito-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://avito-db:5432/avito_db
+      SPRING_DATASOURCE_USERNAME: avito_user
+      SPRING_DATASOURCE_PASSWORD: avito_password
+      SPRING_PROFILES_ACTIVE: docker
+      APP_IMAGES_DIR: /images
     ports:
-      - "3000:80"
+      - "8081:8081"
+    volumes:
+      - avito_images_data:/images
     networks:
       - avito-net
+
+  avito-frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - avito-backend
+    ports:
+      - "3001:80"
+    networks:
+      - avito-net
+
+volumes:
+  avito_postgres_data:
+  avito_images_data:
 
 networks:
   avito-net:
